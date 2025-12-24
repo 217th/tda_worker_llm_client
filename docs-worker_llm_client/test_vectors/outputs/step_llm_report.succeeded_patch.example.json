@@ -1,0 +1,18 @@
+{
+  "steps.<stepId>.status": "SUCCEEDED",
+  "steps.<stepId>.finishedAt": "2025-12-24T12:00:45Z",
+  "steps.<stepId>.outputs": {
+    "gcs_uri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/llm_report:1M:prompt_month_v1:model_gemini_2_0_flash/report.json",
+    "execution": {
+      "llm": {
+        "provider": "gemini",
+        "promptId": "prompt_month_v1",
+        "modelId": "model_gemini_2_0_flash",
+        "generationConfig": { "temperature": 0.2, "maxOutputTokens": 2048 },
+        "usage": { "inputTokens": 1234, "outputTokens": 456, "totalTokens": 1690 },
+        "finishReason": "STOP"
+      },
+      "timing": { "startedAt": "2025-12-24T12:00:21Z", "finishedAt": "2025-12-24T12:00:45Z", "durationMs": 24000 }
+    }
+  }
+}

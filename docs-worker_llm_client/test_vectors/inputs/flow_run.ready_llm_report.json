@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "runId": "20251224-120000_BTCUSDT_a1b2c",
+  "flowKey": "scheduled_month_week_report_v1",
+  "status": "RUNNING",
+  "createdAt": "2025-12-24T12:00:00Z",
+  "updatedAt": "2025-12-24T12:00:20Z",
+  "trigger": { "type": "SCHEDULER", "source": "flow1-every-4h" },
+  "scope": { "symbol": "BTCUSDT" },
+  "progress": {
+    "currentStepId": "llm_report:1M:prompt_month_v1:model_gemini_2_0_flash",
+    "stepCounts": { "total": 3, "pending": 0, "running": 0, "succeeded": 2, "failed": 0 }
+  },
+  "steps": {
+    "ohlcv_export:1M": {
+      "stepType": "OHLCV_EXPORT",
+      "status": "SUCCEEDED",
+      "timeframe": "1M",
+      "createdAt": "2025-12-24T12:00:01Z",
+      "finishedAt": "2025-12-24T12:00:05Z",
+      "dependsOn": [],
+      "inputs": {
+        "source": "bigquery",
+        "dataset": "raw_ohlcv",
+        "symbol": "BTCUSDT",
+        "timeframe": "1M",
+        "exportMode": "all"
+      },
+      "outputs": {
+        "gcs_uri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/ohlcv_export:1M/1M.json"
+      }
+    },
+    "charts:1M:ctpl_default_v1": {
+      "stepType": "CHART_EXPORT",
+      "status": "SUCCEEDED",
+      "timeframe": "1M",
+      "createdAt": "2025-12-24T12:00:06Z",
+      "finishedAt": "2025-12-24T12:00:12Z",
+      "dependsOn": ["ohlcv_export:1M"],
+      "inputs": {
+        "minImages": 3,
+        "requests": [{ "chartTemplateId": "ctpl_default_v1" }]
+      },
+      "outputs": {
+        "outputsManifestGcsUri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/charts:1M:ctpl_default_v1/manifest.json"
+      }
+    },
+    "llm_report:1M:prompt_month_v1:model_gemini_2_0_flash": {
+      "stepType": "LLM_REPORT",
+      "status": "READY",
+      "timeframe": "1M",
+      "createdAt": "2025-12-24T12:00:13Z",
+      "dependsOn": ["ohlcv_export:1M", "charts:1M:ctpl_default_v1"],
+      "inputs": {
+        "llm": {
+          "promptId": "prompt_month_v1",
+          "modelId": "model_gemini_2_0_flash",
+          "generationConfig": {
+            "temperature": 0.2,
+            "maxOutputTokens": 2048
+          }
+        },
+        "ohlcv_gcs_uri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/ohlcv_export:1M/1M.json",
+        "charts_outputsManifestGcsUri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/charts:1M:ctpl_default_v1/manifest.json"
+      },
+      "outputs": {}
+    }
+  }
+}

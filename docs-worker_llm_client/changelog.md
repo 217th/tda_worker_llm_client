@@ -12,5 +12,18 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
-- (add entries here while iterating, or replace with dated entries if you prefer)
-
+- Added first-pass spec pack for `worker_llm_client` (Cloud Functions gen2 Firestore-triggered LLM step executor) and filled core spec sections (`spec/*.md`).
+- Promoted `flow_run` schema and example into canonical contracts (`contracts/flow_run.schema.json`, `contracts/examples/flow_run.example.json`) and added a human-readable contract note (`contracts/flow_run.md`).
+- Promoted canonical JSON Schema for the LLM report JSON file (`contracts/llm_report_file.schema.json`) with an example.
+- Added initial test vectors for a `READY` `LLM_REPORT` step and an error scenario (missing prompt) under `test_vectors/`.
+- Updated `questions/open_questions.md` with blockers around Gemini request parameters, persisted metadata, artifact naming, and logging event taxonomy.
+- Updated checklist completion for covered items (`checklists/component_docs_checklist.ru.md`).
+- Expanded the error/retry model with a stable error-code proposal, partial-failure handling patterns, Firestore contention notes, and reference retry parameters (`spec/error_and_retry_model.md`).
+- Updated logging contract to include `service`/`env`, CloudEvent correlation (`eventId`), and a stable snake_case event taxonomy aligned with Cloud Logging expectations (`spec/observability.md`).
+- Added `cloud_event_parsed` requirement to include compact `flowRunSteps` summaries (id/stepType/status/dependsOn) without leaking step inputs (`spec/observability.md`).
+- Added Cloud Functions gen2 performance/scaling notes (Cloud Run-like concurrency and instance bounds; start with `--concurrency=1`) (`spec/architecture_overview.md`).
+- Added Python implementation conventions (PEP 8, typing, docstrings, error handling, logging) and env-var style guidance (`spec/implementation_contract.md`, `spec/deploy_and_envs.md`).
+- Documented orchestration assumptions (`advance_flow` sets `PENDING→READY`) and future optional `reports/*` indexing; refined open questions to reflect prototype constraints (metadata-in-logs, no attempt history, signed URLs) (`spec/system_integration.md`, `spec/implementation_contract.md`, `questions/open_questions.md`).
+- Recorded decisions: persist extended LLM execution metadata in `flow_run`, deterministic GCS naming without attempts/timestamps, and store only `gcs_uri` (no `signed_url`) (`spec/system_integration.md`, `spec/implementation_contract.md`, `questions/open_questions.md`).
+- Set canonical GCS URI format to `gs://...` and updated the LLM report file schema accordingly; refreshed `questions/open_questions.md` with the remaining unresolved decisions needed for implementation. (`contracts/llm_report_file.schema.json`, `questions/open_questions.md`).
+- Added “semantic gap” open questions around context injection, orchestrator/worker responsibility boundaries, Gemini safety blocking, prompt scope merging, SDK choice, timeouts, and zombie-step recovery (`questions/open_questions.md`).
