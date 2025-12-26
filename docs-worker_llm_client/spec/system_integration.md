@@ -39,7 +39,9 @@ This worker assumes:
 
 ## Prompt / instruction storage (Firestore)
 
-The LLM step references instructions via `steps.<stepId>.inputs.llm.promptId` and the model via `steps.<stepId>.inputs.llm.modelId`.
+The LLM step references instructions via `steps.<stepId>.inputs.llm.promptId`.
+
+Gemini request parameters are provided via `steps.<stepId>.inputs.llm.llmProfile` (model + generation config + structured output knobs). This profile is **authoritative** for the request and is not overridden by any prompt/model defaults.
 
 Draft proposal (collections; names are configurable):
 - `llm_prompts/{promptId}`:
@@ -47,16 +49,14 @@ Draft proposal (collections; names are configurable):
   - optional input schema (what context fields are expected)
   - optional output schema (structured output contract)
   - versioning should live as explicit fields in the document (IDs may be human-readable but must remain stable)
-- `llm_models/{modelId}`:
-  - provider = `gemini`
-  - model name (e.g. `gemini-2.0-flash`, `gemini-2.0-pro`)
-  - default generation config (temperature, max tokens, etc.)
-  - safety settings / policy defaults
+- (future, optional) `llm_profiles/{profileId}`:
+  - a reusable server-side stored profile that can be embedded into `steps[*].inputs.llm.llmProfile` by an orchestrator
+  - not required for MVP (MVP uses inline `llmProfile` in the step)
 
 Exact document schemas and versioning rules are open questions.
 Minimum constraints (recommended):
 - `promptId` should be storage-safe: `[a-z0-9_]+` (no `/`, `.`, `:`, spaces, unicode), length 1..128.
-- `modelId` should follow the same constraints (conceptually this doc is an “LLM profile”: model + defaults + policy).
+- If an `llm_profiles/{profileId}` collection is introduced, `profileId` should follow the same constraints.
 
 ## Outbound interfaces
 
@@ -64,7 +64,7 @@ Minimum constraints (recommended):
 
 The worker sends:
 - resolved prompt/instructions from Firestore
-- resolved model config (and per-step overrides)
+- resolved `llmProfile` (effective request parameters)
 - context pointers and/or embedded context (OHLCV + charts manifest + previous reports), depending on the prompt design
 
 The worker receives:

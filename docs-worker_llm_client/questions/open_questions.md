@@ -6,7 +6,6 @@ Keep this file current. Close questions explicitly (with decision + date/commit 
 
 | ID | Priority | Blocks planning? | Question | Current best guess | Owner | Target date |
 |---:|:--------:|:---------------:|----------|--------------------|-------|-------------|
-| 1 | High | Yes | Какие параметры должны поддерживаться в запросе к Gemini (temperature/topP/topK/maxOutputTokens/stopSequences/responseSchema/…) и какие из них можно переопределять на уровне шага vs на уровне prompt/model? | Support the common GenerationConfig set + structured output knobs; exact allowlist TBD | TBD | TBD |
 | 5 | High | Yes | Какой “набор событий” и обязательные поля структурированных логов должен использоваться (есть наработки из прошлых проектов)? | Proposed: stable snake_case events + required `service/env/runId/stepId/eventId` + `flowKey/timeframe/symbol` when known; needs alignment | TBD | TBD |
 | 6 | Medium | No | Точный формат CloudEvent `subject` для Firestore update trigger (что именно приходит в gen2) и требования к парсеру `runId`. | Parse last segment after `flow_runs/`; confirm real subject samples | TBD | TBD |
 | 7 | High | Yes | Где именно и в каком формате хранить инструкции: структура документа `llm_prompts/{promptId}` (поля, шаблонизация, версия, input/output schema). | Store system + user templates and optional schemas; finalize schema later | TBD | TBD |
@@ -30,6 +29,7 @@ Keep this file current. Close questions explicitly (with decision + date/commit 
 
 | ID | Date | Decision |
 |---:|:----:|----------|
+| 1 | 2025-12-26 | Gemini request parameters are provided only via `steps.*.inputs.llm.llmProfile` (authoritative; no overrides from prompt/model defaults). Allowlist: `model/modelName`, `temperature`, `topP`, `topK`, `maxOutputTokens`, `stopSequences`, `candidateCount`, `responseMimeType`, `responseSchema/jsonSchema`, `thinkingConfig(includeThoughts, thinkingLevel)`. |
 | 2 | 2025-12-24 | Храним **расширенные метаданные** LLM выполнения в `flow_run` (tokens/finishReason/safety/requestId/latency/…), не только в логах. |
 | 3 | 2025-12-24 | Канонический артефакт отчёта в GCS — **один JSON файл** по `contracts/llm_report_file.schema.json` (внутри есть `output.summary.markdown` и `output.details`). |
 | 4 | 2025-12-26 | GCS naming — **детерминированный путь** `/<runId>/<timeframe>/<stepId>.json`, без `attempt` и без не-детерминированных timestamp в имени; `stepId` storage-safe (без `/ . :` и т.п.). |

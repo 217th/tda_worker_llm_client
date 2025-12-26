@@ -8,7 +8,13 @@
     "timeframe": "1M",
     "llm": {
       "promptId": "prompt_month_v1",
-      "modelId": "model_gemini_2_0_flash",
+      "modelName": "gemini-2.0-flash",
+      "llmProfile": {
+        "modelName": "gemini-2.0-flash",
+        "temperature": 0.2,
+        "maxOutputTokens": 2048,
+        "responseMimeType": "application/json"
+      },
       "modelVersion": "gemini-2.0-flash-001",
       "finishReason": "STOP",
       "usageMetadata": { "promptTokenCount": 1234, "totalTokenCount": 1690 }

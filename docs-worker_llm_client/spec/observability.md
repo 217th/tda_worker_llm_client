@@ -27,7 +27,7 @@ Runtime expectation:
 - `attempt` (worker attempt number within a single invocation)
 - `firestore.updateTime` (claim precondition basis)
 - `firestore.document`: `flow_runs/{runId}` (or full doc path if useful)
-- `llm.promptId`, `llm.modelId`
+- `llm.promptId`, `llm.modelName`
 - `llm.generationConfig` (sanitized; no secrets; summary is OK)
 - `llm.requestId` (provider request ID, if available)
 - `llm.usage` (input/output tokens, total tokens; naming TBD by SDK)
@@ -120,17 +120,17 @@ Existing “event taxonomy” from previous projects should be integrated here (
 ## Metrics
 
 Minimum recommended metrics (log-based metrics or custom):
-- `step_executions_total{status,modelId,promptId}`
-- `step_execution_latency_ms{modelId,promptId}` (p50/p95)
-- `llm_request_latency_ms{modelId}`
-- `llm_tokens_total{direction,modelId}` (`input|output`)
+- `step_executions_total{status,modelName,promptId}`
+- `step_execution_latency_ms{modelName,promptId}` (p50/p95)
+- `llm_request_latency_ms{modelName}`
+- `llm_tokens_total{direction,modelName}` (`input|output`)
 - `claim_conflicts_total`
 - `gcs_write_failures_total`
 
 ## Alerts and dashboards
 
 Draft alert candidates:
-- high `step_execution_failed` rate (by flowKey/modelId)
+- high `step_execution_failed` rate (by flowKey/modelName)
 - sustained `RATE_LIMITED` / `RESOURCE_EXHAUSTED`
 - p95 latency increase for `llm.request`
 - backlog indication: many `READY` steps older than N minutes (requires query/metric on Firestore; design TBD)

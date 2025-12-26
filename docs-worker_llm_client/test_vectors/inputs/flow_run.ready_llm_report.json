@@ -54,10 +54,11 @@
       "inputs": {
         "llm": {
           "promptId": "prompt_month_v1",
-          "modelId": "model_gemini_2_0_flash",
-          "generationConfig": {
+          "llmProfile": {
+            "modelName": "gemini-2.0-flash",
             "temperature": 0.2,
-            "maxOutputTokens": 2048
+            "maxOutputTokens": 2048,
+            "responseMimeType": "application/json"
           }
         },
         "ohlcvStepId": "ohlcv_1M_bigquery_all_v1",

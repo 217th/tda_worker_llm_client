@@ -289,10 +289,58 @@
                 "llm": {
                   "type": "object",
                   "additionalProperties": true,
-                  "required": ["promptId", "modelId"],
+                  "required": ["promptId", "llmProfile"],
                   "properties": {
                     "promptId": { "type": "string", "minLength": 1 },
-                    "modelId": { "type": "string", "minLength": 1 }
+                    "llmProfile": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "anyOf": [{ "required": ["modelName"] }, { "required": ["model"] }],
+                      "properties": {
+                        "modelName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "description": "Gemini model name (e.g. gemini-2.0-flash)."
+                        },
+                        "model": {
+                          "type": "string",
+                          "minLength": 1,
+                          "description": "Deprecated alias for modelName."
+                        },
+                        "temperature": { "type": "number" },
+                        "topP": { "type": "number" },
+                        "topK": { "type": "integer", "minimum": 0 },
+                        "maxOutputTokens": { "type": "integer", "minimum": 1 },
+                        "stopSequences": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        },
+                        "candidateCount": { "type": "integer", "minimum": 1 },
+                        "responseMimeType": {
+                          "type": "string",
+                          "description": "Prefer application/json when using structured output."
+                        },
+                        "responseSchema": {
+                          "type": "object",
+                          "description": "Optional JSON Schema for structured output."
+                        },
+                        "jsonSchema": {
+                          "type": "object",
+                          "description": "Alias for responseSchema."
+                        },
+                        "thinkingConfig": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "includeThoughts": { "type": "boolean" },
+                            "thinkingLevel": {
+                              "description": "Provider-specific; keep as string or integer based on chosen SDK.",
+                              "anyOf": [{ "type": "string" }, { "type": "integer" }]
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 },
                 "ohlcvStepId": {

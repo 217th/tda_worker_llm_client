@@ -10,7 +10,7 @@ The worker must:
 - be triggered by Firestore document update events for `flow_runs/{runId}`
 - select an executable step (`READY`, dependencies satisfied)
 - claim it atomically (`READY → RUNNING`) using Firestore optimistic update precondition (`update_time`)
-- perform a Gemini request using instructions stored in Firestore (by `promptId`) and a model selected by `modelId`
+- perform a Gemini request using instructions stored in Firestore (by `promptId`) and an **effective request profile** provided by `inputs.llm.llmProfile`
 - write the output artifact to Cloud Storage (JSON preferred)
 - persist execution metadata and final step status back to Firestore
 
@@ -38,8 +38,7 @@ For this component, we care about:
 - `dependsOn`: step IDs that must be `SUCCEEDED` before execution
 - `inputs.llm`:
   - `promptId` (points to instruction doc in Firestore)
-  - `modelId` (selects Gemini model/config)
-  - optional overrides (e.g., generation config)
+  - `llmProfile` (effective model + request config; authoritative; no overrides)
 - `inputs` (artifact sources for prompt context):
   - `ohlcvStepId`: step ID of an `OHLCV_EXPORT` step; worker resolves `steps[ohlcvStepId].outputs.gcs_uri`
   - `chartsManifestStepId`: step ID of a `CHART_EXPORT` step; worker resolves `steps[chartsManifestStepId].outputs.gcs_uri` (charts manifest JSON)
@@ -52,7 +51,6 @@ For this component, we care about:
 
 Stored separately from flow runs to enable reuse and versioning:
 - prompt/instruction doc referenced by `promptId`
-- model config referenced by `modelId`
 
 Exact schemas are to be finalized.
 
@@ -122,7 +120,7 @@ The worker writes a single JSON file to GCS for the report. Canonical schema:
 
 Notes:
 - the JSON includes `output.summary.markdown` (human-readable) and a flexible `output.details` object
-- the worker should embed enough `metadata` to make the file self-describing (runId/stepId/symbol/timeframe/promptId/modelId + input URIs + finish metadata like modelVersion/finishReason/usage)
+- the worker should embed enough `metadata` to make the file self-describing (runId/stepId/symbol/timeframe/promptId/modelName + input URIs + finish metadata like modelVersion/finishReason/usage)
 
 ### Context artifact ingestion (policy)
 
@@ -148,14 +146,17 @@ Notes:
 - subject format differs between trigger types/SDKs; keep parsing strict enough to avoid false positives but flexible enough for known Firestore subjects
 - if `runId` cannot be parsed, log an error and exit (no Firestore writes)
 
-## LLM request parameters (proposal)
+## LLM request parameters (decision)
 
-The effective Gemini request config is computed as:
-`model defaults` ⟶ overridden by `prompt config` ⟶ overridden by `step.inputs.llm` overrides.
+The effective Gemini request config is taken from `steps.<stepId>.inputs.llm.llmProfile`.
 
-Recommended parameters to support:
+Override policy:
+- `llmProfile` is **authoritative** for the request.
+- The worker does **not** merge/override it from prompt defaults or model defaults.
 
-- `model` / `modelName` (selected by `modelId`)
+Supported parameter allowlist (Gemini/Vertex; map to the chosen SDK):
+
+- `model` / `modelName`
 - `temperature`
 - `topP`
 - `topK`
@@ -164,7 +165,7 @@ Recommended parameters to support:
 - `candidateCount` (if supported)
 - `responseMimeType` (prefer `application/json` for structured output)
 - `responseSchema` / `jsonSchema` (when using structured output)
-- `safetySettings` (policy-driven defaults, optionally overrideable)
+- `thinkingConfig`: `includeThoughts`, `thinkingLevel`
 
 Structured output implementation note:
 - If using the `google-genai` Python SDK, configure JSON output with `response_mime_type="application/json"` and provide a schema via `response_json_schema` (often generated from Pydantic).

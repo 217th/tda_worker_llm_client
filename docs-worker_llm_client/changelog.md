@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Decided Gemini request parameters are provided only via `steps.*.inputs.llm.llmProfile` (no overrides from prompt/model defaults), updated canonical contracts/examples/test vectors accordingly, and closed open question #1 (`contracts/*.json`, `contracts/examples/*.json`, `test_vectors/*`, `spec/*.md`, `questions/open_questions.md`).
 - Added first-pass spec pack for `worker_llm_client` (Cloud Functions gen2 Firestore-triggered LLM step executor) and filled core spec sections (`spec/*.md`).
 - Promoted `flow_run` schema and example into canonical contracts (`contracts/flow_run.schema.json`, `contracts/examples/flow_run.example.json`) and added a human-readable contract note (`contracts/flow_run.md`).
 - Promoted canonical JSON Schema for the LLM report JSON file (`contracts/llm_report_file.schema.json`) with an example.

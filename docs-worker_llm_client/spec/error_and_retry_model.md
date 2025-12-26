@@ -13,7 +13,7 @@ Where errors are persisted:
 - `FLOW_RUN_NOT_FOUND`: `flow_runs/{runId}` does not exist (stale trigger)
 - `FLOW_RUN_INVALID`: `flow_run` fails validation for this worker (schema/required fields)
 - `PROMPT_NOT_FOUND`: prompt doc missing for `promptId`
-- `MODEL_NOT_FOUND`: model config missing for `modelId`
+- `LLM_PROFILE_INVALID`: missing/invalid `inputs.llm.llmProfile` (model/config not usable)
 - `INVALID_STEP_INPUTS`: required inputs missing (e.g., missing `ohlcvStepId` / `chartsManifestStepId`)
 - `INVALID_STRUCTURED_OUTPUT`: model output is not valid JSON / violates schema (policy TBD)
 
@@ -42,7 +42,7 @@ Common / infrastructure:
 
 LLM-specific (`stepType=LLM_REPORT`):
 - `PROMPT_NOT_FOUND`
-- `MODEL_NOT_FOUND`
+- `LLM_PROFILE_INVALID`
 - `GEMINI_REQUEST_FAILED`
 - `RATE_LIMITED`
 - `INVALID_STRUCTURED_OUTPUT`

@@ -29,10 +29,15 @@
 	        "llm": {
 	          "type": "object",
 	          "additionalProperties": false,
-	          "required": ["promptId", "modelId", "finishReason"],
+	          "required": ["promptId", "modelName", "finishReason"],
 	          "properties": {
 	            "promptId": { "type": "string", "minLength": 1 },
-	            "modelId": { "type": "string", "minLength": 1 },
+	            "modelName": { "type": "string", "minLength": 1 },
+	            "llmProfile": {
+	              "type": "object",
+	              "description": "Optional: effective request profile used for this run (copied from inputs.llm.llmProfile).",
+	              "additionalProperties": true
+	            },
 	            "modelVersion": { "type": "string" },
 	            "finishReason": { "type": "string", "minLength": 1 },
 	            "usageMetadata": {

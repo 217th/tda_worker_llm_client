@@ -35,7 +35,15 @@
       "createdAt": "2025-12-24T12:05:13Z",
       "dependsOn": ["ohlcv_1M_bigquery_all_v1", "charts_1M_default_set_v1"],
       "inputs": {
-        "llm": { "promptId": "prompt_DOES_NOT_EXIST", "modelId": "model_gemini_2_0_flash" },
+        "llm": {
+          "promptId": "prompt_DOES_NOT_EXIST",
+          "llmProfile": {
+            "modelName": "gemini-2.0-flash",
+            "temperature": 0.2,
+            "maxOutputTokens": 2048,
+            "responseMimeType": "application/json"
+          }
+        },
         "ohlcvStepId": "ohlcv_1M_bigquery_all_v1",
         "chartsManifestStepId": "charts_1M_default_set_v1",
         "previousReportStepIds": []
