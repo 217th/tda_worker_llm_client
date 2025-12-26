@@ -8,11 +8,11 @@
   "trigger": { "type": "SCHEDULER", "source": "flow1-every-4h" },
   "scope": { "symbol": "BTCUSDT" },
   "progress": {
-    "currentStepId": "llm_report:1M:prompt_month_v1:model_gemini_2_0_flash",
+    "currentStepId": "llm_report_1M_month_summary_v1",
     "stepCounts": { "total": 3, "pending": 0, "running": 0, "succeeded": 2, "failed": 0 }
   },
   "steps": {
-    "ohlcv_export:1M": {
+    "ohlcv_1M_bigquery_all_v1": {
       "stepType": "OHLCV_EXPORT",
       "status": "SUCCEEDED",
       "timeframe": "1M",
@@ -27,30 +27,30 @@
         "exportMode": "all"
       },
       "outputs": {
-        "gcs_uri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/ohlcv_export:1M/1M.json"
+        "gcs_uri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/1M/ohlcv_1M_bigquery_all_v1.json"
       }
     },
-    "charts:1M:ctpl_default_v1": {
+    "charts_1M_default_set_v1": {
       "stepType": "CHART_EXPORT",
       "status": "SUCCEEDED",
       "timeframe": "1M",
       "createdAt": "2025-12-24T12:00:06Z",
       "finishedAt": "2025-12-24T12:00:12Z",
-      "dependsOn": ["ohlcv_export:1M"],
+      "dependsOn": ["ohlcv_1M_bigquery_all_v1"],
       "inputs": {
         "minImages": 3,
         "requests": [{ "chartTemplateId": "ctpl_default_v1" }]
       },
       "outputs": {
-        "outputsManifestGcsUri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/charts:1M:ctpl_default_v1/manifest.json"
+        "gcs_uri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/1M/charts_1M_default_set_v1.json"
       }
     },
-    "llm_report:1M:prompt_month_v1:model_gemini_2_0_flash": {
+    "llm_report_1M_month_summary_v1": {
       "stepType": "LLM_REPORT",
       "status": "READY",
       "timeframe": "1M",
       "createdAt": "2025-12-24T12:00:13Z",
-      "dependsOn": ["ohlcv_export:1M", "charts:1M:ctpl_default_v1"],
+      "dependsOn": ["ohlcv_1M_bigquery_all_v1", "charts_1M_default_set_v1"],
       "inputs": {
         "llm": {
           "promptId": "prompt_month_v1",
@@ -60,8 +60,9 @@
             "maxOutputTokens": 2048
           }
         },
-        "ohlcv_gcs_uri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/ohlcv_export:1M/1M.json",
-        "charts_outputsManifestGcsUri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/charts:1M:ctpl_default_v1/manifest.json"
+        "ohlcvStepId": "ohlcv_1M_bigquery_all_v1",
+        "chartsManifestStepId": "charts_1M_default_set_v1",
+        "previousReportStepIds": []
       },
       "outputs": {}
     }

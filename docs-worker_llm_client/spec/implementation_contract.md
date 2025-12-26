@@ -40,6 +40,10 @@ For this component, we care about:
   - `promptId` (points to instruction doc in Firestore)
   - `modelId` (selects Gemini model/config)
   - optional overrides (e.g., generation config)
+- `inputs` (artifact sources for prompt context):
+  - `ohlcvStepId`: step ID of an `OHLCV_EXPORT` step; worker resolves `steps[ohlcvStepId].outputs.gcs_uri`
+  - `chartsManifestStepId`: step ID of a `CHART_EXPORT` step; worker resolves `steps[chartsManifestStepId].outputs.gcs_uri` (charts manifest JSON)
+  - optional `previousReportStepIds`: step IDs of earlier `LLM_REPORT` steps whose artifacts may be included as context
 - `outputs`:
   - `gcs_uri` (output artifact)
   - optional execution metadata (see below)
@@ -57,7 +61,7 @@ Exact schemas are to be finalized.
 1. **No silent execution:** worker must never execute a step unless it is `READY` and dependencies are satisfied.
 2. **At most one claimant:** only one invocation may transition a step from `READY` to `RUNNING` (enforced by precondition on `update_time`).
 3. **Idempotent event handling:** duplicate/reordered Firestore update events must not produce duplicated side effects.
-4. **Deterministic artifact path:** output object name must be derived from stable identifiers (at least `runId` + `stepId`) to support idempotency.
+4. **Deterministic artifact path:** output object name must be derived from stable identifiers (at least `runId` + `timeframe` + `stepId`) to support idempotency.
 5. **No sensitive data in logs:** prompt text, secrets, and large payloads are not logged; only hashes/lengths/URIs.
 
 6. **Workers do not set `READY`:** step eligibility is decided by the orchestrator (e.g., `advance_flow`); workers only do `READY → RUNNING → SUCCEEDED/FAILED`.
@@ -117,16 +121,24 @@ The worker writes a single JSON file to GCS for the report. Canonical schema:
 - `contracts/llm_report_file.schema.json`
 
 Notes:
-- the JSON includes `summary.markdown` (human-readable) and a flexible `details` object
-- the worker should embed enough `metadata` to make the file self-describing (runId/stepId/symbol/timeframe/promptId/modelId + input URIs)
+- the JSON includes `output.summary.markdown` (human-readable) and a flexible `output.details` object
+- the worker should embed enough `metadata` to make the file self-describing (runId/stepId/symbol/timeframe/promptId/modelId + input URIs + finish metadata like modelVersion/finishReason/usage)
+
+### Context artifact ingestion (policy)
+
+For JSON context artifacts (OHLCV, charts manifest, previous reports):
+- worker downloads objects from GCS and injects the content as text into the prompt (or as a dedicated text-part, depending on the SDK).
+- apply a hard size limit per artifact (e.g., `maxContextBytesPerArtifact`, default 32KB); if exceeded, fail the step with `INVALID_STEP_INPUTS` (contract violation / too-large context).
 
 ### Artifact naming (decision)
 
-- Use **one deterministic path** derived from `runId + stepId`.
-- Do not include `attempt` or timestamps in the object name.
+- Group artifacts by `runId` and use deterministic names derived from stable identifiers.
+- Canonical JSON artifact path (OHLCV / charts manifest / LLM report):
+  - `<ARTIFACTS_PREFIX>/<runId>/<timeframe>/<stepId>.json`
+- Do not include `attempt` or non-deterministic timestamps in JSON object names.
 
-Current recommended shape:
-- `<ARTIFACTS_PREFIX>/<runId>/<stepId>/report.json`
+Invariant:
+- `steps[stepId].timeframe` must match both the `<timeframe>` path segment and the `<timeframe>` embedded in `stepId` (if present).
 
 ## CloudEvent parsing (runId extraction)
 
@@ -154,6 +166,9 @@ Recommended parameters to support:
 - `responseSchema` / `jsonSchema` (when using structured output)
 - `safetySettings` (policy-driven defaults, optionally overrideable)
 
+Structured output implementation note:
+- If using the `google-genai` Python SDK, configure JSON output with `response_mime_type="application/json"` and provide a schema via `response_json_schema` (often generated from Pydantic).
+
 ## Execution metadata persisted to Firestore (proposal)
 
 Persist under `steps.<stepId>.outputs` (or `steps.<stepId>.outputs.execution`):
@@ -163,14 +178,11 @@ Persist under `steps.<stepId>.outputs` (or `steps.<stepId>.outputs.execution`):
   - optional `contentType` (`application/json`, `text/markdown`)
   - optional `sha256`/`md5`
 - `llm`:
-  - `provider` = `gemini`
-  - `modelId` + resolved `modelName`
-  - `promptId` (+ prompt version if separate)
-  - resolved `generationConfig` (sanitized)
-  - `requestId` (provider ID, if any)
   - `finishReason`
-  - `usage` (tokens: input/output/total, if available)
-  - `safety` (safety ratings/blocks, if available)
+  - `modelVersion` (if available)
+  - `usageMetadata` (token counts; at minimum `promptTokenCount` and `totalTokenCount`, plus optional `thoughtsTokenCount`)
+  - `requestId` / `operationId` (if available; for correlation)
+  - optional `safety` (safety ratings/blocks, if available)
 - `timing`:
   - `startedAt`, `finishedAt`, `durationMs`
 - `errors` (if failed):

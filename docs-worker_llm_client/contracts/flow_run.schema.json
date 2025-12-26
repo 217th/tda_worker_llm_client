@@ -257,7 +257,11 @@
               "type": "object",
               "additionalProperties": true,
               "properties": {
-                "outputsManifestGcsUri": { "type": "string", "pattern": "^gs://.+" },
+                "gcs_uri": {
+                  "type": "string",
+                  "description": "Primary output artifact for this step (charts manifest JSON).",
+                  "pattern": "^gs://.+"
+                },
                 "expires_at": { "$ref": "#/$defs/rfc3339Timestamp" }
               }
             }
@@ -265,7 +269,7 @@
         },
         {
           "if": { "properties": { "status": { "const": "SUCCEEDED" } } },
-          "then": { "properties": { "outputs": { "required": ["outputsManifestGcsUri"] } } }
+          "then": { "properties": { "outputs": { "required": ["gcs_uri"] } } }
         }
       ]
     },
@@ -280,7 +284,7 @@
             "inputs": {
               "type": "object",
               "additionalProperties": true,
-              "required": ["llm", "ohlcv_gcs_uri", "charts_outputsManifestGcsUri"],
+              "required": ["llm", "ohlcvStepId", "chartsManifestStepId"],
               "properties": {
                 "llm": {
                   "type": "object",
@@ -291,15 +295,19 @@
                     "modelId": { "type": "string", "minLength": 1 }
                   }
                 },
-                "ohlcv_gcs_uri": { "type": "string", "pattern": "^gs://.+" },
-                "charts_outputsManifestGcsUri": {
+                "ohlcvStepId": {
                   "type": "string",
-                  "description": "Manifest с набором графиков/индикаторов, если используется.",
-                  "pattern": "^gs://.+"
+                  "description": "StepId of an OHLCV_EXPORT step whose output artifact should be used as input context for this LLM_REPORT step.",
+                  "minLength": 1
                 },
-                "reportIds": {
+                "chartsManifestStepId": {
+                  "type": "string",
+                  "description": "StepId of a CHART_EXPORT step; worker resolves its primary output (charts manifest JSON) via steps[chartsManifestStepId].outputs.gcs_uri.",
+                  "minLength": 1
+                },
+                "previousReportStepIds": {
                   "type": "array",
-                  "description": "Ссылки на предыдущие отчёты, если включаются в контекст (например 1M отчёт для 1w шага).",
+                  "description": "Optional: stepIds of previous LLM_REPORT steps whose report artifacts may be included as context.",
                   "items": { "type": "string", "minLength": 1 }
                 }
               }
@@ -309,8 +317,46 @@
               "additionalProperties": true,
               "properties": {
                 "gcs_uri": { "type": "string", "pattern": "^gs://.+" },
-                "reportId": { "type": "string", "minLength": 1 },
-                "expires_at": { "$ref": "#/$defs/rfc3339Timestamp" }
+                "execution": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "timing": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["startedAt", "finishedAt", "durationMs"],
+                      "properties": {
+                        "startedAt": { "$ref": "#/$defs/rfc3339Timestamp" },
+                        "finishedAt": { "$ref": "#/$defs/rfc3339Timestamp" },
+                        "durationMs": { "type": "integer", "minimum": 0 }
+                      }
+                    },
+                    "llm": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "required": ["finishReason"],
+                      "properties": {
+                        "finishReason": { "type": "string", "minLength": 1 },
+                        "modelVersion": { "type": "string" },
+                        "usageMetadata": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "properties": {
+                            "promptTokenCount": { "type": "integer", "minimum": 0 },
+                            "totalTokenCount": { "type": "integer", "minimum": 0 },
+                            "thoughtsTokenCount": { "type": "integer", "minimum": 0 }
+                          }
+                        },
+                        "requestId": { "type": "string" },
+                        "operationId": { "type": "string" }
+                      }
+                    },
+                    "reused": {
+                      "type": "boolean",
+                      "description": "Optional: true if the worker detected an existing deterministic artifact and finalized without re-calling the LLM."
+                    }
+                  }
+                }
               }
             }
           }

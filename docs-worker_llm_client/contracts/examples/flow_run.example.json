@@ -13,11 +13,11 @@
     "symbol": "BTCUSDT"
   },
   "progress": {
-    "currentStepId": "charts:1M:ctpl_default_v1",
+    "currentStepId": "charts_1M_default_set_v1",
     "stepCounts": { "total": 3, "pending": 1, "running": 1, "succeeded": 1, "failed": 0 }
   },
   "steps": {
-    "ohlcv_export:1M": {
+    "ohlcv_1M_bigquery_all_v1": {
       "stepType": "OHLCV_EXPORT",
       "status": "SUCCEEDED",
       "timeframe": "1M",
@@ -32,15 +32,15 @@
         "exportMode": "all"
       },
       "outputs": {
-        "gcs_uri": "gs://artifacts-bucket/20251215-102530_BTCUSDT_k3f7a/ohlcv_export:1M/1M.json"
+        "gcs_uri": "gs://artifacts-bucket/20251215-102530_BTCUSDT_k3f7a/1M/ohlcv_1M_bigquery_all_v1.json"
       }
     },
-    "charts:1M:ctpl_default_v1": {
+    "charts_1M_default_set_v1": {
       "stepType": "CHART_EXPORT",
       "status": "RUNNING",
       "timeframe": "1M",
       "createdAt": "2025-12-15T10:25:46Z",
-      "dependsOn": ["ohlcv_export:1M"],
+      "dependsOn": ["ohlcv_1M_bigquery_all_v1"],
       "inputs": {
         "minImages": 3,
         "requests": [
@@ -52,16 +52,17 @@
       },
       "outputs": {}
     },
-    "llm_report:1M:prompt_month_v1:model_gpt_4o_mini": {
+    "llm_report_1M_month_summary_v1": {
       "stepType": "LLM_REPORT",
       "status": "PENDING",
       "timeframe": "1M",
       "createdAt": "2025-12-15T10:25:46Z",
-      "dependsOn": ["ohlcv_export:1M", "charts:1M:ctpl_default_v1"],
+      "dependsOn": ["ohlcv_1M_bigquery_all_v1", "charts_1M_default_set_v1"],
       "inputs": {
         "llm": { "promptId": "prompt_month_v1", "modelId": "model_gpt_4o_mini" },
-        "ohlcv_gcs_uri": "gs://artifacts-bucket/20251215-102530_BTCUSDT_k3f7a/ohlcv_export:1M/1M.json",
-        "charts_outputsManifestGcsUri": "gs://artifacts-bucket/charts/20251215-102530_BTC-USDT_k3f7a/charts:1M:ctpl_default_v1/manifest.json"
+        "ohlcvStepId": "ohlcv_1M_bigquery_all_v1",
+        "chartsManifestStepId": "charts_1M_default_set_v1",
+        "previousReportStepIds": []
       },
       "outputs": {}
     }

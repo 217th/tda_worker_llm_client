@@ -46,7 +46,7 @@ Draft proposal (collections; names are configurable):
   - prompt text and templating
   - optional input schema (what context fields are expected)
   - optional output schema (structured output contract)
-  - versioning (`promptId` may embed version, e.g. `prompt_month_v1`)
+  - versioning should live as explicit fields in the document (IDs may be human-readable but must remain stable)
 - `llm_models/{modelId}`:
   - provider = `gemini`
   - model name (e.g. `gemini-2.0-flash`, `gemini-2.0-pro`)
@@ -54,6 +54,9 @@ Draft proposal (collections; names are configurable):
   - safety settings / policy defaults
 
 Exact document schemas and versioning rules are open questions.
+Minimum constraints (recommended):
+- `promptId` should be storage-safe: `[a-z0-9_]+` (no `/`, `.`, `:`, spaces, unicode), length 1..128.
+- `modelId` should follow the same constraints (conceptually this doc is an “LLM profile”: model + defaults + policy).
 
 ## Outbound interfaces
 
@@ -74,12 +77,25 @@ The worker writes the final report artifact to GCS and persists its URI into:
 - `steps.<stepId>.outputs.gcs_uri`
 
 Artifact naming scheme (decision):
-- use one deterministic path derived from `runId + stepId`
-- do not include `attempt` or timestamps in the object name
+- group artifacts by `runId` (everything for a run lives under one prefix)
+- use deterministic object names derived from stable identifiers (`runId`, `timeframe`, `stepId`)
+- do not include `attempt` or non-deterministic timestamps in object names
 - do not store `signed_url` in Firestore; store only `gcs_uri`
 
-Recommended shape:
-- `<ARTIFACTS_PREFIX>/<runId>/<stepId>/report.json`
+Canonical shapes:
+- JSON artifacts (OHLCV / charts manifest / LLM report):
+  - `<ARTIFACTS_PREFIX>/<runId>/<timeframe>/<stepId>.json`
+- Charts PNG artifacts (multiple per step):
+  - folder: `<ARTIFACTS_PREFIX>/<runId>/<timeframe>/<stepId>/`
+  - file: `<ARTIFACTS_PREFIX>/<runId>/<timeframe>/<stepId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`
+
+Invariant:
+- `steps[stepId].timeframe` must match both the `<timeframe>` path segment and the `<timeframe>` embedded in `stepId` (if present).
+
+Recommended `stepId` canon (storage-safe):
+- `<stepType>_<timeframe>_<slug>_v<major>`
+  - `<stepType>` is a short stable token (e.g. `ohlcv`, `charts`, `llm_report`, `llm_recommendation`)
+  - `<slug>` is a brief snake_case note (ASCII), must not include symbol
 
 ### Optional indexed metadata collections (future)
 

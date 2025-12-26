@@ -8,7 +8,7 @@
   "trigger": { "type": "SCHEDULER", "source": "flow1-every-4h" },
   "scope": { "symbol": "BTCUSDT" },
   "steps": {
-    "ohlcv_export:1M": {
+    "ohlcv_1M_bigquery_all_v1": {
       "stepType": "OHLCV_EXPORT",
       "status": "SUCCEEDED",
       "timeframe": "1M",
@@ -16,28 +16,29 @@
       "finishedAt": "2025-12-24T12:05:05Z",
       "dependsOn": [],
       "inputs": { "source": "bigquery", "dataset": "raw_ohlcv", "symbol": "BTCUSDT", "timeframe": "1M", "exportMode": "all" },
-      "outputs": { "gcs_uri": "gs://artifacts-bucket/20251224-120500_BTCUSDT_d3e4f/ohlcv_export:1M/1M.json" }
+      "outputs": { "gcs_uri": "gs://artifacts-bucket/20251224-120500_BTCUSDT_d3e4f/1M/ohlcv_1M_bigquery_all_v1.json" }
     },
-    "charts:1M:ctpl_default_v1": {
+    "charts_1M_default_set_v1": {
       "stepType": "CHART_EXPORT",
       "status": "SUCCEEDED",
       "timeframe": "1M",
       "createdAt": "2025-12-24T12:05:06Z",
       "finishedAt": "2025-12-24T12:05:12Z",
-      "dependsOn": ["ohlcv_export:1M"],
+      "dependsOn": ["ohlcv_1M_bigquery_all_v1"],
       "inputs": { "minImages": 1, "requests": [{ "chartTemplateId": "ctpl_default_v1" }] },
-      "outputs": { "outputsManifestGcsUri": "gs://artifacts-bucket/20251224-120500_BTCUSDT_d3e4f/charts:1M:ctpl_default_v1/manifest.json" }
+      "outputs": { "gcs_uri": "gs://artifacts-bucket/20251224-120500_BTCUSDT_d3e4f/1M/charts_1M_default_set_v1.json" }
     },
-    "llm_report:1M:prompt_DOES_NOT_EXIST:model_gemini_2_0_flash": {
+    "llm_report_1M_month_summary_v1": {
       "stepType": "LLM_REPORT",
       "status": "READY",
       "timeframe": "1M",
       "createdAt": "2025-12-24T12:05:13Z",
-      "dependsOn": ["ohlcv_export:1M", "charts:1M:ctpl_default_v1"],
+      "dependsOn": ["ohlcv_1M_bigquery_all_v1", "charts_1M_default_set_v1"],
       "inputs": {
         "llm": { "promptId": "prompt_DOES_NOT_EXIST", "modelId": "model_gemini_2_0_flash" },
-        "ohlcv_gcs_uri": "gs://artifacts-bucket/20251224-120500_BTCUSDT_d3e4f/ohlcv_export:1M/1M.json",
-        "charts_outputsManifestGcsUri": "gs://artifacts-bucket/20251224-120500_BTCUSDT_d3e4f/charts:1M:ctpl_default_v1/manifest.json"
+        "ohlcvStepId": "ohlcv_1M_bigquery_all_v1",
+        "chartsManifestStepId": "charts_1M_default_set_v1",
+        "previousReportStepIds": []
       },
       "outputs": {}
     }

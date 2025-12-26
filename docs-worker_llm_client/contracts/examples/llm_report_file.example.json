@@ -1,24 +1,30 @@
 {
   "metadata": {
     "runId": "20251224-120000_BTCUSDT_a1b2c",
-    "stepId": "llm_report:1M:prompt_month_v1:model_gemini_2_0_flash",
+    "stepId": "llm_report_1M_month_summary_v1",
     "createdAt": "2025-12-24T12:00:45Z",
+    "finishedAt": "2025-12-24T12:00:45Z",
     "symbol": "BTCUSDT",
     "timeframe": "1M",
     "llm": {
       "promptId": "prompt_month_v1",
-      "modelId": "model_gemini_2_0_flash"
+      "modelId": "model_gemini_2_0_flash",
+      "modelVersion": "gemini-2.0-flash-001",
+      "finishReason": "STOP",
+      "usageMetadata": { "promptTokenCount": 1234, "totalTokenCount": 1690 }
     },
     "inputs": {
-      "ohlcv_gcs_uri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/ohlcv_export:1M/1M.json",
-      "charts_outputsManifestGcsUri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/charts:1M:ctpl_default_v1/manifest.json",
-      "reportIds": ["report_1m_previous"]
+      "ohlcv_gcs_uri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/1M/ohlcv_1M_bigquery_all_v1.json",
+      "charts_outputsManifestGcsUri": "gs://artifacts-bucket/20251224-120000_BTCUSDT_a1b2c/1M/charts_1M_default_set_v1.json",
+      "report_gcs_uris": ["gs://artifacts-bucket/20251224-115500_BTCUSDT_prev00/1M/llm_report_1M_month_summary_v1.json"]
     }
   },
-  "summary": {
-    "markdown": "Краткое резюме (Markdown) по текущему таймфрейму."
-  },
-  "details": {
-    "notes": "Details-структура эволюционирует и определяется prompt’ом/шаблоном structured output."
+  "output": {
+    "summary": {
+      "markdown": "Краткое резюме (Markdown) по текущему таймфрейму."
+    },
+    "details": {
+      "notes": "Details-структура эволюционирует и определяется prompt’ом/шаблоном structured output."
+    }
   }
 }

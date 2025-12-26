@@ -48,8 +48,9 @@ Prototype orchestration model:
 Inputs (minimum):
 - `inputs.llm.promptId`: instruction/prompt document ID in Firestore.
 - `inputs.llm.modelId`: model config ID in Firestore (Gemini model selection).
-- `inputs.ohlcv_gcs_uri`: pointer to OHLCV JSON artifact.
-- `inputs.charts_outputsManifestGcsUri`: pointer to charts manifest artifact.
+- `inputs.ohlcvStepId`: stepId of an `OHLCV_EXPORT` step; worker resolves `steps[ohlcvStepId].outputs.gcs_uri`.
+- `inputs.chartsManifestStepId`: stepId of a `CHART_EXPORT` step; worker resolves `steps[chartsManifestStepId].outputs.gcs_uri` (charts manifest JSON).
+- optional `inputs.previousReportStepIds`: stepIds of previous `LLM_REPORT` steps whose report artifacts may be included as context.
 
 Outputs (minimum on success):
 - `outputs.gcs_uri`: GCS URI for the final report artifact written by the worker.

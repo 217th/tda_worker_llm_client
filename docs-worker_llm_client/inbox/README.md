@@ -14,3 +14,5 @@ Processed items (copied into canonical locations):
 - `flow_run.example.json` → `../contracts/examples/flow_run.example.json`
 - `llm_report_file.schema.json` → `../contracts/llm_report_file.schema.json`
 - `orchestration_rules.md` → distilled into `../spec/system_integration.md` and `../spec/implementation_contract.md`
+- `adjusting_naming_schemes.md` → distilled into `../spec/system_integration.md`, `../spec/implementation_contract.md`, `../contracts/flow_run.schema.json`, `../contracts/flow_run.md`, and refreshed examples/test vectors
+- `gemini_api_man.md` → distilled into `../spec/implementation_contract.md` (structured JSON output notes)
