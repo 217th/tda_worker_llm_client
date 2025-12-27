@@ -185,7 +185,7 @@ Supported parameter allowlist (Gemini API; map to the chosen SDK):
 - `thinkingConfig`: `includeThoughts`, `thinkingLevel`
 
 Structured output implementation note:
-- If using the `google-genai` Python SDK, configure JSON output with `response_mime_type="application/json"` and provide a schema via `response_json_schema` (often generated from Pydantic).
+- If using the `google-genai` Python SDK, configure JSON output with `response_mime_type="application/json"` and provide a schema via `response_json_schema` (MVP: sourced from `llm_schemas/{schemaId}.jsonSchema`).
 - MVP requires deterministic single-candidate behavior: `candidateCount=1`. If the step `llmProfile` specifies a different value (when supported), treat as `LLM_PROFILE_INVALID` (do not override).
 - Schema boundary (MVP): the provider schema validates only the model-owned `LLMReportFile.output`. The worker builds the final `LLMReportFile` by combining worker-owned `metadata` + model-owned `output`.
 - Schema registry (MVP): when `structuredOutput.schemaId` is present, the worker loads `llm_schemas/{schemaId}` and uses its `jsonSchema` as the provider response schema; persist/log `llm.schemaId` + `llm.schemaSha256` and treat missing/invalid/unsupported schema as `LLM_PROFILE_INVALID`.
@@ -322,7 +322,7 @@ When structured output is enabled (JSON mode + response schema), the worker must
 1) Extract candidate text (the JSON string) from the provider SDK response.
 2) Check provider `finishReason` (if present) and treat incomplete/blocked generations as invalid output.
 3) Parse JSON.
-4) Validate the parsed JSON against the expected schema/model (Pydantic recommended).
+4) Validate the parsed JSON against the expected JSON Schema from the registry (`llm_schemas/{schemaId}.jsonSchema`) and the minimal-invariants policy.
 
 ##### Candidate text extraction (MVP)
 

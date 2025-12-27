@@ -230,7 +230,7 @@ Recommended fields for `structured_output_invalid`:
   - `finish_reason`: provider indicates generation was not successful for returning a complete payload
   - `missing_text`: no extractable candidate text found where expected
   - `json_parse`: invalid JSON (parse error)
-  - `schema_validation`: JSON parsed but failed schema/Pydantic validation
+  - `schema_validation`: JSON parsed but failed JSON Schema validation
 - `reason.message`: short sanitized message, no payload excerpts
 - `diagnostics.textBytes`: byte length of extracted candidate text (UTF-8)
 - `diagnostics.textSha256`: SHA-256 hex of extracted candidate text (UTF-8)

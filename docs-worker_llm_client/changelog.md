@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Closed structured output open question #32: made `llm_schemas/{schemaId}.jsonSchema` the single source of truth for output validation (no Pydantic-as-authority on MVP), and aligned validation/logging wording accordingly (`questions/open_questions.md`, `contracts/llm_schema.md`, `spec/implementation_contract.md`, `spec/error_and_retry_model.md`, `spec/observability.md`).
 - Closed structured output open question #38: `output.details` remains free-form on MVP; stability guaranteed via `output.summary.markdown` and future tightening happens via schema version bump (`questions/open_questions.md`, `contracts/llm_schema.md`).
 - Strengthened structured output schema pre-flight validation: require the schema to enforce `summary.markdown` (and top-level `summary/details`) and log `structured_output_schema_invalid` on schema misconfiguration (`spec/error_and_retry_model.md`, `spec/observability.md`, `spec/implementation_contract.md`, `contracts/llm_schema.md`, `questions/open_questions.md`).
 - Closed structured output open question #33: defined a concrete repair prompt contract (code-owned prompt, second Gemini call only, eligibility by `reason.kind`, safe diagnostics, and no persistence/logging of raw candidate text) (`questions/open_questions.md`, `spec/implementation_contract.md`, `spec/observability.md`).

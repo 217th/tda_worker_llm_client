@@ -2,6 +2,8 @@
 
 Purpose: store large structured-output JSON Schemas separately from prompt docs so they are easy to inspect and troubleshoot.
 
+Decision (MVP): `llm_schemas/{schemaId}.jsonSchema` is the **single source of truth** for validating the model-owned `output` payload.
+
 ## Collection
 
 - Firestore collection: `llm_schemas`
