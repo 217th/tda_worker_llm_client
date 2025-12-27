@@ -233,6 +233,8 @@ Recommended fields for `structured_output_invalid`:
 - `diagnostics.textBytes`: byte length of extracted candidate text (UTF-8)
 - `diagnostics.textSha256`: SHA-256 hex of extracted candidate text (UTF-8)
 - `diagnostics.validationErrors`: optional array of sanitized items (e.g. `{"path":"output.summary.markdown","error":"field required"}`), capped to a small number (e.g. 10)
+- `policy.repairEligible`: boolean (true only for `reason.kind in {missing_text,json_parse,schema_validation}` and when time budget allows)
+- `policy.repairExecuted`: boolean
 
 If a repair attempt is executed:
 - emit `structured_output_repair_attempt_started` and `structured_output_repair_attempt_finished`

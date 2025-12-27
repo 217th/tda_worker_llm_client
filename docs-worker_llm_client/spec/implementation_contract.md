@@ -373,3 +373,27 @@ Schema versioning (MVP):
 - The worker writes `metadata.schemaVersion` into the `llm_report_file` artifact (worker-owned).
 - `metadata.schemaVersion` represents the version of the model-owned `output` format (structured output schema).
 - `llmProfile.structuredOutput.schemaId` must follow `llm_report_output_v{schemaVersion}`; if it does not match this convention or is unparseable, treat as `LLM_PROFILE_INVALID`.
+
+#### Repair prompt contract (MVP)
+
+Definition:
+- “Repair” is a **second Gemini call** to regenerate the structured output (it is not a client-side JSON fixer).
+
+Eligibility (in addition to time budget checks):
+- repair applies only to structured-output validation failures with:
+  - `reason.kind in {missing_text, json_parse, schema_validation}`
+- repair does **not** apply to:
+  - `finishReason == SAFETY` (handled as `LLM_SAFETY_BLOCK`)
+
+Repair request contents:
+- The worker generates the repair prompt in code (not stored in Firestore).
+- The worker must reiterate: “return **only JSON** matching the schema; no markdown; no extra text”.
+- The worker provides:
+  - `schemaId` and the schema (`llm_schemas/{schemaId}.jsonSchema`)
+  - the invalidation reason (`reason.kind`) and a sanitized `reason.message`
+  - sanitized validation errors (capped; e.g. 10 items)
+  - optionally, the previous candidate text **in-memory only** (never logged/persisted)
+
+Result handling:
+- if the repair output validates, proceed as a normal success (write standard `llm_report_file`)
+- otherwise, finalize as `FAILED` with `INVALID_STRUCTURED_OUTPUT`
