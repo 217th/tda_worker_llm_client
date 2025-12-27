@@ -12,6 +12,9 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Updated the static model to reflect Secret Manager–injected Gemini API key configuration (single-key `GEMINI_API_KEY` vs rotation-friendly `GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID`) and the rule that only `llm.auth.mode/keyId` are loggable (`static_model.md`, `spec/deploy_and_envs.md`, `spec/observability.md`).
+- Updated the static model to explicitly include `ClaimResult`/`FinalizeResult` and the recommended `FlowRunRepository.claim_step/finalize_step` API aligned with the Firestore `update_time` precondition implementation (`static_model.md`, `spec/implementation_contract.md`).
+- Documented a concrete recommended Firestore claim/finalize implementation for `READY → RUNNING → SUCCEEDED/FAILED` using optimistic `update_time` preconditions (by analogy with other workers) (`spec/implementation_contract.md`).
 - Closed SPK-001 (Gemini API key handling): documented Secret Manager → env var injection, rotation runbook, and multi-key config (`GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID`) with strict “never log/persist secrets” rules (`spec/deploy_and_envs.md`, `spec/observability.md`, `questions/open_questions.md`, `questions/arch_spikes.md`).
 - Closed structured output open question #44: added 3 negative structured-output fixtures + expected failure patches (truncated JSON, missing required, wrong type) and fixed expected `error.code` mapping (`questions/open_questions.md`, `fixtures/structured_output_invalid/*`, `test_vectors/outputs/*`).
 - Closed structured output open questions #35 and #39: persist only `attempts.total` (no per-attempt histories) and do not require/generate `output.summary.html` on MVP (`questions/open_questions.md`, `spec/implementation_contract.md`).

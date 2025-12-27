@@ -84,6 +84,8 @@ No questions
 | `CloudEventParser` | Service | Extract/validate `runId` from CloudEvent `subject` |
 | `FlowRunRepository` | Repository (port) | Load + patch flow_run with optimistic preconditions |
 | `FirestoreFlowRunRepository` | Repository (impl) | Firestore implementation (update_time preconditions) |
+| `ClaimResult` | Value Object | Claim outcome (`claimed/status/reason`) for `READY → RUNNING` |
+| `FinalizeResult` | Value Object | Finalize outcome (`updated/status/reason`) for `RUNNING → SUCCEEDED/FAILED` |
 | `PromptRepository` | Repository (port) | Fetch `LLMPrompt` |
 | `FirestorePromptRepository` | Repository (impl) | Firestore implementation |
 | `SchemaRepository` | Repository (port) | Fetch `LLMSchema` |
@@ -92,6 +94,8 @@ No questions
 | `GeminiClientAdapter` | Client (impl) | Gemini AI Studio adapter |
 | `EventLogger` | Adapter (port) | Structured log events (`jsonPayload.event`) |
 | `CloudLoggingEventLogger` | Adapter (impl) | Python `logging` JSON envelope |
+| `GeminiApiKey` | Value Object | One Gemini API key record (`id`, `api_key`) from `GEMINI_API_KEYS_JSON` |
+| `GeminiAuthConfig` | Value Object | Auth mode + selected key id (never logs key) |
 | `WorkerConfig` | Value Object | Validated env config |
 | `TimeBudgetPolicy` | Policy | Enforces finalize budget + external call cutoffs |
 
@@ -121,6 +125,8 @@ No questions
 | `CloudEventParser` | Infra / `infra/cloudevents.py` | Service | Parse runId from CloudEvent subject | CloudEvent parsing (`spec/implementation_contract.md`) |
 | `FlowRunRepository` | App / `app/services.py` | Repository (port) | Load + patch flow_run with preconditions | Claim/finalize (`spec/architecture_overview.md`) |
 | `FirestoreFlowRunRepository` | Infra / `infra/firestore.py` | Repository (impl) | Firestore implementation (update_time precondition) | Claim/finalize (`spec/implementation_contract.md`) |
+| `ClaimResult` | Infra / `infra/firestore.py` | Value Object | Result of `READY → RUNNING` claim attempt | Recommended implementation (`spec/implementation_contract.md`) |
+| `FinalizeResult` | Infra / `infra/firestore.py` | Value Object | Result of `RUNNING → SUCCEEDED/FAILED` finalize attempt | Recommended implementation (`spec/implementation_contract.md`) |
 | `PromptRepository` | App / `app/services.py` | Repository (port) | Fetch prompt doc | `spec/prompt_storage_and_context.md` |
 | `FirestorePromptRepository` | Infra / `infra/firestore.py` | Repository (impl) | Firestore `llm_prompts/{promptId}` | Missing prompt vector (`test_vectors/inputs/flow_run.ready_llm_report_missing_prompt.json`) |
 | `SchemaRepository` | App / `app/services.py` | Repository (port) | Fetch schema doc | Schema registry (`spec/implementation_contract.md`) |
@@ -129,6 +135,8 @@ No questions
 | `GeminiClientAdapter` | Infra / `infra/gemini.py` | Client (impl) | Gemini AI Studio call adapter | `spec/implementation_contract.md` (AI Studio MVP) |
 | `EventLogger` | Ops / `ops/logging.py` | Adapter (port) | Structured event logging API | `spec/observability.md` |
 | `CloudLoggingEventLogger` | Ops / `ops/logging.py` | Adapter (impl) | Emit JSON logs with stable taxonomy | `spec/observability.md` |
+| `GeminiApiKey` | Ops / `ops/config.py` | Value Object | One Gemini API key record parsed from `GEMINI_API_KEYS_JSON` | `spec/deploy_and_envs.md` (Gemini API key management) |
+| `GeminiAuthConfig` | Ops / `ops/config.py` | Value Object | Selected Gemini auth config (mode + key id) | `spec/deploy_and_envs.md`, `spec/observability.md` |
 | `WorkerConfig` | Ops / `ops/config.py` | Value Object | Env config validation | `spec/deploy_and_envs.md` |
 | `TimeBudgetPolicy` | Ops / `ops/time_budget.py` | Policy | Enforce finalize reserve + deadlines | Timeout policy (`spec/implementation_contract.md`) |
 | `FlowRunEventHandler` | App / `app/handler.py` | Application Service | Orchestrate end-to-end invocation | Scenario A/B + edge cases (`spec/implementation_contract.md`) |
@@ -497,12 +505,15 @@ No questions
   - Invariants/rules:
     - Claim/finalize must use Firestore `update_time` preconditions (no transactions).
     - Parsing is tolerant: ignore unknown fields; validate required subset.
+    - Firestore dotted-path updates require a storage-safe `stepId` (must not contain `.`); otherwise FieldPath updates are required and are out of scope for MVP.
   - Main states/attributes (meaning):
     - None (interface).
 - Specification-level:
   - Public API:
     - `get(run_id)` → `(FlowRun, update_time) | None`.
-    - `patch(run_id, patch, precondition_update_time)` → success/conflict/error.
+    - `patch(run_id, patch, precondition_update_time)` → success/conflict/error (low-level primitive).
+    - `claim_step(run_id, step_id, started_at_rfc3339)` → `ClaimResult` (recommended convenience; internally reads snapshot + uses `update_time` precondition).
+    - `finalize_step(run_id, step_id, status, finished_at_rfc3339, outputs_gcs_uri?, execution?, error?)` → `FinalizeResult` (recommended convenience; internally reads snapshot + uses `update_time` precondition).
   - Exceptions/errors:
     - `FirestoreUnavailable` for transient errors.
   - Dependencies:
@@ -515,6 +526,7 @@ No questions
   - Meaning in the domain: Firestore implementation of `FlowRunRepository`.
   - Invariants/rules:
     - Avoid transactions; keep patches minimal; short retries on contention.
+    - Claim/finalize operations must be implemented as: read snapshot → validate step status gate → update with `last_update_time` precondition (and short backoff retries on benign precondition/aborted failures).
   - Main states/attributes (meaning):
     - Firestore client, collection name, retry policy.
 - Specification-level:
@@ -526,6 +538,29 @@ No questions
     - Firestore SDK.
   - Notes on data flows:
     - Implements claim and finalize patches as described in `spec/implementation_contract.md`.
+
+**4.22.1 ClaimResult**
+- Conceptual:
+  - Meaning in the domain: Represents the outcome of an attempted atomic claim (`READY → RUNNING`).
+  - Invariants/rules:
+    - Precondition failures are expected under races and are not treated as step failures.
+- Specification-level:
+  - Fields:
+    - `claimed` (bool)
+    - `status` (str|None): observed status during the last read
+    - `reason` (str|None): `not_ready|precondition_failed`
+
+**4.22.2 FinalizeResult**
+- Conceptual:
+  - Meaning in the domain: Represents the outcome of an attempted finalization (`RUNNING → SUCCEEDED/FAILED`).
+  - Invariants/rules:
+    - If the step is already final, do not overwrite (`already_final`).
+    - Precondition failures are expected under races (`precondition_failed`).
+- Specification-level:
+  - Fields:
+    - `updated` (bool)
+    - `status` (str|None): observed status during the last read
+    - `reason` (str|None): `already_final|not_running|precondition_failed`
 
 **4.23 PromptRepository**
 - Conceptual:
@@ -620,7 +655,7 @@ No questions
     - MVP uses API key auth (AI Studio only).
     - For `LLM_REPORT`, response must be JSON (`application/json`) per profile validation.
   - Main states/attributes (meaning):
-    - Gemini client, API key, default timeout.
+    - Gemini client, resolved API key (in-memory only), selected key id (optional), default timeout.
 - Specification-level:
   - Public API:
     - Implements `LLMClient.generate(...)`.
@@ -630,6 +665,7 @@ No questions
     - Gemini SDK (implementation detail; per spec hint).
   - Notes on data flows:
     - Must not log prompt or raw output.
+    - Must never log the API key (or its hash). For correlation, logs may include only `llm.auth.mode` and optional `llm.auth.keyId` per `spec/observability.md`.
 
 **4.29 EventLogger**
 - Conceptual:
@@ -670,6 +706,8 @@ No questions
   - Meaning in the domain: Validated runtime configuration snapshot (env vars).
   - Invariants/rules:
     - Required settings (collection names, artifacts bucket, timeouts) must be present and valid.
+    - Gemini API keys are provided only via env vars injected from Secret Manager (never committed).
+    - Config validation errors must mention only env var names / key ids, never the secret value (and never its hash).
   - Main states/attributes (meaning):
     - Firestore collections, artifacts bucket/prefix, API key config, timeouts, log level.
 - Specification-level:
@@ -681,6 +719,31 @@ No questions
     - OS environment.
   - Notes on data flows:
     - Drives CloudEvent parsing, Firestore collection names, and artifact naming.
+    - Selects Gemini auth config (AI Studio MVP):
+      - single-key mode: `GEMINI_API_KEY`
+      - multi-key mode (recommended for rotation): `GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID`
+      - the selected `keyId` is safe to log (`llm.auth.keyId`); the key itself is never logged/persisted.
+
+**4.31.1 GeminiApiKey**
+- Conceptual:
+  - Meaning in the domain: One API key record used for rotation-friendly configuration.
+- Specification-level:
+  - Fields:
+    - `id` (str): stable identifier (safe to log)
+    - `api_key` (str): secret (never log/persist)
+  - Construction:
+    - Parsed from `GEMINI_API_KEYS_JSON` (JSON array of `{id, apiKey}`).
+
+**4.31.2 GeminiAuthConfig**
+- Conceptual:
+  - Meaning in the domain: Selected Gemini auth mode/config for this process instance.
+  - Invariants/rules:
+    - Rotation is performed by updating Secret Manager + rolling a new revision; no hot-reload is assumed.
+- Specification-level:
+  - Fields:
+    - `mode` (e.g. `ai_studio_api_key`)
+    - `key_id` (str|None): selected key id when multi-key mode is used
+    - `api_key` (str): secret (never log/persist)
 
 **4.32 TimeBudgetPolicy**
 - Conceptual:
@@ -870,6 +933,8 @@ package "Application + Infra" {
   interface FlowRunRepository {
     +get(runId: str): FlowRunRecord?
     +patch(runId: str, patch: dict, preconditionUpdateTime): PatchResult
+    +claim_step(runId: str, stepId: str, startedAt: str): ClaimResult
+    +finalize_step(runId: str, stepId: str, status: str, finishedAt: str, outputs?: dict, error?: dict): FinalizeResult
   }
 
   class FirestoreFlowRunRepository
@@ -930,4 +995,3 @@ Explanations of relationships/design decisions:
 5. `StructuredOutputValidator` is separate from `LLMClient` so output correctness and provider calls evolve independently (and can be unit-tested with fixtures).
 6. Split-brain recovery is expressed as an application-level rule: if the deterministic report object exists while the step is `RUNNING`, skip the LLM call and finalize Firestore.
 7. Logging is modeled as a port (`EventLogger`) to enforce the stable event taxonomy from `spec/observability.md`.
-

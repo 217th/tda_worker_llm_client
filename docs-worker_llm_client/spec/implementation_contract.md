@@ -122,6 +122,192 @@ Processing:
    - `steps.<stepId>.status = SUCCEEDED`
    - `steps.<stepId>.finishedAt = now()`
 
+### Firestore step claim/finalize (recommended implementation)
+
+This section is a concrete “by analogy” blueprint for `READY → RUNNING → SUCCEEDED/FAILED` using Firestore optimistic preconditions (no transactions).
+
+#### Preconditions + patch shape
+
+- The worker must **read the document before each write**, and use the document `update_time` as an optimistic precondition for `doc_ref.update(...)`.
+- Firestore nested updates are performed via dotted field paths like `steps.<stepId>.status`.
+  - Therefore, `stepId` must be **storage-safe** and must not contain `.` or `/` (see the `stepId` storage-safe decision in `questions/open_questions.md`). If a selected `stepId` violates this, treat the run as invalid for this worker (`FLOW_RUN_INVALID`) and do not attempt to patch.
+
+Claim patch (minimal):
+- `steps.<stepId>.status = RUNNING`
+- `steps.<stepId>.outputs.execution.timing.startedAt = now()`
+
+Finalize patch (success; minimal):
+- `steps.<stepId>.status = SUCCEEDED`
+- `steps.<stepId>.finishedAt = now()`
+- `steps.<stepId>.outputs.gcs_uri = <gs://...>`
+- `steps.<stepId>.outputs.execution = {...}` (timing + llm metadata + attempts)
+
+Finalize patch (failure; minimal):
+- `steps.<stepId>.status = FAILED`
+- `steps.<stepId>.finishedAt = now()`
+- `steps.<stepId>.error = {code, message, details?}` (sanitized)
+- `steps.<stepId>.outputs.execution = {...}` (timing + partial metadata when available)
+
+#### Reference code (Python; illustrative)
+
+```py
+from __future__ import annotations
+
+from dataclasses import dataclass
+import time
+from typing import Any, Mapping, Literal
+
+
+@dataclass(frozen=True, slots=True)
+class ClaimResult:
+    claimed: bool
+    status: str | None
+    reason: str | None = None  # not_ready|precondition_failed
+
+
+@dataclass(frozen=True, slots=True)
+class FinalizeResult:
+    updated: bool
+    status: str | None
+    reason: str | None = None  # already_final|not_running|precondition_failed
+
+
+def _get_step_status(flow_run: Mapping[str, Any], step_id: str) -> str | None:
+    steps = flow_run.get("steps")
+    if not isinstance(steps, Mapping):
+        return None
+    step = steps.get(step_id)
+    if not isinstance(step, Mapping):
+        return None
+    status = step.get("status")
+    return status if isinstance(status, str) else None
+
+
+def _build_step_update(step_id: str, updates: Mapping[str, Any]) -> dict[str, Any]:
+    # Requires storage-safe stepId (no '.'), because Firestore uses '.' as a path separator.
+    return {f"steps.{step_id}.{key}": value for key, value in updates.items()}
+
+
+def _is_precondition_or_aborted(exc: Exception) -> bool:
+    try:
+        from google.api_core import exceptions as gax
+
+        return isinstance(exc, (gax.FailedPrecondition, gax.Conflict, gax.Aborted))
+    except Exception:
+        return exc.__class__.__name__ in ("FailedPrecondition", "Conflict", "Aborted")
+
+
+def claim_step(
+    *,
+    firestore_client: Any,
+    flow_runs_collection: str,
+    run_id: str,
+    step_id: str,
+    started_at_rfc3339: str,
+) -> ClaimResult:
+    doc_ref = firestore_client.collection(flow_runs_collection).document(run_id)
+    max_attempts = 3
+    base_backoff_seconds = 0.2
+
+    last_status: str | None = None
+    for attempt in range(max_attempts):
+        snapshot = doc_ref.get()
+        flow_run = snapshot.to_dict() if snapshot is not None else None
+        flow_run = flow_run if isinstance(flow_run, dict) else {}
+
+        status = _get_step_status(flow_run, step_id)
+        last_status = status
+        if status != "READY":
+            return ClaimResult(claimed=False, status=status, reason="not_ready")
+
+        update = _build_step_update(
+            step_id,
+            {
+                "status": "RUNNING",
+                "outputs.execution.timing.startedAt": started_at_rfc3339,
+            },
+        )
+        try:
+            update_time = getattr(snapshot, "update_time", None)
+            if update_time is not None and hasattr(firestore_client, "write_option"):
+                option = firestore_client.write_option(last_update_time=update_time)
+                doc_ref.update(update, option=option)
+            else:
+                doc_ref.update(update)
+            return ClaimResult(claimed=True, status=status)
+        except Exception as exc:
+            if _is_precondition_or_aborted(exc):
+                if attempt < max_attempts - 1:
+                    time.sleep(base_backoff_seconds * (2**attempt))
+                    continue
+                return ClaimResult(claimed=False, status=last_status, reason="precondition_failed")
+            raise
+
+    return ClaimResult(claimed=False, status=last_status, reason="precondition_failed")
+
+
+def finalize_step(
+    *,
+    firestore_client: Any,
+    flow_runs_collection: str,
+    run_id: str,
+    step_id: str,
+    status: Literal["SUCCEEDED", "FAILED"],
+    finished_at_rfc3339: str,
+    outputs_gcs_uri: str | None = None,
+    execution: dict[str, Any] | None = None,
+    error: dict[str, Any] | None = None,
+) -> FinalizeResult:
+    doc_ref = firestore_client.collection(flow_runs_collection).document(run_id)
+    max_attempts = 3
+    base_backoff_seconds = 0.2
+
+    last_status: str | None = None
+    for attempt in range(max_attempts):
+        snapshot = doc_ref.get()
+        flow_run = snapshot.to_dict() if snapshot is not None else None
+        flow_run = flow_run if isinstance(flow_run, dict) else {}
+
+        current_status = _get_step_status(flow_run, step_id)
+        last_status = current_status
+        if current_status in ("SUCCEEDED", "FAILED"):
+            return FinalizeResult(updated=False, status=current_status, reason="already_final")
+        if current_status != "RUNNING":
+            return FinalizeResult(updated=False, status=current_status, reason="not_running")
+
+        updates: dict[str, Any] = {"status": status, "finishedAt": finished_at_rfc3339}
+        if outputs_gcs_uri is not None:
+            updates["outputs.gcs_uri"] = outputs_gcs_uri
+        if execution is not None:
+            updates["outputs.execution"] = execution
+        if error is not None:
+            updates["error"] = error
+
+        update = _build_step_update(step_id, updates)
+        try:
+            update_time = getattr(snapshot, "update_time", None)
+            if update_time is not None and hasattr(firestore_client, "write_option"):
+                option = firestore_client.write_option(last_update_time=update_time)
+                doc_ref.update(update, option=option)
+            else:
+                doc_ref.update(update)
+            return FinalizeResult(updated=True, status=current_status)
+        except Exception as exc:
+            if _is_precondition_or_aborted(exc):
+                if attempt < max_attempts - 1:
+                    time.sleep(base_backoff_seconds * (2**attempt))
+                    continue
+                return FinalizeResult(updated=False, status=last_status, reason="precondition_failed")
+            raise
+
+    return FinalizeResult(updated=False, status=last_status, reason="precondition_failed")
+```
+
+Notes:
+- The worker should treat `ClaimResult(reason=precondition_failed)` as a normal race (`STEP_CLAIM_CONFLICT`) and exit without side effects.
+- The worker should treat `FinalizeResult(reason=already_final)` as a normal race (`STEP_FINALIZE_CONFLICT`) and exit without overwriting.
+- Any error details persisted into `steps.<stepId>.error.details` must be safe (no secrets; no raw prompt/context; no raw model output).
+
 ### Output artifact format (canonical)
 
 The worker writes a single JSON file to GCS for the report. Canonical schema:
