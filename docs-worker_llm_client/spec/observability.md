@@ -118,6 +118,8 @@ Prompt + context:
 LLM:
 - `llm_request_started`
 - `llm_request_finished` (include `status=succeeded|failed`, `finishReason` if available)
+- `structured_output_invalid` (structured output parse/schema/finishReason failure; include reason and safe diagnostics)
+- `structured_output_repair_attempt_started` / `structured_output_repair_attempt_finished`
 
 Artifacts:
 - `gcs_write_started`
@@ -190,6 +192,9 @@ This table is the canonical event taxonomy for `worker_llm_client`.
 | --- | --- | --- | --- |
 | `llm_request_started` | INFO | before Gemini call | `llm.modelName`, `llm.promptId` |
 | `llm_request_finished` | INFO/ERROR | after Gemini call | `status` (`succeeded|failed`), optional `finishReason`, optional `llm.usage` |
+| `structured_output_invalid` | WARNING | structured output validation failed (before optional repair / before finalizing as FAILED) | `reason.kind` (`finish_reason|missing_text|json_parse|schema_validation`), `reason.message` (sanitized), `llm.finishReason` (if available), `diagnostics.textBytes`, `diagnostics.textSha256`, `policy.repairPlanned` (bool), `policy.remainingSeconds`, `policy.finalizeBudgetSeconds` |
+| `structured_output_repair_attempt_started` | INFO | before the repair Gemini call | `attempt` (=1), `policy.repairDeadlineSeconds`, `policy.remainingSeconds`, `policy.finalizeBudgetSeconds` |
+| `structured_output_repair_attempt_finished` | INFO/ERROR | after the repair Gemini call | `attempt` (=1), `status` (`succeeded|failed`), optional `llm.finishReason`, optional `llm.usage` |
 
 ### Output + finalize
 
@@ -205,6 +210,29 @@ This table is the canonical event taxonomy for `worker_llm_client`.
 - Never log secrets (Secret Manager values, tokens, credentials).
 - Avoid logging full `flow_run` payloads; if absolutely needed for diagnostics, log a small redacted preview (or just `runId` + selected `stepId` + hashes/lengths).
 - Do not put secrets/PII into GCS object names or URLs.
+
+## Structured output diagnostics (MVP)
+
+When structured output is enabled (Gemini JSON mode / response schema), failures must be **explainable from logs** without leaking the raw model output.
+
+Rules:
+- Never log raw candidate text / JSON payload, even on validation failure.
+- Prefer logging **sizes + hashes** of the candidate text and a **sanitized** summary of validation errors.
+
+Recommended fields for `structured_output_invalid`:
+- `reason.kind`: one of:
+  - `finish_reason`: provider indicates generation was not successful for returning a complete payload
+  - `missing_text`: no extractable candidate text found where expected
+  - `json_parse`: invalid JSON (parse error)
+  - `schema_validation`: JSON parsed but failed schema/Pydantic validation
+- `reason.message`: short sanitized message, no payload excerpts
+- `diagnostics.textBytes`: byte length of extracted candidate text (UTF-8)
+- `diagnostics.textSha256`: SHA-256 hex of extracted candidate text (UTF-8)
+- `diagnostics.validationErrors`: optional array of sanitized items (e.g. `{"path":"output.summary.markdown","error":"field required"}`), capped to a small number (e.g. 10)
+
+If a repair attempt is executed:
+- emit `structured_output_repair_attempt_started` and `structured_output_repair_attempt_finished`
+- include `attempt=1` and a clear `status`
 
 ## Metrics
 

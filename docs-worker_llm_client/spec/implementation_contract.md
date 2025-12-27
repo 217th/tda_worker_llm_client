@@ -274,6 +274,7 @@ Rule:
 - Avoid bare `except`; catch specific exception types where possible
 - Normalize exceptions into stable `error.code` values (see `spec/error_and_retry_model.md`)
 - Keep error messages sanitized (no secrets, no full prompt/context payloads)
+- For structured output failures, `steps.<stepId>.error.message` should contain only a short sanitized summary (e.g., `kind=json_parse` / `kind=schema_validation` + finishReason), never the raw model output.
 
 ### Logging
 
@@ -307,5 +308,30 @@ If the artifact is written to GCS but the final Firestore patch fails:
 ### Structured output mismatch
 
 If Gemini returns invalid JSON / violates the expected schema:
-- treat as a model-output error
-- decide whether to retry with a repair prompt or mark step `FAILED` (open question)
+- treat as a model-output error: finalize step as `FAILED` with `error.code=INVALID_STRUCTURED_OUTPUT` unless a bounded repair attempt is allowed
+
+#### MVP policy: validation + repair (at most one)
+
+When structured output is enabled (JSON mode + response schema), the worker must implement a deterministic validation pipeline:
+
+1) Extract candidate text (the JSON string) from the provider SDK response.
+2) Check provider `finishReason` (if present) and treat incomplete/blocked generations as invalid output.
+3) Parse JSON.
+4) Validate the parsed JSON against the expected schema/model (Pydantic recommended).
+
+If any of these steps fails:
+- Emit `structured_output_invalid` (see `spec/observability.md`) with:
+  - `reason.kind` and a sanitized `reason.message`
+  - `llm.finishReason` when available
+  - safe diagnostics: `diagnostics.textBytes` and `diagnostics.textSha256`
+  - policy snapshot: `policy.finalizeBudgetSeconds`, `policy.remainingSeconds`, `policy.repairPlanned`
+- Never log the raw candidate text or full validation error dumps.
+
+Repair attempt:
+- Allow **at most one** repair attempt (a second Gemini call) within the same invocation.
+- Execute it only when remaining invocation time is safely above the `finalizeBudgetSeconds` reserve.
+- Log repair boundaries:
+  - `structured_output_repair_attempt_started` (include `attempt=1`)
+  - `structured_output_repair_attempt_finished` (include `attempt=1`, `status`)
+
+If the repair attempt still fails validation, finalize the step as `FAILED` with `INVALID_STRUCTURED_OUTPUT`.

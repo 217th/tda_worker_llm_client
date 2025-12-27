@@ -16,7 +16,7 @@ Where errors are persisted:
 - `LLM_PROFILE_INVALID`: missing/invalid `inputs.llm.llmProfile` (model/config not usable)
 - `INVALID_STEP_INPUTS`: required inputs missing (e.g., missing `ohlcvStepId` / `chartsManifestStepId`)
 - `LLM_SAFETY_BLOCK`: generation blocked by model/provider safety filters
-- `INVALID_STRUCTURED_OUTPUT`: model output is not valid JSON / violates schema (policy TBD)
+- `INVALID_STRUCTURED_OUTPUT`: structured output is invalid (JSON parse / schema validation / incomplete payload). MVP: allow at most **one** repair attempt within the same invocation if time budget allows; otherwise finalize as `FAILED`.
 
 ### 2) Retryable (transient)
 
@@ -75,6 +75,7 @@ For Firestore/GCS/Gemini transient failures:
 MVP timeout constraints:
 - Gemini request deadline is `600s` (10 minutes). Cloud Function timeout is `780s` (13 minutes) with `FINALIZE_BUDGET_SECONDS=120`.
 - Because the Gemini call can take most of the invocation budget, default `maxGeminiAttempts=1` (no full retry loops).
+  - Repair policy (MVP): if structured output validation fails, allow `maxRepairAttempts=1` **only** when remaining invocation time is safely above `finalizeBudgetSeconds` (see `spec/implementation_contract.md`). Repair is a bounded recovery step inside the same invocation, not a “Gemini retry loop”.
 
 Reference-style retry parameters (suggested defaults):
 - attempts: 5
