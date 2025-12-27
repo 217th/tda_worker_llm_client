@@ -234,6 +234,10 @@ If a repair attempt is executed:
 - emit `structured_output_repair_attempt_started` and `structured_output_repair_attempt_finished`
 - include `attempt=1` and a clear `status`
 
+Additional mapping notes (MVP):
+- `finishReason == SAFETY` should be treated as `LLM_SAFETY_BLOCK` (non-retryable) and is not a structured-output “repairable” case.
+- truncation-like outcomes (e.g., `MAX_TOKENS`) that lead to parse/schema failure should surface as `INVALID_STRUCTURED_OUTPUT` and include `llm.finishReason` in `structured_output_invalid`.
+
 ## Metrics
 
 Minimum recommended metrics (log-based metrics or custom):

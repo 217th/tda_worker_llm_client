@@ -335,3 +335,13 @@ Repair attempt:
   - `structured_output_repair_attempt_finished` (include `attempt=1`, `status`)
 
 If the repair attempt still fails validation, finalize the step as `FAILED` with `INVALID_STRUCTURED_OUTPUT`.
+
+`finishReason` mapping (MVP):
+- if `finishReason == SAFETY`: finalize the step as `FAILED` with `error.code=LLM_SAFETY_BLOCK` (no repair)
+- any outcome that results in invalid JSON / schema failure (including truncation like `MAX_TOKENS`) is `INVALID_STRUCTURED_OUTPUT` (repair allowed per policy)
+
+Failure artifact policy (MVP):
+- do not write raw model output to GCS (neither success path logs nor failure artifacts)
+- optional: write a standard `llm_report_file` artifact containing only:
+  - a short summary markdown saying structured output validation failed
+  - `output.details` with safe debug fields (reason kind, finishReason, `textBytes`, `textSha256`, sanitized validation errors)

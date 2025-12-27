@@ -18,6 +18,9 @@ Where errors are persisted:
 - `LLM_SAFETY_BLOCK`: generation blocked by model/provider safety filters
 - `INVALID_STRUCTURED_OUTPUT`: structured output is invalid (JSON parse / schema validation / incomplete payload). MVP: allow at most **one** repair attempt within the same invocation if time budget allows; otherwise finalize as `FAILED`.
 
+Orchestrator note (MVP):
+- treat `INVALID_STRUCTURED_OUTPUT` as terminal for automatic runs (no auto re-run with the same step inputs). Manual rerun should create a new run/step identity.
+
 ### 2) Retryable (transient)
 
 - `FIRESTORE_UNAVAILABLE`: transient Firestore errors (timeouts, 5xx)
