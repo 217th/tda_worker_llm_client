@@ -17,6 +17,7 @@ Also keep a human-readable explanation of key fields and versioning rules.
 - `llm_schema.schema.json`: Canonical JSON Schema for Firestore document `llm_schemas/{schemaId}` (structured output schema registry).
 - `llm_schema.md`: Human-readable semantics for schema registry docs (immutability/versioning, usage from `llmProfile`).
 - `llm_report_file.schema.json`: Canonical JSON Schema for the LLM report JSON file written to GCS.
+- `debug/llm_report_output.debug.schema.json`: Debug-only JSON Schema for model-owned `output` (derived from `inbox/so_schema.md`).
 - `examples/flow_run.example.json`: Example `flow_runs/{runId}` document.
 - `examples/llm_prompt.example.json`: Example `llm_prompts/{promptId}` document.
 - `examples/llm_schema.example.json`: Example `llm_schemas/{schemaId}` document.

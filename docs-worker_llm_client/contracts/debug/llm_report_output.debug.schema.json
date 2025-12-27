@@ -1,0 +1,400 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LLMReportOutputDebug",
+  "description": "Debug schema for model-owned LLMReportFile.output. Derived from docs-worker_llm_client/inbox/so_schema.md example; intended for troubleshooting/iteration, not as the MVP production contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "details"],
+  "properties": {
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["markdown"],
+      "properties": {
+        "markdown": { "type": "string", "minLength": 1 }
+      }
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timeframe",
+        "symbol",
+        "as_of_date",
+        "trend",
+        "waves",
+        "wave_scenarios",
+        "patterns",
+        "key_levels",
+        "indicators_summary",
+        "risks_and_limitations",
+        "scenarios",
+        "analysis_confidence",
+        "agent_recommendations",
+        "summary_for_next_timeframes"
+      ],
+      "properties": {
+        "timeframe": {
+          "type": "string",
+          "description": "Timeframe token (examples: 1M, 1W, 1D, 4H).",
+          "pattern": "^[0-9]{1,3}[mhdwMHDW]$"
+        },
+        "symbol": { "type": "string", "minLength": 1 },
+        "as_of_date": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "trend": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["direction", "trend_strength", "phase", "cycle_phase", "description"],
+          "properties": {
+            "direction": { "type": "string", "enum": ["bull", "bear", "sideways"] },
+            "trend_strength": { "type": "string", "enum": ["weak", "moderate", "strong"] },
+            "phase": { "type": "string", "enum": ["impulse", "correction", "consolidation"] },
+            "cycle_phase": { "type": "string", "minLength": 1 },
+            "description": { "type": "string", "minLength": 1 }
+          }
+        },
+        "waves": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/wave" }
+        },
+        "wave_scenarios": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "linked_scenarios", "probability", "description", "waves", "quantitative_score"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "linked_scenarios": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+              "probability": { "type": "string", "enum": ["High", "Medium", "Low"] },
+              "description": { "type": "string", "minLength": 1 },
+              "waves": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "$ref": "#/$defs/waveScenarioWave" }
+              },
+              "quantitative_score": { "$ref": "#/$defs/quantitativeScoreSimple" }
+            }
+          }
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "direction", "price_zone", "description"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "direction": { "type": "string", "enum": ["bullish", "bearish", "neutral"] },
+              "price_zone": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": { "type": "number" }
+              },
+              "description": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "key_levels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "level", "source", "strength", "note"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["support", "resistance", "vpvr_poc", "vpvr_hvn", "vpvr_lvn", "fib", "ma"]
+              },
+              "level": { "type": "number" },
+              "source": { "type": "string", "minLength": 1 },
+              "strength": {
+                "anyOf": [
+                  { "type": "integer", "enum": [1, 2, 3] },
+                  { "type": "null" }
+                ]
+              },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "indicators_summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ma", "bb", "macd", "rsi", "adx"],
+          "properties": {
+            "ma": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["ma12_vs_ma26", "description"],
+              "properties": {
+                "ma12_vs_ma26": { "type": "string", "minLength": 1 },
+                "description": { "type": "string", "minLength": 1 }
+              }
+            },
+            "bb": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["state", "description"],
+              "properties": {
+                "state": { "type": "string", "minLength": 1 },
+                "description": { "type": "string", "minLength": 1 }
+              }
+            },
+            "macd": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["state", "description"],
+              "properties": {
+                "state": { "type": "string", "minLength": 1 },
+                "description": { "type": "string", "minLength": 1 }
+              }
+            },
+            "rsi": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value_zone", "description"],
+              "properties": {
+                "value_zone": { "type": "string", "minLength": 1 },
+                "description": { "type": "string", "minLength": 1 }
+              }
+            },
+            "adx": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["strength", "description"],
+              "properties": {
+                "strength": { "type": "string", "minLength": 1 },
+                "description": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        },
+        "risks_and_limitations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["factors", "sensitivity_comment"],
+          "properties": {
+            "factors": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "sensitivity_comment": { "type": "string" }
+          }
+        },
+        "scenarios": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/scenario" }
+        },
+        "analysis_confidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["overall_confidence", "comment"],
+          "properties": {
+            "overall_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+            "comment": { "type": "string" }
+          }
+        },
+        "agent_recommendations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["need_weekly", "need_daily", "need_derivatives", "need_onchain"],
+          "properties": {
+            "need_weekly": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "need_daily": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "need_derivatives": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "need_onchain": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          }
+        },
+        "summary_for_next_timeframes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "dominant_scenario_id",
+            "one_line",
+            "key_points",
+            "trend",
+            "key_levels_brief",
+            "scenarios_brief"
+          ],
+          "properties": {
+            "dominant_scenario_id": { "type": "string", "minLength": 1 },
+            "one_line": { "type": "string", "minLength": 1 },
+            "key_points": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "trend": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["direction", "cycle_phase", "key_message"],
+              "properties": {
+                "direction": { "type": "string", "enum": ["bull", "bear", "sideways"] },
+                "cycle_phase": { "type": "string", "minLength": 1 },
+                "key_message": { "type": "string", "minLength": 1 }
+              }
+            },
+            "key_levels_brief": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["supports", "resistances"],
+              "properties": {
+                "supports": { "type": "array", "items": { "type": "number" } },
+                "resistances": { "type": "array", "items": { "type": "number" } }
+              }
+            },
+            "scenarios_brief": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["base", "bullish", "bearish"],
+              "properties": {
+                "base": { "type": "string", "minLength": 1 },
+                "bullish": { "type": "string", "minLength": 1 },
+                "bearish": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "dateOrNull": {
+      "anyOf": [
+        { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        { "type": "null" }
+      ]
+    },
+    "numberOrNull": {
+      "anyOf": [{ "type": "number" }, { "type": "null" }]
+    },
+    "wave": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "degree",
+        "start_date",
+        "start_price",
+        "end_date",
+        "end_price",
+        "confidence"
+      ],
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "degree": { "type": "string", "enum": ["cycle", "primary", "intermediate", "minor"] },
+        "start_date": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "start_price": { "type": "number" },
+        "end_date": { "$ref": "#/$defs/dateOrNull" },
+        "end_price": { "$ref": "#/$defs/numberOrNull" },
+        "confidence": { "type": "string", "enum": ["High", "Medium", "Low"] }
+      }
+    },
+    "waveScenarioWave": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "degree", "start_date", "start_price", "end_date", "end_price"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "degree": { "type": "string", "enum": ["cycle", "primary", "intermediate", "minor"] },
+        "start_date": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "start_price": { "type": "number" },
+        "end_date": { "$ref": "#/$defs/dateOrNull" },
+        "end_price": { "$ref": "#/$defs/numberOrNull" }
+      }
+    },
+    "quantitativeScoreSimple": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_score", "normalized_probability", "method_comment"],
+      "properties": {
+        "total_score": { "type": "integer", "minimum": 0 },
+        "normalized_probability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "method_comment": { "type": "string" }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "role",
+        "probability",
+        "direction",
+        "time_horizon",
+        "targets",
+        "target_zones",
+        "invalidation_levels",
+        "probability_comment",
+        "rationale",
+        "quantitative_score"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "enum": ["base", "bullish", "bearish", "other"] },
+        "probability": { "type": "string", "enum": ["High", "Medium", "Low"] },
+        "direction": { "type": "string", "enum": ["up", "down", "sideways"] },
+        "time_horizon": { "type": "string", "minLength": 1 },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "level"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["primary_target", "secondary_target", "extension"]
+              },
+              "level": { "type": "number" }
+            }
+          }
+        },
+        "target_zones": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "number" }
+          }
+        },
+        "invalidation_levels": { "type": "array", "items": { "type": "number" } },
+        "probability_comment": { "type": "string" },
+        "rationale": { "type": "string" },
+        "quantitative_score": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["total_score", "components", "normalized_probability", "method_comment"],
+          "properties": {
+            "total_score": { "type": "integer", "minimum": 0 },
+            "components": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "structure",
+                "momentum_and_patterns",
+                "distance_to_invalidation",
+                "volume_and_onchain"
+              ],
+              "properties": {
+                "structure": { "type": "integer", "minimum": 0 },
+                "momentum_and_patterns": { "type": "integer", "minimum": 0 },
+                "distance_to_invalidation": { "type": "integer", "minimum": 0 },
+                "volume_and_onchain": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "normalized_probability": { "type": "number", "minimum": 0, "maximum": 1 },
+            "method_comment": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}
+
