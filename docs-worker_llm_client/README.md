@@ -13,6 +13,7 @@ Document the component/service **as part of a larger multi-service system** so i
 - `spec/implementation_contract.md`
 - `spec/architecture_overview.md`
 - `spec/system_integration.md`
+- `spec/prompt_storage_and_context.md`
 - `contracts/README.md`
 - `questions/open_questions.md`
 - `changelog.md`

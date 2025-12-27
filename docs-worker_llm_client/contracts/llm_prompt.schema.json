@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/llm_prompt.schema.json",
+  "title": "LLMPrompt",
+  "description": "Firestore document stored at llm_prompts/{promptId}. MVP: stores only instruction texts (systemInstruction + userPrompt).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "systemInstruction", "userPrompt"],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "description": "Schema version for this prompt document format.",
+      "const": 1
+    },
+    "systemInstruction": {
+      "type": "string",
+      "minLength": 1,
+      "description": "System instruction text (no templating in MVP)."
+    },
+    "userPrompt": {
+      "type": "string",
+      "minLength": 1,
+      "description": "User prompt text (no templating in MVP). Worker appends a generated **UserInput** section."
+    }
+  }
+}

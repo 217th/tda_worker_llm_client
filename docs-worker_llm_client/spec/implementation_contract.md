@@ -126,7 +126,16 @@ Notes:
 
 For JSON context artifacts (OHLCV, charts manifest, previous reports):
 - worker downloads objects from GCS and injects the content as text into the prompt (or as a dedicated text-part, depending on the SDK).
-- apply a hard size limit per artifact (e.g., `maxContextBytesPerArtifact`, default 32KB); if exceeded, fail the step with `INVALID_STEP_INPUTS` (contract violation / too-large context).
+- apply a hard size limit per JSON artifact: `maxContextBytesPerJsonArtifact = 64KB`; if exceeded, fail the step with `INVALID_STEP_INPUTS` (contract violation / too-large context).
+
+For image artifacts (charts):
+- preferred: pass as inline bytes (file/data parts) in the LLM request (e.g., PNG bytes) when supported by the chosen SDK/endpoint.
+- also add a short text description per chart into the generated `UserInput` section (preferred source: chart description copied into charts manifest during export).
+- apply a hard size limit per chart image: `maxChartImageBytes = 256KB`; if exceeded, fail the step with `INVALID_STEP_INPUTS` (contract violation / image too large).
+
+Prompt assembly note:
+- `llm_prompts/{promptId}` stores `systemInstruction` + a base `userPrompt` text.
+- the worker appends a generated **UserInput** section describing and including resolved inputs (see `spec/prompt_storage_and_context.md`).
 
 ### Artifact naming (decision)
 

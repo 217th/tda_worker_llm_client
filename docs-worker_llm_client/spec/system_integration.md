@@ -43,20 +43,23 @@ The LLM step references instructions via `steps.<stepId>.inputs.llm.promptId`.
 
 Gemini request parameters are provided via `steps.<stepId>.inputs.llm.llmProfile` (model + generation config + structured output knobs). This profile is **authoritative** for the request and is not overridden by any prompt/model defaults.
 
-Draft proposal (collections; names are configurable):
-- `llm_prompts/{promptId}`:
-  - prompt text and templating
-  - optional input schema (what context fields are expected)
-  - optional output schema (structured output contract)
-  - versioning should live as explicit fields in the document (IDs may be human-readable but must remain stable)
-- (future, optional) `llm_profiles/{profileId}`:
-  - a reusable server-side stored profile that can be embedded into `steps[*].inputs.llm.llmProfile` by an orchestrator
+Collections (names are configurable; MVP uses Firestore only for prompts):
+- `llm_prompts/{promptId}`: canonical prompt document schema is defined in:
+  - machine-readable: `contracts/llm_prompt.schema.json`
+  - human-readable notes: `contracts/llm_prompt.md`
+  - example: `contracts/examples/llm_prompt.example.json`
+
+Key rules (MVP decisions):
+- `promptId` (Firestore doc ID) must be storage-safe: `^[a-z0-9_]{1,128}$` (no `/`, `.`, `:`, spaces, unicode).
+- Versioning is encoded into `promptId` by convention (e.g. `llm_report_1m_v1`).
+- Prompt doc stores only **instruction texts** (`systemInstruction`, `userPrompt`). Effective Gemini request config (including response schema) is taken from `inputs.llm.llmProfile`.
+
+Future (optional, post-MVP):
+- `llm_profiles/{profileId}`:
+  - a reusable server-side stored profile that an orchestrator could copy into `steps[*].inputs.llm.llmProfile`
   - not required for MVP (MVP uses inline `llmProfile` in the step)
 
-Exact document schemas and versioning rules are open questions.
-Minimum constraints (recommended):
-- `promptId` should be storage-safe: `[a-z0-9_]+` (no `/`, `.`, `:`, spaces, unicode), length 1..128.
-- If an `llm_profiles/{profileId}` collection is introduced, `profileId` should follow the same constraints.
+See also: `spec/prompt_storage_and_context.md` for context-injection + UserInput assembly rules.
 
 ## Outbound interfaces
 
