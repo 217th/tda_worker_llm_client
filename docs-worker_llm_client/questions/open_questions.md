@@ -6,7 +6,6 @@ Keep this file current. Close questions explicitly (with decision + date/commit 
 
 | ID | Priority | Blocks planning? | Question | Current best guess | Owner | Target date |
 |---:|:--------:|:---------------:|----------|--------------------|-------|-------------|
-| 44 | Medium | Yes | SO: Test vectors: какие обязательные негативные кейсы добавляем для structured output (truncated JSON, wrong type, missing required, extra text, multi-candidate) и как валидируем в CI? | MVP: добавить минимум 3 кейса (truncated/missing required/wrong type) и ожидаемые `error.code`. | TBD | TBD |
 
 ## Decisions (closed)
 
@@ -55,3 +54,4 @@ Keep this file current. Close questions explicitly (with decision + date/commit 
 | 32 | 2025-12-27 | Structured output validation source of truth (MVP): `llm_schemas/{schemaId}.jsonSchema` is the single source of truth for validating model-owned `output`. The worker validates output against that JSON Schema (plus the minimal invariants policy) and logs only sanitized validation errors (path/type), never raw payload. Pydantic may be added later as an optional helper but is not authoritative for the contract. |
 | 35 | 2025-12-27 | Repair metadata (MVP): persist only the final attempt's LLM metadata (finishReason/usage/requestId/…) in `steps.<stepId>.outputs.execution.llm`. Additionally store a single counter `attempts.total` (1 or 2, where 2 means a repair attempt was executed). Do not persist per-attempt histories. |
 | 39 | 2025-12-27 | `output.summary.html` (MVP): not required and not generated. The model returns only `output.summary.markdown`; HTML rendering/sanitization is out of scope for MVP. |
+| 44 | 2025-12-27 | Structured output negative test vectors (MVP): add at least 3 failure fixtures/vectors — truncated JSON, missing required field, wrong type. Expected `error.code` for these is `INVALID_STRUCTURED_OUTPUT`. Schema/configuration failures (e.g., missing schemaId, invalid schema, or schema not requiring `summary.markdown`) are pre-flight and use `LLM_PROFILE_INVALID`. |

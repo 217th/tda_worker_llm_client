@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Closed structured output open question #44: added 3 negative structured-output fixtures + expected failure patches (truncated JSON, missing required, wrong type) and fixed expected `error.code` mapping (`questions/open_questions.md`, `fixtures/structured_output_invalid/*`, `test_vectors/outputs/*`).
 - Closed structured output open questions #35 and #39: persist only `attempts.total` (no per-attempt histories) and do not require/generate `output.summary.html` on MVP (`questions/open_questions.md`, `spec/implementation_contract.md`).
 - Closed structured output open question #32: made `llm_schemas/{schemaId}.jsonSchema` the single source of truth for output validation (no Pydantic-as-authority on MVP), and aligned validation/logging wording accordingly (`questions/open_questions.md`, `contracts/llm_schema.md`, `spec/implementation_contract.md`, `spec/error_and_retry_model.md`, `spec/observability.md`).
 - Closed structured output open question #38: `output.details` remains free-form on MVP; stability guaranteed via `output.summary.markdown` and future tightening happens via schema version bump (`questions/open_questions.md`, `contracts/llm_schema.md`).

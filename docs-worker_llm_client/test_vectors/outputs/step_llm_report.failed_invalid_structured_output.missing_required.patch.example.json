@@ -1,0 +1,21 @@
+{
+  "steps.<stepId>.status": "FAILED",
+  "steps.<stepId>.finishedAt": "2025-12-27T12:00:45Z",
+  "steps.<stepId>.error": {
+    "code": "INVALID_STRUCTURED_OUTPUT",
+    "message": "structured_output_invalid kind=schema_validation missing=summary.markdown"
+  },
+  "steps.<stepId>.outputs": {
+    "execution": {
+      "llm": {
+        "finishReason": "STOP",
+        "attempts": { "total": 1 }
+      },
+      "timing": {
+        "startedAt": "2025-12-27T12:00:21Z",
+        "finishedAt": "2025-12-27T12:00:45Z",
+        "durationMs": 24000
+      }
+    }
+  }
+}
