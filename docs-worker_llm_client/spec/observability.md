@@ -7,6 +7,11 @@ Logging backend: **Google Cloud Logging** (structured JSON logs).
 Runtime expectation:
 - Log to stdout/stderr via Python `logging`; Cloud Functions gen2 / Cloud Run ingests these into Cloud Logging as `jsonPayload`.
 
+Baseline goals:
+- Provide a **stable event taxonomy** (snake_case) so dashboards/alerts can query `jsonPayload.event`.
+- Support at-least-once Firestore trigger delivery (duplicate/reordered events).
+- Avoid leaking secrets, full prompt text, or full artifacts.
+
 ### Required fields (every log entry)
 
 - `service`: `worker_llm_client` (stable service name for dashboards)
@@ -14,6 +19,8 @@ Runtime expectation:
 - `component`: `worker_llm_client`
 - `event`: stable event name (snake_case; see below)
 - `severity`: `DEBUG|INFO|WARNING|ERROR`
+- `message`: default equals `event`
+- `time`: RFC3339 timestamp (UTC)
 - correlation:
   - `eventId` (CloudEvent `id`)
   - `runId`
@@ -23,6 +30,9 @@ Runtime expectation:
 
 ### Recommended fields (when applicable)
 
+- CloudEvent metadata:
+  - `eventType` (CloudEvent `type`)
+  - `subject` (CloudEvent `subject`)
 - `stepType` (expect `LLM_REPORT`)
 - `attempt` (worker attempt number within a single invocation)
 - `firestore.updateTime` (claim precondition basis)
@@ -32,8 +42,10 @@ Runtime expectation:
 - `llm.requestId` (provider request ID, if available)
 - `llm.usage` (input/output tokens, total tokens; naming TBD by SDK)
 - `artifact.gcs_uri`
+- `artifacts`: compact summaries of inputs/outputs (URIs, sizes, hashes; no full payloads)
 - `durationMs`
 - `error.code`, `error.message` (sanitized), `error.retryable`
+- `exception` (exception info/stack trace when applicable)
 
 ### Event names (baseline proposal)
 
@@ -42,6 +54,7 @@ Event names are a stable API for dashboards/alerts; keep them in **snake_case**.
 CloudEvent lifecycle:
 - `cloud_event_received`
 - `cloud_event_parsed` (runId extracted)
+- `cloud_event_ignored` (e.g., `reason=event_type_filtered|flow_run_not_found|invalid_subject`)
 - `cloud_event_noop` (e.g., `reason=no_ready_step|dependency_not_succeeded|already_final`)
 - `cloud_event_finished`
 
@@ -97,6 +110,11 @@ Step lifecycle:
 - `ready_step_selected`
 - `claim_attempt` (`claimed=true|false`; include `reason=precondition_failed|error`)
 
+Prompt + context:
+- `prompt_fetch_started` / `prompt_fetch_finished`
+- `context_resolve_started` / `context_resolve_finished`
+- `gcs_read_started` / `gcs_read_finished` (for inputs)
+
 LLM:
 - `llm_request_started`
 - `llm_request_finished` (include `status=succeeded|failed`, `finishReason` if available)
@@ -109,7 +127,78 @@ Final status:
 - `step_completed`
 - `step_failed`
 
-Existing “event taxonomy” from previous projects should be integrated here (open question).
+### Execution flow (typical ordering)
+
+Typical successful flow (one invocation):
+1. `cloud_event_received`
+2. `cloud_event_parsed` (+ `flowRunSteps` summaries)
+3. `ready_step_selected`
+4. `claim_attempt` (`claimed=true`)
+5. `prompt_fetch_started` → `prompt_fetch_finished`
+6. `context_resolve_started` (+ `gcs_read_*` for referenced inputs) → `context_resolve_finished`
+7. `llm_request_started` → `llm_request_finished` (`status=succeeded`)
+8. `gcs_write_started` → `gcs_write_finished`
+9. `step_completed`
+10. `cloud_event_finished`
+
+Expected no-op flows:
+- no READY step: `cloud_event_noop` (`reason=no_ready_step`)
+- dependencies not satisfied: `cloud_event_noop` (`reason=dependency_not_succeeded`)
+- claim lost race: `cloud_event_noop` (`reason=claim_conflict`)
+
+## Event catalog (MVP)
+
+This table is the canonical event taxonomy for `worker_llm_client`.
+
+### CloudEvent ingestion
+
+| Event | Severity | When | Required fields (in addition to base) |
+| --- | --- | --- | --- |
+| `cloud_event_received` | INFO | entrypoint invoked | `eventType`, `subject` |
+| `cloud_event_ignored` | WARNING | event filtered/invalid | `reason` |
+| `cloud_event_parsed` | INFO | runId parsed + flowRun loaded | `flowRunFound`, `flowRunStatus`, `flowRunSteps[]` |
+| `cloud_event_noop` | INFO | expected no-op | `reason` |
+| `cloud_event_finished` | INFO | handler ends | `status` (`noop|ok|failed`) |
+
+`cloud_event_noop.reason` values (stable):
+- `no_ready_step`
+- `dependency_not_succeeded`
+- `claim_conflict`
+- `already_final`
+
+### Step selection and claim
+
+| Event | Severity | When | Required fields |
+| --- | --- | --- | --- |
+| `ready_step_selected` | INFO | READY step chosen | `stepId`, `stepType`, `timeframe` |
+| `claim_attempt` | INFO/WARNING | claim attempted | `claimed` (bool), `reason` (`precondition_failed|error|ok`) |
+
+### Prompt and context
+
+| Event | Severity | When | Required fields |
+| --- | --- | --- | --- |
+| `prompt_fetch_started` | INFO | before reading `llm_prompts/{promptId}` | `llm.promptId` |
+| `prompt_fetch_finished` | INFO/ERROR | after read | `ok` (bool), optional `error.code` |
+| `context_resolve_started` | INFO | before resolving inputs | `inputsSummary` (URIs only) |
+| `gcs_read_started` | INFO | before reading an input object | `gcs_uri`, `kind` (`ohlcv|charts_manifest|previous_report|chart_image`) |
+| `gcs_read_finished` | INFO/ERROR | after reading an input object | `gcs_uri`, `kind`, `ok` (bool), `bytes` |
+| `context_resolve_finished` | INFO/ERROR | after resolution | `ok` (bool), `artifacts` (sizes/hashes only) |
+
+### LLM call
+
+| Event | Severity | When | Required fields |
+| --- | --- | --- | --- |
+| `llm_request_started` | INFO | before Gemini call | `llm.modelName`, `llm.promptId` |
+| `llm_request_finished` | INFO/ERROR | after Gemini call | `status` (`succeeded|failed`), optional `finishReason`, optional `llm.usage` |
+
+### Output + finalize
+
+| Event | Severity | When | Required fields |
+| --- | --- | --- | --- |
+| `gcs_write_started` | INFO | before writing report | `artifact.gcs_uri` |
+| `gcs_write_finished` | INFO/ERROR | after write | `artifact.gcs_uri`, `ok` (bool), `bytes` |
+| `step_completed` | INFO | after Firestore finalize success | `stepId`, `status` (`SUCCEEDED`) |
+| `step_failed` | ERROR | after Firestore finalize failure | `stepId`, `status` (`FAILED`), `error.code` |
 
 ## Security and privacy (minimum)
 
