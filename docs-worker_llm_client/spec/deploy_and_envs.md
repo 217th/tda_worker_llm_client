@@ -21,6 +21,11 @@ Target runtime: **Google Cloud Functions (gen2)** with an **Eventarc Firestore t
 - document: `flow_runs/{runId}`
 - region: same as Firestore / Eventarc routing policy (decision TBD)
 
+Timeouts (MVP recommendation):
+- Cloud Function timeout: `780s` (13 minutes)
+- Gemini request deadline: `600s` (10 minutes)
+- Reserve `120s` for cleanup/finalize (GCS write + Firestore patch). See `spec/implementation_contract.md`.
+
 Service account must have (minimum):
 - Firestore read/write access to `flow_runs/*` and prompt/model collections
 - Cloud Storage object write access to artifacts bucket
@@ -38,6 +43,8 @@ Configuration via environment variables (draft):
 - `ARTIFACTS_PREFIX` (optional)
 - `GEMINI_API_KEY` (MVP, AI Studio; prefer injecting from Secret Manager)
 - `GEMINI_LOCATION` (future/Vertex; if applicable)
+- `GEMINI_TIMEOUT_SECONDS` (MVP, default `600`)
+- `FINALIZE_BUDGET_SECONDS` (MVP, default `120`)
 - `LOG_LEVEL`
 
 Environment variable style (implementation guidance):

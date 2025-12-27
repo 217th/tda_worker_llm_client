@@ -9,7 +9,6 @@ Keep this file current. Close questions explicitly (with decision + date/commit 
 | 5 | High | Yes | Какой “набор событий” и обязательные поля структурированных логов должен использоваться (есть наработки из прошлых проектов)? | Proposed: stable snake_case events + required `service/env/runId/stepId/eventId` + `flowKey/timeframe/symbol` when known; needs alignment | TBD | TBD |
 | 6 | Medium | No | Точный формат CloudEvent `subject` для Firestore update trigger (что именно приходит в gen2) и требования к парсеру `runId`. | Parse last segment after `flow_runs/`; confirm real subject samples | TBD | TBD |
 | 13 | High | Yes | Политика при `INVALID_STRUCTURED_OUTPUT`: ретраить (repair prompt) vs сразу `FAILED`? Сколько попыток? | Likely 1 repair attempt max; otherwise `FAILED` | TBD | TBD |
-| 23 | Medium | No | **Timeout Policy:** Какой таймаут ставить на вызов Gemini внутри Cloud Function? Учитывая, что сама функция имеет таймаут (макс 60m в gen2), сколько оставлять на "cleanup/finalize" при зависании модели? | Gemini timeout = Function timeout - 30s (на финализацию и запись ошибки). | TBD | TBD |
 
 ## Decisions (closed)
 
@@ -35,3 +34,4 @@ Keep this file current. Close questions explicitly (with decision + date/commit 
 | 20 | 2025-12-27 | Safety blocks are treated as `FAILED` with error code `LLM_SAFETY_BLOCK` (non-retryable). Artifact write is optional; if written, it must not violate the canonical `llm_report_file` schema. |
 | 22 | 2025-12-27 | MVP uses **AI Studio** endpoint (API key auth). Production may move to Vertex AI later (ADC/IAM). |
 | 24 | 2025-12-27 | Zombie step recovery is out of scope for the worker. A separate reaper job or orchestrator policy handles stuck `RUNNING` steps. |
+| 23 | 2025-12-27 | Timeout policy (MVP): target Cloud Function timeout `780s` (13m). Gemini request deadline `600s` (10m). Reserve `finalizeBudgetSeconds=120s` for GCS write + Firestore finalize; do not start new external calls (especially Gemini) when remaining time is below the finalize budget. |

@@ -72,6 +72,10 @@ For Firestore/GCS/Gemini transient failures:
 - cap overall step execution time to stay within Cloud Functions timeout
 - do not retry indefinitely; failure should mark the step `FAILED` with an error code
 
+MVP timeout constraints:
+- Gemini request deadline is `600s` (10 minutes). Cloud Function timeout is `780s` (13 minutes) with `FINALIZE_BUDGET_SECONDS=120`.
+- Because the Gemini call can take most of the invocation budget, default `maxGeminiAttempts=1` (no full retry loops).
+
 Reference-style retry parameters (suggested defaults):
 - attempts: 5
 - base delay: 1s

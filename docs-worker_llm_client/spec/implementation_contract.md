@@ -179,6 +179,29 @@ Supported parameter allowlist (Gemini API; map to the chosen SDK):
 Structured output implementation note:
 - If using the `google-genai` Python SDK, configure JSON output with `response_mime_type="application/json"` and provide a schema via `response_json_schema` (often generated from Pydantic).
 
+## Timeout policy (MVP)
+
+Goal: allow up to **10 minutes** for a single Gemini call, while guaranteeing time to finalize the step (write artifact + patch Firestore).
+
+Recommended defaults:
+- Cloud Function timeout (deployment): `780s` (13 minutes)
+- Gemini request deadline: `600s` (10 minutes)
+- Finalize budget: `120s` reserved for:
+  - writing the artifact to GCS (or handling write failure)
+  - patching `steps.<stepId>.outputs.*`, `steps.<stepId>.error` (if any), and step status
+
+Guardrail:
+- if remaining invocation time is less than `finalizeBudgetSeconds`, the worker must not start new external calls (especially Gemini) and should proceed to finalize the step as `FAILED` with an appropriate error code.
+
+Suggested per-call timeouts (upper bounds; retries must still fit into the overall budget):
+- Firestore:
+  - read flow_run: `10s`
+  - claim patch: `10s` (with short claim retries on precondition contention)
+  - finalize patch: `15s`
+- GCS:
+  - download an input artifact (JSON/PNG): `20s` per object
+  - upload final report JSON: `60s`
+
 ## Execution metadata persisted to Firestore (proposal)
 
 Persist under `steps.<stepId>.outputs` (or `steps.<stepId>.outputs.execution`):
