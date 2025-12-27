@@ -36,6 +36,7 @@ This worker assumes:
 
 - Firestore `flow_runs/{runId}` JSON Schema: `contracts/flow_run.schema.json`
 - LLM report file JSON Schema (canonical): `contracts/llm_report_file.schema.json`
+- LLM schema registry document JSON Schema: `contracts/llm_schema.schema.json`
 - Example `flow_runs/{runId}` document: `contracts/examples/flow_run.example.json`
 
 ## Prompt / instruction storage (Firestore)
@@ -44,16 +45,21 @@ The LLM step references instructions via `steps.<stepId>.inputs.llm.promptId`.
 
 Gemini request parameters are provided via `steps.<stepId>.inputs.llm.llmProfile` (model + generation config + structured output knobs). This profile is **authoritative** for the request and is not overridden by any prompt/model defaults.
 
-Collections (names are configurable; MVP uses Firestore only for prompts):
+Collections (names are configurable; MVP uses Firestore for prompts and schema registry):
 - `llm_prompts/{promptId}`: canonical prompt document schema is defined in:
   - machine-readable: `contracts/llm_prompt.schema.json`
   - human-readable notes: `contracts/llm_prompt.md`
   - example: `contracts/examples/llm_prompt.example.json`
 
+- `llm_schemas/{schemaId}`: structured output schema registry (large JSON Schemas):
+  - machine-readable: `contracts/llm_schema.schema.json`
+  - human-readable notes: `contracts/llm_schema.md`
+  - example: `contracts/examples/llm_schema.example.json`
+
 Key rules (MVP decisions):
 - `promptId` (Firestore doc ID) must be storage-safe: `^[a-z0-9_]{1,128}$` (no `/`, `.`, `:`, spaces, unicode).
 - Versioning is encoded into `promptId` by convention (e.g. `llm_report_1m_v1`).
-- Prompt doc stores only **instruction texts** (`systemInstruction`, `userPrompt`). Effective Gemini request config (including response schema) is taken from `inputs.llm.llmProfile`.
+- Prompt doc stores only **instruction texts** (`systemInstruction`, `userPrompt`). Effective Gemini request config (including structured output schema reference) is taken from `inputs.llm.llmProfile`.
 
 Future (optional, post-MVP):
 - `llm_profiles/{profileId}`:

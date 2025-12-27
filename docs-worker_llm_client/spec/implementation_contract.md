@@ -180,12 +180,15 @@ Supported parameter allowlist (Gemini API; map to the chosen SDK):
 - `stopSequences`
 - `candidateCount` (if supported)
 - `responseMimeType` (prefer `application/json` for structured output)
-- `responseSchema` / `jsonSchema` (when using structured output)
+- `structuredOutput.schemaId` (preferred; references `llm_schemas/{schemaId}`)
+- `responseSchema` / `jsonSchema` (discouraged for MVP; large schemas should live in the registry)
 - `thinkingConfig`: `includeThoughts`, `thinkingLevel`
 
 Structured output implementation note:
 - If using the `google-genai` Python SDK, configure JSON output with `response_mime_type="application/json"` and provide a schema via `response_json_schema` (often generated from Pydantic).
- - MVP requires deterministic single-candidate behavior: `candidateCount=1`. If the step `llmProfile` specifies a different value (when supported), treat as `LLM_PROFILE_INVALID` (do not override).
+- MVP requires deterministic single-candidate behavior: `candidateCount=1`. If the step `llmProfile` specifies a different value (when supported), treat as `LLM_PROFILE_INVALID` (do not override).
+- Schema boundary (MVP): the provider schema validates only the model-owned `LLMReportFile.output`. The worker builds the final `LLMReportFile` by combining worker-owned `metadata` + model-owned `output`.
+- Schema registry (MVP): when `structuredOutput.schemaId` is present, the worker loads `llm_schemas/{schemaId}` and uses its `jsonSchema` as the provider response schema; persist/log `llm.schemaId` + `llm.schemaSha256` and treat missing/invalid/unsupported schema as `LLM_PROFILE_INVALID`.
 
 ## Timeout policy (MVP)
 

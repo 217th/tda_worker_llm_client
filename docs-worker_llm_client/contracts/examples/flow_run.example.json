@@ -64,8 +64,13 @@
           "llmProfile": {
             "modelName": "gemini-2.0-flash",
             "temperature": 0.2,
+            "candidateCount": 1,
             "maxOutputTokens": 2048,
-            "responseMimeType": "application/json"
+            "responseMimeType": "application/json",
+            "structuredOutput": {
+              "schemaId": "llm_report_output_v1",
+              "kind": "LLM_REPORT_OUTPUT"
+            }
           }
         },
         "ohlcvStepId": "ohlcv_1M_bigquery_all_v1",

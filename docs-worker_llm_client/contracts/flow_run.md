@@ -48,6 +48,10 @@ Prototype orchestration model:
 Inputs (minimum):
 - `inputs.llm.promptId`: instruction/prompt document ID in Firestore.
 - `inputs.llm.llmProfile`: effective Gemini request profile (model + generation/structured-output knobs). This is **authoritative** for the request and **must not** be overridden by prompt/model defaults.
+- For structured output (MVP):
+  - `inputs.llm.llmProfile.responseMimeType`: should be `application/json`
+  - `inputs.llm.llmProfile.structuredOutput.schemaId`: references `llm_schemas/{schemaId}` (the schema validates only `LLMReportFile.output`; `LLMReportFile.metadata` is worker-owned)
+  - `inputs.llm.llmProfile.candidateCount`: if provided, must be `1` (deterministic behavior)
 - `inputs.ohlcvStepId`: stepId of an `OHLCV_EXPORT` step; worker resolves `steps[ohlcvStepId].outputs.gcs_uri`.
 - `inputs.chartsManifestStepId`: stepId of a `CHART_EXPORT` step; worker resolves `steps[chartsManifestStepId].outputs.gcs_uri` (charts manifest JSON).
 - optional `inputs.previousReportStepIds`: stepIds of previous `LLM_REPORT` steps whose report artifacts may be included as context.

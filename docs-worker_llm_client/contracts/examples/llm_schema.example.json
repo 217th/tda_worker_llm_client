@@ -1,0 +1,30 @@
+{
+  "schemaId": "llm_report_output_v1",
+  "kind": "LLM_REPORT_OUTPUT",
+  "createdAt": "2025-12-27T00:00:00Z",
+  "description": "Structured output schema for worker_llm_client LLM report output (output-only, metadata is worker-owned).",
+  "sha256": "1267bf2982c5b2ab8991ffe70894134f0357f0bc7deb8a61d9959fa886a24797",
+  "jsonSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["summary", "details"],
+    "properties": {
+      "summary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["markdown"],
+        "properties": {
+          "markdown": {
+            "type": "string",
+            "description": "Human-readable report summary in Markdown."
+          }
+        }
+      },
+      "details": {
+        "type": "object",
+        "description": "Arbitrary detailed JSON (schema may evolve).",
+        "additionalProperties": true
+      }
+    }
+  }
+}

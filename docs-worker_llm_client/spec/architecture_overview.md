@@ -28,7 +28,8 @@ Inbound:
 Outbound:
 - Firestore read/write:
   - `flow_runs/{runId}` (read + step status patches)
-  - prompt/instruction docs (exact collections TBD; see `questions/open_questions.md`)
+  - prompt/instruction docs: `llm_prompts/{promptId}`
+  - structured output schema registry: `llm_schemas/{schemaId}`
 - Cloud Storage:
   - read upstream artifacts referenced by the step (e.g., OHLCV JSON, charts manifest)
   - write LLM output artifact (JSON preferred; Markdown optional)

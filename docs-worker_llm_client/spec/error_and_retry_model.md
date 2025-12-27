@@ -24,6 +24,7 @@ Orchestrator note (MVP):
 Structured output config note (MVP):
 - if structured output is required but unsupported/unavailable for the chosen model/endpoint/SDK → `LLM_PROFILE_INVALID` (non-retryable)
 - require `candidateCount=1` for deterministic behavior; other values (when specified) → `LLM_PROFILE_INVALID`
+- if `structuredOutput.schemaId` is required but missing/unresolvable, or the referenced schema is invalid/unsupported → `LLM_PROFILE_INVALID`
 
 ### 2) Retryable (transient)
 

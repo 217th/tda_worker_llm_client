@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LLMSchema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaId", "kind", "createdAt", "jsonSchema", "sha256"],
+  "properties": {
+    "schemaId": {
+      "type": "string",
+      "description": "Firestore document ID (immutable). Storage-safe ASCII identifier.",
+      "pattern": "^[a-z0-9_]{1,128}$"
+    },
+    "kind": {
+      "type": "string",
+      "description": "What this schema validates.",
+      "enum": ["LLM_REPORT_OUTPUT"]
+    },
+    "createdAt": {
+      "type": "string",
+      "description": "RFC3339 timestamp (UTC).",
+      "format": "date-time"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human note for troubleshooting / discovery."
+    },
+    "jsonSchema": {
+      "type": "object",
+      "description": "JSON Schema object to be passed to the provider generation config.",
+      "additionalProperties": true
+    },
+    "sha256": {
+      "type": "string",
+      "description": "SHA-256 hex of canonical JSON encoding of `jsonSchema` (for drift detection).",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "isActive": {
+      "type": "boolean",
+      "description": "Optional discovery flag; does not affect immutability.",
+      "default": true
+    }
+  }
+}

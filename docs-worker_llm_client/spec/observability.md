@@ -38,6 +38,7 @@ Baseline goals:
 - `firestore.updateTime` (claim precondition basis)
 - `firestore.document`: `flow_runs/{runId}` (or full doc path if useful)
 - `llm.promptId`, `llm.modelName`
+- `llm.schemaId`, `llm.schemaSha256` (when structured output schema registry is used)
 - `llm.generationConfig` (sanitized; no secrets; summary is OK)
 - `llm.requestId` (provider request ID, if available)
 - `llm.usage` (input/output tokens, total tokens; naming TBD by SDK)
@@ -220,6 +221,7 @@ Rules:
 - Prefer logging **sizes + hashes** of the candidate text and a **sanitized** summary of validation errors.
 
 Recommended fields for `structured_output_invalid`:
+- `llm.schemaId`, `llm.schemaSha256` (when schema registry is used)
 - `reason.kind`: one of:
   - `finish_reason`: provider indicates generation was not successful for returning a complete payload
   - `missing_text`: no extractable candidate text found where expected

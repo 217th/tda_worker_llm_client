@@ -315,10 +315,21 @@
                           "type": "array",
                           "items": { "type": "string" }
                         },
-                        "candidateCount": { "type": "integer", "minimum": 1 },
+                        "candidateCount": { "type": "integer", "minimum": 1, "maximum": 1 },
                         "responseMimeType": {
                           "type": "string",
                           "description": "Prefer application/json when using structured output."
+                        },
+                        "structuredOutput": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "Structured output configuration. Schema is referenced via the schema registry (llm_schemas/{schemaId}).",
+                          "required": ["schemaId"],
+                          "properties": {
+                            "schemaId": { "type": "string", "pattern": "^[a-z0-9_]{1,128}$" },
+                            "schemaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                            "kind": { "type": "string", "enum": ["LLM_REPORT_OUTPUT"] }
+                          }
                         },
                         "responseSchema": {
                           "type": "object",
