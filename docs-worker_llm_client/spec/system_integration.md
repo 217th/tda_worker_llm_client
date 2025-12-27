@@ -60,6 +60,7 @@ Key rules (MVP decisions):
 - `promptId` (Firestore doc ID) must be storage-safe: `^[a-z0-9_]{1,128}$` (no `/`, `.`, `:`, spaces, unicode).
 - Versioning is encoded into `promptId` by convention (e.g. `llm_report_1m_v1`).
 - Prompt doc stores only **instruction texts** (`systemInstruction`, `userPrompt`). Effective Gemini request config (including structured output schema reference) is taken from `inputs.llm.llmProfile`.
+- Structured output schema naming convention: `llmProfile.structuredOutput.schemaId` uses `llm_report_output_v{N}`; the worker writes `metadata.schemaVersion=N` into the report artifact.
 
 Future (optional, post-MVP):
 - `llm_profiles/{profileId}`:

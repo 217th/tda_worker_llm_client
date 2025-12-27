@@ -39,6 +39,7 @@ Baseline goals:
 - `firestore.document`: `flow_runs/{runId}` (or full doc path if useful)
 - `llm.promptId`, `llm.modelName`
 - `llm.schemaId`, `llm.schemaSha256` (when structured output schema registry is used)
+- `llm.schemaVersion` (when known; derived from `llm.schemaId` naming)
 - `llm.generationConfig` (sanitized; no secrets; summary is OK)
 - `llm.requestId` (provider request ID, if available)
 - `llm.usage` (input/output tokens, total tokens; naming TBD by SDK)

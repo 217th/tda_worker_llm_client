@@ -368,3 +368,8 @@ Failure artifact policy (MVP):
 Model output data safety (MVP):
 - Treat raw model output (candidate text / JSON) as sensitive: do not log it and do not persist it on failures.
 - Rely on safe diagnostics (hash/len + sanitized validation errors) for troubleshooting.
+
+Schema versioning (MVP):
+- The worker writes `metadata.schemaVersion` into the `llm_report_file` artifact (worker-owned).
+- `metadata.schemaVersion` represents the version of the model-owned `output` format (structured output schema).
+- `llmProfile.structuredOutput.schemaId` must follow `llm_report_output_v{schemaVersion}`; if it does not match this convention or is unparseable, treat as `LLM_PROFILE_INVALID`.

@@ -10,8 +10,13 @@
 		    "metadata": {
 	      "type": "object",
 	      "additionalProperties": false,
-	      "required": ["runId", "stepId", "createdAt", "finishedAt", "symbol", "timeframe", "llm", "inputs"],
+	      "required": ["schemaVersion", "runId", "stepId", "createdAt", "finishedAt", "symbol", "timeframe", "llm", "inputs"],
 	      "properties": {
+	        "schemaVersion": {
+	          "type": "integer",
+	          "minimum": 1,
+	          "description": "Version of the model-owned `output` format written in this file. Worker-owned; derived from the structured output schema id used for the step (e.g., `llm_report_output_v1` -> 1)."
+	        },
 	        "runId": {
 	          "type": "string",
 	          "description": "Flow run docId.",
@@ -33,6 +38,16 @@
 	          "properties": {
 	            "promptId": { "type": "string", "minLength": 1 },
 	            "modelName": { "type": "string", "minLength": 1 },
+	            "schemaId": {
+	              "type": "string",
+	              "description": "Structured output schema id used for this report (llm_schemas/{schemaId}).",
+	              "pattern": "^[a-z0-9_]{1,128}$"
+	            },
+	            "schemaSha256": {
+	              "type": "string",
+	              "description": "SHA-256 hex of canonical JSON encoding of the structured output schema (`llm_schemas/{schemaId}.jsonSchema`).",
+	              "pattern": "^[a-f0-9]{64}$"
+	            },
 	            "llmProfile": {
 	              "type": "object",
 	              "description": "Optional: effective request profile used for this run (copied from inputs.llm.llmProfile).",

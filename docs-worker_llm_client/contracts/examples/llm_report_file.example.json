@@ -1,5 +1,6 @@
 {
   "metadata": {
+    "schemaVersion": 1,
     "runId": "20251224-120000_BTCUSDT_a1b2c",
     "stepId": "llm_report_1M_month_summary_v1",
     "createdAt": "2025-12-24T12:00:45Z",
@@ -9,6 +10,8 @@
     "llm": {
       "promptId": "prompt_month_v1",
       "modelName": "gemini-2.0-flash",
+      "schemaId": "llm_report_output_v1",
+      "schemaSha256": "1267bf2982c5b2ab8991ffe70894134f0357f0bc7deb8a61d9959fa886a24797",
       "llmProfile": {
         "modelName": "gemini-2.0-flash",
         "temperature": 0.2,

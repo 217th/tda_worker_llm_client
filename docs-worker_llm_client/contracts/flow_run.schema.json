@@ -326,7 +326,7 @@
                           "description": "Structured output configuration. Schema is referenced via the schema registry (llm_schemas/{schemaId}).",
                           "required": ["schemaId"],
                           "properties": {
-                            "schemaId": { "type": "string", "pattern": "^[a-z0-9_]{1,128}$" },
+                            "schemaId": { "type": "string", "pattern": "^llm_report_output_v[1-9][0-9]*$" },
                             "schemaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
                             "kind": { "type": "string", "enum": ["LLM_REPORT_OUTPUT"] }
                           }

@@ -15,6 +15,7 @@ Canonical schema:
 
 - Treat each schema doc as **immutable**.
 - Changes create a new `schemaId` (e.g., `llm_report_output_v1`, `llm_report_output_v2`).
+- Naming convention (MVP): `llm_report_output_v{N}` where `N` matches the report artifact `metadata.schemaVersion` written by the worker.
 
 ## Usage (MVP)
 
