@@ -121,6 +121,7 @@ LLM:
 - `llm_request_started`
 - `llm_request_finished` (include `status=succeeded|failed`, `finishReason` if available)
 - `structured_output_invalid` (structured output parse/schema/finishReason failure; include reason and safe diagnostics)
+- `structured_output_schema_invalid` (schema registry/configuration invalid; fail-fast without calling Gemini)
 - `structured_output_repair_attempt_started` / `structured_output_repair_attempt_finished`
 
 Artifacts:
@@ -195,6 +196,7 @@ This table is the canonical event taxonomy for `worker_llm_client`.
 | `llm_request_started` | INFO | before Gemini call | `llm.modelName`, `llm.promptId` |
 | `llm_request_finished` | INFO/ERROR | after Gemini call | `status` (`succeeded|failed`), optional `finishReason`, optional `llm.usage` |
 | `structured_output_invalid` | WARNING | structured output validation failed (before optional repair / before finalizing as FAILED) | `reason.kind` (`finish_reason|missing_text|json_parse|schema_validation`), `reason.message` (sanitized), `llm.finishReason` (if available), `diagnostics.textBytes`, `diagnostics.textSha256`, `policy.repairPlanned` (bool), `policy.remainingSeconds`, `policy.finalizeBudgetSeconds` |
+| `structured_output_schema_invalid` | ERROR | structured output schema is missing/invalid/unsupported (pre-flight; no Gemini call) | `llm.schemaId`, `llm.schemaSha256` (if available), `reason.message` (sanitized), `error.code` (`LLM_PROFILE_INVALID`) |
 | `structured_output_repair_attempt_started` | INFO | before the repair Gemini call | `attempt` (=1), `policy.repairDeadlineSeconds`, `policy.remainingSeconds`, `policy.finalizeBudgetSeconds` |
 | `structured_output_repair_attempt_finished` | INFO/ERROR | after the repair Gemini call | `attempt` (=1), `status` (`succeeded|failed`), optional `llm.finishReason`, optional `llm.usage` |
 

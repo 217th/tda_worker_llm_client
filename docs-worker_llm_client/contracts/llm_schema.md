@@ -26,5 +26,19 @@ The worker:
 - validates it is present and usable for the selected provider/model
 - passes `jsonSchema` into the Gemini generation config
 
+### Minimal invariants for `kind=LLM_REPORT_OUTPUT` (MVP)
+
+To keep downstream consumers stable, the schema must enforce at least:
+- top-level required keys: `summary` and `details`
+- `summary.markdown` is required and is a string
+
+If the schema does not enforce these invariants, treat it as invalid configuration (`LLM_PROFILE_INVALID`) and do not call Gemini.
+
+### `details` contract (MVP)
+
+- `details` is intentionally **free-form** (`additionalProperties=true`).
+- Do not require stable keys inside `details` on MVP.
+- If stable machine-readable fields are needed later, introduce them by tightening the structured output schema in a new version (`llm_report_output_v{N}`) and bumping `metadata.schemaVersion`.
+
 Troubleshooting:
 - always log and persist `schemaId` + `schemaSha256` (and never the raw output payload)

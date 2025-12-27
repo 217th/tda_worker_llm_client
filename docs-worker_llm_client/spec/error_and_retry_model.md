@@ -26,6 +26,7 @@ Structured output config note (MVP):
 - require `candidateCount=1` for deterministic behavior; other values (when specified) → `LLM_PROFILE_INVALID`
 - if `structuredOutput.schemaId` is required but missing/unresolvable, or the referenced schema is invalid/unsupported → `LLM_PROFILE_INVALID`
 - if `structuredOutput.schemaId` does not follow `llm_report_output_v{N}` naming (unparseable schema version) → `LLM_PROFILE_INVALID`
+- if the referenced structured-output schema does not require `summary.markdown` (and top-level `summary/details`) → `LLM_PROFILE_INVALID`
 
 ### 2) Retryable (transient)
 

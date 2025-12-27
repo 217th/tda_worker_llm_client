@@ -189,6 +189,7 @@ Structured output implementation note:
 - MVP requires deterministic single-candidate behavior: `candidateCount=1`. If the step `llmProfile` specifies a different value (when supported), treat as `LLM_PROFILE_INVALID` (do not override).
 - Schema boundary (MVP): the provider schema validates only the model-owned `LLMReportFile.output`. The worker builds the final `LLMReportFile` by combining worker-owned `metadata` + model-owned `output`.
 - Schema registry (MVP): when `structuredOutput.schemaId` is present, the worker loads `llm_schemas/{schemaId}` and uses its `jsonSchema` as the provider response schema; persist/log `llm.schemaId` + `llm.schemaSha256` and treat missing/invalid/unsupported schema as `LLM_PROFILE_INVALID`.
+  - Schema minimal invariants (MVP): for `kind=LLM_REPORT_OUTPUT`, the schema must require `output.summary.markdown` (and `output.details`), otherwise treat as `LLM_PROFILE_INVALID` (pre-flight failure; do not call Gemini).
 
 ## Timeout policy (MVP)
 
