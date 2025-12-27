@@ -10,6 +10,7 @@ Aggregate the readiness criteria for handing off this component to implementatio
 - `spec/observability.md` defines required log fields and baseline events
 - `spec/deploy_and_envs.md` lists required env vars and IAM
 - `questions/open_questions.md` is populated and triaged (blockers marked)
+- Implementation plan reuses proven code (copy-paste) from `worker_chart_export` and `worker_ohlcv_export` for CloudEvent parsing + structured logging (aligned to this spec pack)
 
 ## MVP acceptance checks
 

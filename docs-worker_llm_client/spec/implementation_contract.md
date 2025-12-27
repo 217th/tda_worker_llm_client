@@ -149,11 +149,18 @@ Invariant:
 
 ## CloudEvent parsing (runId extraction)
 
-Worker derives `runId` from CloudEvent `subject` by extracting the last path segment after `flow_runs/`.
+Observed CloudEvent `subject` pattern (gen2/Eventarc):
+- `documents/<FLOW_RUNS_COLLECTION>/<runId>` (default: `documents/flow_runs/<runId>`)
+
+Worker derives `runId` from CloudEvent `subject` by:
+1) splitting `subject` by `/`
+2) finding the segment equal to `<FLOW_RUNS_COLLECTION>` (default `flow_runs`)
+3) taking the next segment as `runId`
+4) validating `runId` against `contracts/flow_run.schema.json` (`runId` pattern)
 
 Notes:
-- subject format differs between trigger types/SDKs; keep parsing strict enough to avoid false positives but flexible enough for known Firestore subjects
-- if `runId` cannot be parsed, log an error and exit (no Firestore writes)
+- `cloud_event_received` must include `eventType` and `subject` in logs (see `spec/observability.md`)
+- if `subject` cannot be parsed or `runId` fails validation, emit `cloud_event_ignored` with `reason=invalid_subject` and exit (no Firestore writes)
 
 ## LLM request parameters (decision)
 
@@ -230,6 +237,22 @@ Decision (2025-12-24): persist **extended** LLM execution metadata in `flow_run`
 ## Implementation conventions (Python)
 
 These conventions are not part of the runtime contract, but they help keep the worker implementation consistent and maintainable.
+
+### Reuse existing implementations (MVP)
+
+To minimize production issues, implementation should reuse proven code from existing workers via **copy-paste** (no shared library required for MVP):
+
+- Source projects:
+  - `worker_chart_export`
+  - `worker_ohlcv_export`
+- Expected reuse targets (copy-paste + adapt field names to this worker’s contracts):
+  - structured logging utilities (`JsonFormatter`/`log_event`-style wrapper) and stable `event` taxonomy aligned with `spec/observability.md`
+  - CloudEvent parsing (`subject`/`eventType` handling) and `runId` extraction rules aligned with `spec/system_integration.md`
+  - Firestore claim/finalize helpers using optimistic preconditions (`update_time`) and short jittered retries (no transactions)
+  - common no-op/ignored reasons (`cloud_event_noop`, `cloud_event_ignored`) and consistent error mapping (`error.code`)
+
+Rule:
+- Any copied implementation must be adjusted to match this spec pack’s contracts (schemas, error codes, log fields). If a source worker behaves differently, the spec wins.
 
 ### Code style
 

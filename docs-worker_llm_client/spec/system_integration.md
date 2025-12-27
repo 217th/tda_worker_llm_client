@@ -28,7 +28,8 @@ This worker assumes:
 
 - Trigger: Firestore **document update** events on `flow_runs/{runId}`.
 - CloudEvent handling:
-  - parse `runId` from `subject` (exact subject format is an open question; see `questions/open_questions.md`)
+  - observed `subject` pattern (gen2/Eventarc): `documents/<FLOW_RUNS_COLLECTION>/<runId>` (default: `documents/flow_runs/<runId>`)
+  - parse `runId` from `subject` by finding the `<FLOW_RUNS_COLLECTION>` path segment and taking the next segment
   - fetch `flow_runs/{runId}` from Firestore even if the event carries document data (treat Firestore as source of truth)
 
 ## Data contracts
