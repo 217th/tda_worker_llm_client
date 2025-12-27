@@ -101,7 +101,7 @@ Processing:
    - if multiple, pick deterministically (lexicographic by `stepId`)
 3. Claim the step:
    - patch `steps.<stepId>.status = RUNNING`
-   - patch `steps.<stepId>.startedAt = now()` (field name TBD; if absent in schema, store in `outputs` or a nested `execution` object)
+   - patch `steps.<stepId>.outputs.execution.timing.startedAt = now()`
    - write with optimistic precondition: `last_update_time = doc.update_time`
 4. Resolve prompt and model config from Firestore.
 5. Load referenced context artifacts from GCS (as required by the prompt).
@@ -163,7 +163,7 @@ Override policy:
 - `llmProfile` is **authoritative** for the request.
 - The worker does **not** merge/override it from prompt defaults or model defaults.
 
-Supported parameter allowlist (Gemini/Vertex; map to the chosen SDK):
+Supported parameter allowlist (Gemini API; map to the chosen SDK):
 
 - `model` / `modelName`
 - `temperature`
@@ -247,8 +247,7 @@ If Firestore precondition fails during `READY → RUNNING`:
 ### Dependency graph inconsistencies
 
 If `dependsOn` contains unknown step IDs:
-- do not execute
-- mark step `FAILED` only if this is considered a configuration error for the flow (decision pending)
+- mark step `FAILED` as a configuration error (non-retryable), using `error.code=INVALID_STEP_INPUTS`
 
 ### Step already completed
 

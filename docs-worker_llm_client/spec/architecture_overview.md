@@ -32,7 +32,7 @@ Outbound:
 - Cloud Storage:
   - read upstream artifacts referenced by the step (e.g., OHLCV JSON, charts manifest)
   - write LLM output artifact (JSON preferred; Markdown optional)
-- Google Gemini (Vertex AI / GenAI API) for text generation / structured output
+- Google Gemini API (MVP: AI Studio endpoint) for text generation / structured output
 - Cloud Logging for structured logs
 
 ## High-level flows

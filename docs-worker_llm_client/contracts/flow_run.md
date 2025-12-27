@@ -30,7 +30,7 @@ Common required fields:
   - `RUNNING`: claimed/executing
   - `SUCCEEDED`: completed successfully
   - `FAILED`: completed with failure
-  - `SKIPPED`: intentionally skipped (policy TBD for dependency satisfaction)
+  - `SKIPPED`: intentionally skipped (does **not** satisfy `dependsOn`)
   - `CANCELLED`: cancelled by orchestrator/user
 - `dependsOn`: list of step IDs; all must be `SUCCEEDED` before the step can execute (current requirement).
 - `inputs`: step-specific inputs (structure depends on `stepType`).

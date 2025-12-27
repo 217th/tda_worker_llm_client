@@ -57,7 +57,7 @@ To make noisy Cloud Logging streams easier to analyze, `cloud_event_parsed` logs
 - keep payload compact:
   - do **not** include `inputs` (avoid leaking prompt/context)
   - avoid embedding large structures (no full `steps` objects)
-  - if step count is very large, allow truncation with an explicit `truncated=true` flag (policy TBD)
+  - MVP: do not truncate `flowRunSteps` (log all step summaries)
 
 Recommended fields for the same log entry:
 - `flowRunFound`: boolean

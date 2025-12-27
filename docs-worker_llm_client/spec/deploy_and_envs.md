@@ -24,7 +24,8 @@ Target runtime: **Google Cloud Functions (gen2)** with an **Eventarc Firestore t
 Service account must have (minimum):
 - Firestore read/write access to `flow_runs/*` and prompt/model collections
 - Cloud Storage object write access to artifacts bucket
-- Gemini/Vertex AI invoke permissions (e.g., `aiplatform.endpoints.predict` / model invocation role depending on SDK)
+- MVP (AI Studio): no special IAM for Gemini invocation (uses API key). Service account should have access to Secret Manager to read the API key.
+- (future, non-MVP) Vertex AI: Gemini invoke permissions via IAM (e.g., appropriate Vertex AI roles) when switching to ADC/IAM auth.
 
 Configuration via environment variables (draft):
 - `GCP_PROJECT`
@@ -35,7 +36,8 @@ Configuration via environment variables (draft):
 - `LLM_MODELS_COLLECTION` (default `llm_models`)
 - `ARTIFACTS_BUCKET`
 - `ARTIFACTS_PREFIX` (optional)
-- `GEMINI_LOCATION` (if applicable)
+- `GEMINI_API_KEY` (MVP, AI Studio; prefer injecting from Secret Manager)
+- `GEMINI_LOCATION` (future/Vertex; if applicable)
 - `LOG_LEVEL`
 
 Environment variable style (implementation guidance):
@@ -50,7 +52,7 @@ Validation rules (minimum):
 - `LOG_LEVEL` must be one of `DEBUG|INFO|WARNING|ERROR`
 
 Secrets:
-- Prefer Workload Identity / service account auth; avoid embedding API keys.
+- MVP uses an API key for AI Studio. Store it in Secret Manager and inject into the function as an environment variable (do not commit it, do not log it).
 
 ## Rollback plan
 

@@ -15,6 +15,7 @@ Where errors are persisted:
 - `PROMPT_NOT_FOUND`: prompt doc missing for `promptId`
 - `LLM_PROFILE_INVALID`: missing/invalid `inputs.llm.llmProfile` (model/config not usable)
 - `INVALID_STEP_INPUTS`: required inputs missing (e.g., missing `ohlcvStepId` / `chartsManifestStepId`)
+- `LLM_SAFETY_BLOCK`: generation blocked by model/provider safety filters
 - `INVALID_STRUCTURED_OUTPUT`: model output is not valid JSON / violates schema (policy TBD)
 
 ### 2) Retryable (transient)
@@ -45,6 +46,7 @@ LLM-specific (`stepType=LLM_REPORT`):
 - `LLM_PROFILE_INVALID`
 - `GEMINI_REQUEST_FAILED`
 - `RATE_LIMITED`
+- `LLM_SAFETY_BLOCK`
 - `INVALID_STRUCTURED_OUTPUT`
 
 No-op / not a failure (should not set `error` field):
@@ -139,7 +141,7 @@ Mechanisms:
 
 3. **Idempotent GCS write**:
     - prefer “create-only” semantics (GCS precondition `ifGenerationMatch=0`)
-    - if object already exists, treat as success and reuse it (policy TBD; depends on whether outputs are deterministic)
+    - if object already exists, treat as success and reuse it (deterministic object name; supports split-brain finalize)
 
 4. **At-least-once Firestore patching**:
     - finalization (`RUNNING → SUCCEEDED/FAILED`) may be retried

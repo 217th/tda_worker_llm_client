@@ -74,6 +74,9 @@ The worker receives:
 - generated text or structured JSON
 - model/usage metadata (tokens, finish reason, safety)
 
+MVP endpoint choice:
+- AI Studio (API key auth). Vertex AI (ADC/IAM) may be adopted later for production hardening.
+
 ### Cloud Storage artifacts
 
 The worker writes the final report artifact to GCS and persists its URI into:
@@ -107,6 +110,9 @@ Prototype mentions possible future collections to support filtering/revision wit
 - `recommendations/{recoId}`
 
 If introduced, `flow_runs/{runId}` steps may store both `reportId/recommendationId` and `gcs_uri`.
+
+MVP decision:
+- no separate indexing collections; use `flow_run` + GCS only.
 
 ## Delivery/ordering/idempotency guarantees
 
