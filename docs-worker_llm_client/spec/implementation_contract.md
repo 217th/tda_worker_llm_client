@@ -227,6 +227,7 @@ Persist under `steps.<stepId>.outputs` (or `steps.<stepId>.outputs.execution`):
   - `modelVersion` (if available)
   - `usageMetadata` (token counts; at minimum `promptTokenCount` and `totalTokenCount`, plus optional `thoughtsTokenCount`)
   - `requestId` / `operationId` (if available; for correlation)
+  - `attempts.total` (integer): 1 normally; 2 if a structured-output repair attempt was executed
   - optional `safety` (safety ratings/blocks, if available)
 - `timing`:
   - `startedAt`, `finishedAt`, `durationMs`
@@ -365,6 +366,10 @@ Failure artifact policy (MVP):
 - optional: write a standard `llm_report_file` artifact containing only:
   - a short summary markdown saying structured output validation failed
   - `output.details` with safe debug fields (reason kind, finishReason, `textBytes`, `textSha256`, sanitized validation errors)
+
+`output.summary.html` policy (MVP):
+- Do not require or generate `output.summary.html`.
+- If present in the model output (non-MVP), treat it as optional and do not render it server-side without sanitization.
 
 Model output data safety (MVP):
 - Treat raw model output (candidate text / JSON) as sensitive: do not log it and do not persist it on failures.
