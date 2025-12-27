@@ -49,14 +49,21 @@ Inputs (minimum):
 - `inputs.llm.promptId`: instruction/prompt document ID in Firestore.
 - `inputs.llm.llmProfile`: effective Gemini request profile (model + generation/structured-output knobs). This is **authoritative** for the request and **must not** be overridden by prompt/model defaults.
 - For structured output (MVP):
-  - `inputs.llm.llmProfile.responseMimeType`: should be `application/json`
+  - `inputs.llm.llmProfile.responseMimeType`: must be `application/json` (otherwise `LLM_PROFILE_INVALID`; no markdown-only fallback for `LLM_REPORT`)
   - `inputs.llm.llmProfile.structuredOutput.schemaId`: references `llm_schemas/{schemaId}` (the schema validates only `LLMReportFile.output`; `LLMReportFile.metadata` is worker-owned)
+  - `inputs.llm.llmProfile.structuredOutput.schemaSha256`: optional and informational-only in MVP (loggable, not enforced)
   - `inputs.llm.llmProfile.candidateCount`: if provided, must be `1` (deterministic behavior)
 - `inputs.ohlcvStepId`: stepId of an `OHLCV_EXPORT` step; worker resolves `steps[ohlcvStepId].outputs.gcs_uri`.
 - `inputs.chartsManifestStepId`: stepId of a `CHART_EXPORT` step; worker resolves `steps[chartsManifestStepId].outputs.gcs_uri` (charts manifest JSON).
-- optional `inputs.previousReportStepIds`: stepIds of previous `LLM_REPORT` steps whose report artifacts may be included as context.
+- optional `inputs.previousReportStepIds`: stepIds of previous `LLM_REPORT` steps whose report artifacts may be included as context. If any referenced step is missing, not `LLM_REPORT`, or missing `outputs.gcs_uri`, the worker must fail the step as `INVALID_STEP_INPUTS`.
 
 Outputs (minimum on success):
 - `outputs.gcs_uri`: GCS URI for the final report artifact written by the worker.
 
 Execution metadata is stored alongside outputs (exact structure is defined in `spec/implementation_contract.md` and may evolve).
+
+## Validation tolerance (MVP)
+
+Even though `contracts/flow_run.schema.json` is strict, the worker must tolerate extra fields beyond the schema (prototype reality):
+- ignore unknown fields and additional properties
+- validate only the subset required for execution and safe failure modes

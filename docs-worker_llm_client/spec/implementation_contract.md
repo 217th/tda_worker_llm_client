@@ -54,6 +54,15 @@ Stored separately from flow runs to enable reuse and versioning:
 
 Exact schemas are to be finalized.
 
+## Validation policy (MVP)
+
+The worker must tolerate extra fields beyond the canonical JSON Schemas (prototype reality).
+
+Rules:
+- do not reject `flow_runs/{runId}` for unknown/extra fields
+- validate only the subset required for this worker’s behavior (run status, step graph, `LLM_REPORT` inputs, and referenced `outputs.gcs_uri`)
+- treat missing required fields / wrong types in the required subset as `FLOW_RUN_INVALID` (run-level) or `INVALID_STEP_INPUTS` (step-level), depending on where the violation occurs
+
 ## Invariants
 
 1. **No silent execution:** worker must never execute a step unless it is `READY` and dependencies are satisfied.
@@ -190,6 +199,8 @@ Structured output implementation note:
 - Schema boundary (MVP): the provider schema validates only the model-owned `LLMReportFile.output`. The worker builds the final `LLMReportFile` by combining worker-owned `metadata` + model-owned `output`.
 - Schema registry (MVP): when `structuredOutput.schemaId` is present, the worker loads `llm_schemas/{schemaId}` and uses its `jsonSchema` as the provider response schema; persist/log `llm.schemaId` + `llm.schemaSha256` and treat missing/invalid/unsupported schema as `LLM_PROFILE_INVALID`.
   - Schema minimal invariants (MVP): for `kind=LLM_REPORT_OUTPUT`, the schema must require `output.summary.markdown` (and `output.details`), otherwise treat as `LLM_PROFILE_INVALID` (pre-flight failure; do not call Gemini).
+- `inputs.llm.llmProfile.structuredOutput.schemaSha256` (if present) is informational-only in MVP (loggable, but not enforced; mismatches must not cause failure).
+- For `stepType=LLM_REPORT`, if `llmProfile.responseMimeType` is not `application/json`, treat as `LLM_PROFILE_INVALID` (no markdown-only fallback).
 
 ## Timeout policy (MVP)
 
@@ -302,6 +313,20 @@ If Firestore precondition fails during `READY → RUNNING`:
 If `dependsOn` contains unknown step IDs:
 - mark step `FAILED` as a configuration error (non-retryable), using `error.code=INVALID_STEP_INPUTS`
 
+### Missing upstream artifact references (LLM_REPORT inputs)
+
+For `LLM_REPORT` execution, if any required upstream references are missing or unusable, finalize as `FAILED` with `error.code=INVALID_STEP_INPUTS`:
+- `inputs.ohlcvStepId` points to a missing step
+- `inputs.chartsManifestStepId` points to a missing step
+- referenced steps exist but `steps[...].outputs.gcs_uri` is missing/empty
+
+### Previous report references (LLM_REPORT inputs)
+
+If `inputs.previousReportStepIds[*]` contains any invalid reference, finalize as `FAILED` with `error.code=INVALID_STEP_INPUTS`:
+- referenced step does not exist
+- referenced step exists but `stepType != LLM_REPORT`
+- referenced step exists but `outputs.gcs_uri` is missing/empty
+
 ### Step already completed
 
 If a step is not `READY` (e.g., already `RUNNING/SUCCEEDED/FAILED`), the worker must not modify it.
@@ -309,7 +334,14 @@ If a step is not `READY` (e.g., already `RUNNING/SUCCEEDED/FAILED`), the worker 
 ### Output write succeeded but Firestore update failed
 
 If the artifact is written to GCS but the final Firestore patch fails:
-- the next invocation should be able to detect/reuse the existing artifact by deterministic object name (or by checking for an existing `gcs_uri` in outputs)
+- the next invocation must detect the existing deterministic artifact and finalize Firestore without re-calling the LLM
+
+### Split-brain recovery: step is RUNNING but report artifact exists
+
+If `steps.<stepId>.status == RUNNING` and the deterministic report artifact already exists in GCS at the expected path:
+- do not call Gemini
+- finalize Firestore using the existing `gcs_uri`
+- treat this as a normal completion path (idempotent recovery)
 
 ### Structured output mismatch
 

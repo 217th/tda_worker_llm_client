@@ -14,7 +14,7 @@ Where errors are persisted:
 - `FLOW_RUN_INVALID`: `flow_run` fails validation for this worker (schema/required fields)
 - `PROMPT_NOT_FOUND`: prompt doc missing for `promptId`
 - `LLM_PROFILE_INVALID`: missing/invalid `inputs.llm.llmProfile` (model/config not usable)
-- `INVALID_STEP_INPUTS`: required inputs missing (e.g., missing `ohlcvStepId` / `chartsManifestStepId`)
+- `INVALID_STEP_INPUTS`: required inputs missing or unusable (e.g., missing `ohlcvStepId` / `chartsManifestStepId`, missing referenced `steps[...].outputs.gcs_uri`, or invalid `previousReportStepIds` references)
 - `LLM_SAFETY_BLOCK`: generation blocked by model/provider safety filters
 - `INVALID_STRUCTURED_OUTPUT`: structured output is invalid (JSON parse / schema validation / incomplete payload). MVP: allow at most **one** repair attempt within the same invocation if time budget allows; otherwise finalize as `FAILED`.
 
@@ -23,8 +23,10 @@ Orchestrator note (MVP):
 
 Structured output config note (MVP):
 - if structured output is required but unsupported/unavailable for the chosen model/endpoint/SDK → `LLM_PROFILE_INVALID` (non-retryable)
+- for `stepType=LLM_REPORT`, if `llmProfile.responseMimeType` is not `application/json` → `LLM_PROFILE_INVALID` (no markdown-only fallback)
 - require `candidateCount=1` for deterministic behavior; other values (when specified) → `LLM_PROFILE_INVALID`
 - if `structuredOutput.schemaId` is required but missing/unresolvable, or the referenced schema is invalid/unsupported → `LLM_PROFILE_INVALID`
+- `structuredOutput.schemaSha256` (if present) is informational-only (loggable, but not enforced)
 - if `structuredOutput.schemaId` does not follow `llm_report_output_v{N}` naming (unparseable schema version) → `LLM_PROFILE_INVALID`
 - if the referenced structured-output schema does not require `summary.markdown` (and top-level `summary/details`) → `LLM_PROFILE_INVALID`
 - validation source of truth: model output is validated against `llm_schemas/{schemaId}.jsonSchema` (single source of truth); do not introduce a second authoritative validator in MVP
@@ -114,7 +116,7 @@ Symptoms:
 Handling:
 - retry the finalize patch a few times within the invocation
 - if still failing: let the invocation fail (so the event can be retried if retries are enabled) OR rely on the next Firestore update invocation to finalize
-- next invocation should be able to detect the existing object and finalize without re-calling the LLM
+- next invocation must detect the existing object and finalize without re-calling the LLM
 
 ### 2) Claim OK, crash before side effects
 

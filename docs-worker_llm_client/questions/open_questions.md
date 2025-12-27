@@ -23,7 +23,7 @@ Keep this file current. Close questions explicitly (with decision + date/commit 
 | 8 | 2025-12-27 | `dependsOn` is satisfied only by `SUCCEEDED`. `SKIPPED` does **not** satisfy dependencies. |
 | 11 | 2025-12-27 | Step timing is stored under `steps.<stepId>.outputs.execution.timing` (`startedAt/finishedAt/durationMs`). Do not add `steps.<stepId>.startedAt` to the `flow_run` schema. |
 | 12 | 2025-12-27 | If `dependsOn` references a non-existent `stepId`, treat it as a configuration error and mark the step `FAILED` (non-retryable). |
-| 14 | 2025-12-27 | Split-brain handling: if the deterministic GCS object already exists but Firestore was not finalized, the worker may reuse the object and finalize the step without re-calling the LLM. |
+| 14 | 2025-12-27 | Split-brain handling: if the deterministic GCS object already exists but Firestore was not finalized (step may still be `RUNNING`), the worker must reuse the object and finalize the step without re-calling the LLM. |
 | 15 | 2025-12-27 | Standardize on Firestore optimistic preconditions (`update_time`) for claim/finalize (no Firestore transactions) across workers. |
 | 16 | 2025-12-27 | MVP: no truncation/limits for `cloud_event_parsed.flowRunSteps` are required. Log all step summaries (still without inputs). |
 | 17 | 2025-12-27 | MVP: `flow_run` + GCS is sufficient; no separate indexing storage (`reports/*`) on MVP. |
@@ -55,3 +55,8 @@ Keep this file current. Close questions explicitly (with decision + date/commit 
 | 35 | 2025-12-27 | Repair metadata (MVP): persist only the final attempt's LLM metadata (finishReason/usage/requestId/…) in `steps.<stepId>.outputs.execution.llm`. Additionally store a single counter `attempts.total` (1 or 2, where 2 means a repair attempt was executed). Do not persist per-attempt histories. |
 | 39 | 2025-12-27 | `output.summary.html` (MVP): not required and not generated. The model returns only `output.summary.markdown`; HTML rendering/sanitization is out of scope for MVP. |
 | 44 | 2025-12-27 | Structured output negative test vectors (MVP): add at least 3 failure fixtures/vectors — truncated JSON, missing required field, wrong type. Expected `error.code` for these is `INVALID_STRUCTURED_OUTPUT`. Schema/configuration failures (e.g., missing schemaId, invalid schema, or schema not requiring `summary.markdown`) are pre-flight and use `LLM_PROFILE_INVALID`. |
+| 45 | 2025-12-27 | `previousReportStepIds` strictness: if any referenced step is missing, not `LLM_REPORT`, or missing `outputs.gcs_uri`, finalize the step as `FAILED` with `error.code=INVALID_STEP_INPUTS` (non-retryable). |
+| 46 | 2025-12-27 | Missing upstream artifact outputs: if `ohlcvStepId`/`chartsManifestStepId` references a step that exists but lacks `outputs.gcs_uri`, finalize as `FAILED` with `error.code=INVALID_STEP_INPUTS` (non-retryable). |
+| 47 | 2025-12-27 | `structuredOutput.schemaSha256` in `llmProfile` is informational-only in MVP (loggable, not enforced; mismatches do not cause failure). |
+| 48 | 2025-12-27 | `LLM_REPORT` output mode: if `llmProfile.responseMimeType` is not `application/json`, treat as `LLM_PROFILE_INVALID` (no markdown-only fallback). |
+| 49 | 2025-12-27 | FlowRun validation tolerance: the worker tolerates extra fields beyond the canonical JSON schema; it validates only the required subset for execution (ignores unknown fields). |
