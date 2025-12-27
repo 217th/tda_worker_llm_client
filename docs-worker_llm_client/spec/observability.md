@@ -237,6 +237,7 @@ If a repair attempt is executed:
 Additional mapping notes (MVP):
 - `finishReason == SAFETY` should be treated as `LLM_SAFETY_BLOCK` (non-retryable) and is not a structured-output “repairable” case.
 - truncation-like outcomes (e.g., `MAX_TOKENS`) that lead to parse/schema failure should surface as `INVALID_STRUCTURED_OUTPUT` and include `llm.finishReason` in `structured_output_invalid`.
+- if structured output is required but unsupported/unavailable for the chosen model/endpoint/SDK, emit `structured_output_invalid` with `reason.kind=finish_reason` (or a dedicated `reason.kind` if preferred later) and finalize as `LLM_PROFILE_INVALID` (non-retryable).
 
 ## Metrics
 

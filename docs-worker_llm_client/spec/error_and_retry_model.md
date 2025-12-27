@@ -21,6 +21,10 @@ Where errors are persisted:
 Orchestrator note (MVP):
 - treat `INVALID_STRUCTURED_OUTPUT` as terminal for automatic runs (no auto re-run with the same step inputs). Manual rerun should create a new run/step identity.
 
+Structured output config note (MVP):
+- if structured output is required but unsupported/unavailable for the chosen model/endpoint/SDK → `LLM_PROFILE_INVALID` (non-retryable)
+- require `candidateCount=1` for deterministic behavior; other values (when specified) → `LLM_PROFILE_INVALID`
+
 ### 2) Retryable (transient)
 
 - `FIRESTORE_UNAVAILABLE`: transient Firestore errors (timeouts, 5xx)

@@ -185,6 +185,7 @@ Supported parameter allowlist (Gemini API; map to the chosen SDK):
 
 Structured output implementation note:
 - If using the `google-genai` Python SDK, configure JSON output with `response_mime_type="application/json"` and provide a schema via `response_json_schema` (often generated from Pydantic).
+ - MVP requires deterministic single-candidate behavior: `candidateCount=1`. If the step `llmProfile` specifies a different value (when supported), treat as `LLM_PROFILE_INVALID` (do not override).
 
 ## Timeout policy (MVP)
 
@@ -340,8 +341,15 @@ If the repair attempt still fails validation, finalize the step as `FAILED` with
 - if `finishReason == SAFETY`: finalize the step as `FAILED` with `error.code=LLM_SAFETY_BLOCK` (no repair)
 - any outcome that results in invalid JSON / schema failure (including truncation like `MAX_TOKENS`) is `INVALID_STRUCTURED_OUTPUT` (repair allowed per policy)
 
+No fallback policy (MVP):
+- If structured output is required by the step profile but is unsupported/unavailable for the chosen model/endpoint/SDK, do not fall back to markdown-only generation; finalize the step as `FAILED` with `error.code=LLM_PROFILE_INVALID`.
+
 Failure artifact policy (MVP):
 - do not write raw model output to GCS (neither success path logs nor failure artifacts)
 - optional: write a standard `llm_report_file` artifact containing only:
   - a short summary markdown saying structured output validation failed
   - `output.details` with safe debug fields (reason kind, finishReason, `textBytes`, `textSha256`, sanitized validation errors)
+
+Model output data safety (MVP):
+- Treat raw model output (candidate text / JSON) as sensitive: do not log it and do not persist it on failures.
+- Rely on safe diagnostics (hash/len + sanitized validation errors) for troubleshooting.

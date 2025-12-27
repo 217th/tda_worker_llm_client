@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Closed structured output open questions: enforced `candidateCount=1`, clarified no auto-tuning of `maxOutputTokens` on truncation, confirmed no fallback to markdown-only when structured output is required, and tightened data-safety rules for model output (`questions/open_questions.md`, `spec/implementation_contract.md`, `spec/error_and_retry_model.md`, `spec/observability.md`).
 - Closed structured output open questions: finalized `finishReason` → `error.code` mapping, failure-artifact policy (no raw output in GCS), and orchestrator terminal-failure policy for `INVALID_STRUCTURED_OUTPUT` (`questions/open_questions.md`, `spec/implementation_contract.md`, `spec/error_and_retry_model.md`, `spec/observability.md`).
 - Decided structured output invalidation behavior and made it observable: at most 1 repair attempt when time budget allows; added explicit structured-output invalidation/repair log events and documented safe diagnostics (hash/size + sanitized validation errors) (`questions/open_questions.md`, `spec/observability.md`, `spec/implementation_contract.md`, `spec/error_and_retry_model.md`).
 - Expanded structured output specification backlog: decomposed the remaining `INVALID_STRUCTURED_OUTPUT` policy into a concrete checklist of spec decisions to close (schema source-of-truth/versioning, validation strictness, repair strategy, observability, artifacts, and tests) (`questions/open_questions.md`).
