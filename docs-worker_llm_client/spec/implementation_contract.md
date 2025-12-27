@@ -323,6 +323,18 @@ When structured output is enabled (JSON mode + response schema), the worker must
 3) Parse JSON.
 4) Validate the parsed JSON against the expected schema/model (Pydantic recommended).
 
+##### Candidate text extraction (MVP)
+
+Goal: define a deterministic way to obtain the JSON payload string without fragile “regex extraction”.
+
+Rules:
+- MVP requires `candidateCount=1`, so the worker uses only `candidates[0]`.
+- Primary method: concatenate all `candidates[0].content.parts[*].text` values in order.
+- Do not strip/unwrap code fences; do not attempt to “find JSON inside text” via regex.
+- Do not trim/normalize whitespace; hashes/lengths are computed on the exact concatenated UTF-8 bytes.
+- Fallback: if there are no `text` parts (or content/parts missing), use `response.text`.
+- If the extracted text is still missing/empty: treat as invalid output (`reason.kind=missing_text`) and apply the repair/FAIL policy.
+
 If any of these steps fails:
 - Emit `structured_output_invalid` (see `spec/observability.md`) with:
   - `reason.kind` and a sanitized `reason.message`

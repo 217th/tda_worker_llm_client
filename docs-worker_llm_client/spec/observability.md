@@ -222,6 +222,7 @@ Rules:
 
 Recommended fields for `structured_output_invalid`:
 - `llm.schemaId`, `llm.schemaSha256` (when schema registry is used)
+- `diagnostics.extractionMethod`: `candidate_parts|response_text`
 - `reason.kind`: one of:
   - `finish_reason`: provider indicates generation was not successful for returning a complete payload
   - `missing_text`: no extractable candidate text found where expected
