@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Closed SPK-001 (Gemini API key handling): documented Secret Manager → env var injection, rotation runbook, and multi-key config (`GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID`) with strict “never log/persist secrets” rules (`spec/deploy_and_envs.md`, `spec/observability.md`, `questions/open_questions.md`, `questions/arch_spikes.md`).
 - Closed structured output open question #44: added 3 negative structured-output fixtures + expected failure patches (truncated JSON, missing required, wrong type) and fixed expected `error.code` mapping (`questions/open_questions.md`, `fixtures/structured_output_invalid/*`, `test_vectors/outputs/*`).
 - Closed structured output open questions #35 and #39: persist only `attempts.total` (no per-attempt histories) and do not require/generate `output.summary.html` on MVP (`questions/open_questions.md`, `spec/implementation_contract.md`).
 - Closed structured output open question #32: made `llm_schemas/{schemaId}.jsonSchema` the single source of truth for output validation (no Pydantic-as-authority on MVP), and aligned validation/logging wording accordingly (`questions/open_questions.md`, `contracts/llm_schema.md`, `spec/implementation_contract.md`, `spec/error_and_retry_model.md`, `spec/observability.md`).

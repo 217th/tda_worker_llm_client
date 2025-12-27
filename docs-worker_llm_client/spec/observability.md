@@ -38,6 +38,8 @@ Baseline goals:
 - `firestore.updateTime` (claim precondition basis)
 - `firestore.document`: `flow_runs/{runId}` (or full doc path if useful)
 - `llm.promptId`, `llm.modelName`
+- `llm.auth.mode`: `ai_studio_api_key|vertex_adc` (or similar; never log the key itself)
+- `llm.auth.keyId` (optional; only when `GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID` is used)
 - `llm.schemaId`, `llm.schemaSha256` (when structured output schema registry is used)
 - `llm.schemaVersion` (when known; derived from `llm.schemaId` naming)
 - `llm.generationConfig` (sanitized; no secrets; summary is OK)
@@ -212,6 +214,8 @@ This table is the canonical event taxonomy for `worker_llm_client`.
 ## Security and privacy (minimum)
 
 - Never log secrets (Secret Manager values, tokens, credentials).
+- Never log environment dumps (`os.environ`) or config objects that may include secrets.
+- Config/validation errors for secrets must mention only the variable name / key id, never the secret value (and never its hash).
 - Avoid logging full `flow_run` payloads; if absolutely needed for diagnostics, log a small redacted preview (or just `runId` + selected `stepId` + hashes/lengths).
 - Do not put secrets/PII into GCS object names or URLs.
 
