@@ -246,3 +246,61 @@ Smoke checks (draft):
   - logs show `step.claim.succeeded`
   - artifact exists in GCS at expected path
   - Firestore step status transitions to `SUCCEEDED` and `outputs.gcs_uri` is populated
+
+## Smoke checks (dev runbook)
+
+Use placeholders only. This runbook is safe for `dev` and can be run after deploy/update.
+
+### 1) Trigger an update
+
+- Create or update a `flow_runs/{runId}` document so the Firestore **update** trigger fires.
+- For a full pipeline check, use the test vectors under @docs/test_vectors/inputs and set one
+  `LLM_REPORT` step to `READY` with dependencies `SUCCEEDED`.
+- For the stub-only deploy, any update to the document is sufficient (the stub logs the event).
+
+### 2) Verify Cloud Logging (Cloud Run revision logs)
+
+Filter by service + recent time:
+
+```bash
+gcloud logging read \
+  'resource.type="cloud_run_revision"
+   resource.labels.service_name="<FUNCTION_NAME>"
+   timestamp>="<RFC3339_START>"' \
+  --project "<PROJECT_ID>" \
+  --limit 50
+```
+
+For the **stub**, look for `stub invocation` in `textPayload`.
+For the real worker, validate the expected event chain using `jsonPayload.event`:
+
+```bash
+gcloud logging read \
+  'resource.type="cloud_run_revision"
+   resource.labels.service_name="<FUNCTION_NAME>"
+   jsonPayload.event="cloud_event_received"' \
+  --project "<PROJECT_ID>" \
+  --limit 50
+```
+
+Optionally narrow by run/step:
+
+```bash
+gcloud logging read \
+  'resource.type="cloud_run_revision"
+   resource.labels.service_name="<FUNCTION_NAME>"
+   jsonPayload.runId="<RUN_ID>"' \
+  --project "<PROJECT_ID>" \
+  --limit 50
+```
+
+### 3) Verify Firestore step status (real worker only)
+
+- Ensure the `LLM_REPORT` step transitioned to `SUCCEEDED`.
+- Confirm `steps.<stepId>.outputs.gcs_uri` is populated.
+
+### 4) Verify GCS artifact (real worker only)
+
+```bash
+gcloud storage ls "gs://<ARTIFACTS_BUCKET>/<runId>/<timeframe>/<stepId>.json"
+```
