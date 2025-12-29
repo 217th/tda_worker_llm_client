@@ -23,7 +23,7 @@
       "id": "T-002",
       "title": "E00 Spike: define least-privilege IAM for runtime/trigger SAs",
       "description": "Epic 0 (Cloud environment + deploy pipeline): enumerate minimal IAM roles for runtime SA and Eventarc trigger SA (Firestore, GCS, Secret Manager, Eventarc) and document in @docs/spec/deploy_and_envs.md + runbook.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "low",
       "owner": "DOCS",
       "tags": [
@@ -32,7 +32,11 @@
         "iam",
         "gcp"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "71aa4a980cfbd744d3f97ab17cdd7590a0a89a2a",
+        "message": "🔐 T-002 IAM least-privilege"
+      }
     },
     {
       "id": "T-003",
@@ -108,6 +112,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "79c0fdac80be54f5b414b9c2bf3c8cedeed23be584623c5326392c0c8deaf7e8"
+    "checksum": "4c2683efe7b6c14d750859b0f4419dcae4739292fa7a9a804282edb26e99894a"
   }
 }
