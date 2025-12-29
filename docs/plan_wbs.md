@@ -105,7 +105,7 @@
 
 ### Epic 4 — Firestore FlowRun I/O + optimistic concurrency (MVP)
 
-- Epic Status: `READY`
+- Epic Status: `DONE`
 - Classes: `FlowRunRepository`, `FirestoreFlowRunRepository`, `ClaimResult`, `FinalizeResult`
 - Spikes (from `questions/arch_spikes.md`): `SPK-003`, `SPK-004`, `SPK-005`
 - What changes:
@@ -127,7 +127,7 @@
 
 ### Epic 5 — Prompt + schema registry integration (MVP)
 
-- Epic Status: `PENDING`
+- Epic Status: `READY`
 - Classes: `PromptRepository`, `FirestorePromptRepository`, `SchemaRepository`, `FirestoreSchemaRepository`, `LLMPrompt`, `LLMSchema`
 - Spikes (from `questions/arch_spikes.md`): `SPK-006`, `SPK-016`
 - What changes:

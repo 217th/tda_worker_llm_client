@@ -742,12 +742,93 @@
         "hash": "6e726f3632edacd13f026e0e0577fa9e1529ea9e",
         "message": "🧪 T-028 verify epic4 tests"
       }
+    },
+    {
+      "id": "T-029",
+      "title": "E05 Spike: prompt/schema registry invariants",
+      "description": "Epic 5 spikes (SPK-006, SPK-016): document schema validation/tooling, schemaSha256 policy, and prompt/schema versioning/immutability; update specs/contracts as needed.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "DOCS",
+      "tags": [
+        "epic5",
+        "spike",
+        "schema",
+        "prompt"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-030",
+      "title": "E05 Implement PromptRepository + FirestorePromptRepository",
+      "description": "Add PromptRepository port and Firestore implementation for llm_prompts/{promptId}, with error mapping and safe logging rules.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic5",
+        "prompt",
+        "firestore"
+      ],
+      "depends_on": [
+        "T-029"
+      ]
+    },
+    {
+      "id": "T-031",
+      "title": "E05 Implement SchemaRepository + FirestoreSchemaRepository",
+      "description": "Add SchemaRepository port and Firestore implementation for llm_schemas/{schemaId}, including minimal schema invariants validation and schemaSha256 policy.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic5",
+        "schema",
+        "firestore"
+      ],
+      "depends_on": [
+        "T-029"
+      ]
+    },
+    {
+      "id": "T-032",
+      "title": "E05 Add unit tests for prompt/schema repositories",
+      "description": "Unit tests for PromptRepository/SchemaRepository (missing docs, invalid schema invariants, transient errors).",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "TESTER",
+      "tags": [
+        "epic5",
+        "tests"
+      ],
+      "depends_on": [
+        "T-030",
+        "T-031"
+      ]
+    },
+    {
+      "id": "T-033",
+      "title": "E05 Epic 5 DoD verification + stabilization",
+      "description": "Run local tests for Epic 5 prompt/schema repositories and document results in @.codex-swarm/workspace/T-033/README.md.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic5",
+        "verify"
+      ],
+      "depends_on": [
+        "T-032"
+      ],
+      "verify": [
+        "python3 -m pytest -q"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "9a7048d811db71c17644b26f5c921c43320d5a593b19376ded3ed885675cd5aa"
+    "checksum": "a32aaf6831c3463301cda5617ecfa62f76bcd61203470a2a586ac95966af5c31"
   }
 }
