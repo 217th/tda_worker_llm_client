@@ -175,7 +175,7 @@
       "id": "T-009",
       "title": "E01 Spike: define model allowlist policy",
       "description": "Epic 1 spike (SPK-020): define and document the allowed-models policy (format/location of allowlist, enforcement strategy, and error mapping for disallowed models) and update @docs/spec/deploy_and_envs.md and @docs/spec/system_integration.md accordingly.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
@@ -183,7 +183,21 @@
         "spike",
         "config"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "comments": [
+        {
+          "author": "DOCS",
+          "body": "Start: define allowed-models policy and doc updates for Epic 1 (allowlist format, enforcement, error mapping)."
+        },
+        {
+          "author": "DOCS",
+          "body": "Verified: docs-only update; no runtime changes; no tests run."
+        }
+      ],
+      "commit": {
+        "hash": "a98c69b3f6b5cef69f1b3bd00660cc23db265031",
+        "message": "📝 T-009 document model allowlist policy"
+      }
     },
     {
       "id": "T-010",
@@ -255,6 +269,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "360196db156e7de560271a4b58492f3ed3a7e16d40bbb4d04b076be490506954"
+    "checksum": "23bc9dd5640ed0b5d4cb3c7d5abb84758357fcf7438753ac467f767587653f80"
   }
 }
