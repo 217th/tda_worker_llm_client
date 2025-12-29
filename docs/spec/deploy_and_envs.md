@@ -131,6 +131,20 @@ gcloud firestore databases list \
   - `ARTIFACTS_BUCKET`, `GEMINI_TIMEOUT_SECONDS`, `FINALIZE_BUDGET_SECONDS`, `LOG_LEVEL`
 - Secrets injected via `--set-secrets` (single-key or rotation-friendly mode).
 
+## Deploy pipeline (dev)
+
+The repository provides a deploy helper script:
+- @scripts/deploy_dev.sh
+
+It follows the gcp-functions-gen2-python-deploy playbook and supports:
+- first-time vs update deploys,
+- Firestore trigger config,
+- inline or file-based env vars,
+- optional Secret Manager injection.
+
+Before running, export the Deploy request block values as environment variables.
+For update deploys, set `CONFIRM_TRIGGER_UNCHANGED=true` unless you intend to change the trigger.
+
 Configuration via environment variables (draft):
 - `GCP_PROJECT`
 - `GCP_REGION`

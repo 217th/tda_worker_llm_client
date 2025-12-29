@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Added a deploy helper script for dev and documented the pipeline usage (scripts/deploy_dev.sh, spec/deploy_and_envs.md).
 - Rewrote `plan_wbs.md` to align with the latest `static_model.md`, explicitly allocate every class to a concrete MVP epic, and attach the required architectural spikes per epic (from `questions/arch_spikes.md`) (`plan_wbs.md`, `static_model.md`, `questions/arch_spikes.md`).
 - Expanded each epic’s definition-of-done with concrete local vs cloud demo/test scenarios and introduced an explicit “Cloud environment + deploy pipeline” prerequisite epic for Cloud-based acceptance (`plan_wbs.md`).
 - Updated the static model to reflect Secret Manager–injected Gemini API key configuration (single-key `GEMINI_API_KEY` vs rotation-friendly `GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID`) and the rule that only `llm.auth.mode/keyId` are loggable (`static_model.md`, `spec/deploy_and_envs.md`, `spec/observability.md`).
