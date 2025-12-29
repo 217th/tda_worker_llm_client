@@ -1,8 +1,10 @@
 import logging
+import os
 
 import functions_framework
 
 from worker_llm_client.ops.config import ConfigurationError, WorkerConfig
+from worker_llm_client.ops.logging import CloudLoggingEventLogger
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +13,16 @@ try:
 except ConfigurationError as exc:
     logger.error("Configuration error: %s", exc)
     raise
+
+logging.basicConfig(level=getattr(logging, CONFIG.log_level, logging.INFO), format="%(message)s")
+
+ENV_LABEL = os.environ.get("ENV") or os.environ.get("ENVIRONMENT") or "dev"
+EVENT_LOGGER = CloudLoggingEventLogger(
+    service="worker_llm_client",
+    env=ENV_LABEL,
+    component="worker_llm_client",
+    logger=logger,
+)
 
 
 @functions_framework.cloud_event
@@ -28,10 +40,13 @@ def worker_llm_client(cloud_event):
         event_type = getattr(cloud_event, "type", None)
         subject = getattr(cloud_event, "subject", None)
 
-    logger.info(
-        "stub invocation: id=%s type=%s subject=%s",
-        event_id,
-        event_type,
-        subject,
+    EVENT_LOGGER.log(
+        event="cloud_event_received",
+        severity="INFO",
+        eventId=event_id or "unknown",
+        runId="unknown",
+        stepId="unknown",
+        eventType=event_type or "unknown",
+        subject=subject or "unknown",
     )
     return "ok"
