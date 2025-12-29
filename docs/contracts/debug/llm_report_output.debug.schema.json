@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "LLMReportOutputDebug",
-  "description": "Debug schema for model-owned LLMReportFile.output. Derived from docs-worker_llm_client/inbox/so_schema.md example; intended for troubleshooting/iteration, not as the MVP production contract.",
+  "description": "Debug schema for model-owned LLMReportFile.output. Derived from docs/inbox/so_schema.md example; intended for troubleshooting/iteration, not as the MVP production contract.",
   "type": "object",
   "additionalProperties": false,
   "required": ["summary", "details"],

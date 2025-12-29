@@ -1,4 +1,4 @@
-# docs-worker_llm_client
+# docs
 
 ## Purpose
 
@@ -26,7 +26,7 @@ This tree lists the source-of-truth docs for the component. Notes:
 - `contracts/` are the source of truth for machine-readable shapes; `spec/` explains behavior and integration.
 
 ```text
-docs-worker_llm_client/
+docs/
   README.md — This entrypoint; quick links + how to read the pack.
   changelog.md — Per-iteration changelog for this docs pack.
   plan_wbs.md — Epic-level plan/WBS aligned with `static_model.md`.
