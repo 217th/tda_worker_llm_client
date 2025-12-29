@@ -582,7 +582,7 @@
       "id": "T-023",
       "title": "E03 Epic 3 DoD verification + stabilization",
       "description": "Run local verification for Epic 3 (domain/selector tests) and document results in @.codex-swarm/workspace/T-023/README.md.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "INTEGRATOR",
       "tags": [
@@ -594,6 +594,16 @@
       ],
       "verify": [
         "python3 -m pytest -q"
+      ],
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Starting Epic 3 DoD verification + stabilization."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: python3 -m pytest -q (22 passed)."
+        }
       ]
     }
   ],
@@ -601,6 +611,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "7dd45d1cb97120b59ede8786dcb87caad75b1c46433930dd32e7b27727dec7e3"
+    "checksum": "32378d02d9fdfc842feb8e8769829272ae615d50bf5784c37e1b59e0d0676478"
   }
 }
