@@ -24,6 +24,13 @@ Target runtime: **Google Cloud Functions (gen2)** with an **Eventarc Firestore t
 Region alignment rule (MVP): Firestore DB location, Eventarc trigger location, and function region must be identical.
 If they differ, stop and create/select a Firestore DB in the target region before deploying.
 
+SDK/endpoint selection (MVP):
+- Use the Google GenAI Python SDK for Gemini requests.
+- AI Studio (Gemini Developer API): API key auth; pass the key explicitly (do not rely on SDK env defaults).
+- Vertex AI (future): same SDK with `vertexai=True` plus explicit project and location.
+- Structured output (`application/json` + JSON Schema) and image inputs are supported by the SDK; validate
+  the combined multimodal + response schema path in Epic 7 (SPK-010).
+
 Timeouts (MVP recommendation):
 - Cloud Function timeout: `780s` (13 minutes)
 - Gemini request deadline: `600s` (10 minutes)

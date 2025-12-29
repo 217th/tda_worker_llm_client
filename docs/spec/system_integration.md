@@ -84,6 +84,12 @@ The worker receives:
 
 MVP endpoint choice:
 - AI Studio (API key auth). Vertex AI (ADC/IAM) may be adopted later for production hardening.
+- SDK guidance (2025-12-29): use the Google GenAI Python SDK for the Gemini Developer API.
+  - Structured output is supported via `response_mime_type="application/json"` + `response_json_schema`.
+  - Image inputs are supported via multipart content (inline image bytes or File API).
+  - Vertex AI uses the same SDK with `vertexai=True` plus explicit project/location.
+- Constraint note: structured output and image inputs are documented separately; validate the combined
+  multimodal + response schema path in Epic 7 (SPK-010).
 
 ### Cloud Storage artifacts
 
