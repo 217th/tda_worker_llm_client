@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
 import logging
+import os
 from typing import Any
 
 
@@ -40,6 +41,41 @@ class LogPayloadError(ValueError):
 
 def _now_rfc3339() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+class JsonFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:
+        if isinstance(record.msg, dict):
+            base: dict[str, Any] = dict(record.msg)
+        else:
+            base = {"message": record.getMessage()}
+
+        base.setdefault("severity", record.levelname)
+        base.setdefault("logger", record.name)
+        base.setdefault(
+            "time",
+            datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
+        )
+
+        if record.exc_info:
+            base.setdefault("exception", self.formatException(record.exc_info))
+
+        return json.dumps(base, ensure_ascii=False, separators=(",", ":"))
+
+
+def configure_logging(*, level: str | None = None) -> None:
+    lvl = (level or os.environ.get("LOG_LEVEL") or "INFO").upper().strip()
+    root = logging.getLogger()
+    root.setLevel(lvl)
+    if not root.handlers:
+        handler = logging.StreamHandler()
+        handler.setLevel(lvl)
+        handler.setFormatter(JsonFormatter())
+        root.addHandler(handler)
+        return
+    for handler in root.handlers:
+        handler.setLevel(lvl)
+        handler.setFormatter(JsonFormatter())
 
 
 def _validate_required(payload: dict[str, Any], required: tuple[str, ...]) -> None:
@@ -132,7 +168,5 @@ class CloudLoggingEventLogger(EventLogger):
         _check_sizes(payload)
 
         safe_payload = _json_safe(payload)
-        serialized = json.dumps(safe_payload, ensure_ascii=False, separators=(",", ":"))
-
         target_logger = self.logger or logging.getLogger(__name__)
-        target_logger.log(_SEVERITY_TO_LEVEL[severity], serialized)
+        target_logger.log(_SEVERITY_TO_LEVEL[severity], safe_payload)

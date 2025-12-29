@@ -4,24 +4,24 @@ import os
 import functions_framework
 
 from worker_llm_client.ops.config import ConfigurationError, WorkerConfig
-from worker_llm_client.ops.logging import CloudLoggingEventLogger
+from worker_llm_client.ops.logging import CloudLoggingEventLogger, configure_logging
 
+configure_logging()
 logger = logging.getLogger(__name__)
-
 try:
     CONFIG = WorkerConfig.from_env()
 except ConfigurationError as exc:
     logger.error("Configuration error: %s", exc)
     raise
 
-logging.basicConfig(level=getattr(logging, CONFIG.log_level, logging.INFO), format="%(message)s")
+configure_logging(level=CONFIG.log_level)
 
 ENV_LABEL = os.environ.get("ENV") or os.environ.get("ENVIRONMENT") or "dev"
 EVENT_LOGGER = CloudLoggingEventLogger(
     service="worker_llm_client",
     env=ENV_LABEL,
     component="worker_llm_client",
-    logger=logger,
+    logger=logging.getLogger(),
 )
 
 
