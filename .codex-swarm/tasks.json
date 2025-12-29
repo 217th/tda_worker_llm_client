@@ -203,7 +203,7 @@
       "id": "T-010",
       "title": "E01 Implement WorkerConfig + Gemini auth config",
       "description": "Implement Epic 1 classes: WorkerConfig, GeminiApiKey, GeminiAuthConfig. Validate env config (collections, bucket, timeouts, log level) and support single-key auth via GEMINI_API_KEY only; do not leak secrets; wire config into the runtime entrypoint.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "high",
       "owner": "CODER",
       "tags": [
@@ -219,8 +219,16 @@
         {
           "author": "CODER",
           "body": "Start: implement WorkerConfig/GeminiAuthConfig single-key mode only; validate env and wire into entrypoint."
+        },
+        {
+          "author": "CODER",
+          "body": "Verified: manual config sanity check with ARTIFACTS_BUCKET and GEMINI_API_KEY; output: config ok."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "facf2e6dd595ba4d96a1b424d6b674799f120120",
+        "message": "✨ T-010 add runtime config + Gemini auth"
+      }
     },
     {
       "id": "T-011",
@@ -275,6 +283,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "1eec0cb3c285c901bb5a14e07da468da7eaff24ce9bb981c201559a5ea7c7494"
+    "checksum": "bbc05ebc408d9e3a6c111ff94276a66455992bff00689f275f547321f565592d"
   }
 }
