@@ -84,7 +84,12 @@ fi
 
 BUILD_FLAGS=()
 if [[ -n "${BUILD_SA_EMAIL}" ]]; then
-  BUILD_FLAGS=("--build-service-account" "${BUILD_SA_EMAIL}")
+  if [[ "${BUILD_SA_EMAIL}" == projects/*/serviceAccounts/* ]]; then
+    BUILD_SA_REF="${BUILD_SA_EMAIL}"
+  else
+    BUILD_SA_REF="projects/${PROJECT_ID}/serviceAccounts/${BUILD_SA_EMAIL}"
+  fi
+  BUILD_FLAGS=("--build-service-account" "${BUILD_SA_REF}")
 fi
 
 command -v gcloud >/dev/null 2>&1 || fail "gcloud is not installed"
