@@ -506,7 +506,7 @@
       "id": "T-020",
       "title": "E03 Implement workflow domain models",
       "description": "Implement FlowRun, FlowStep, LLMReportStep, LLMReportInputs, StepError, ErrorCode in workflow/domain.py per static_model + implementation_contract; enforce minimal validation and stepId safety.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -515,6 +515,12 @@
       ],
       "depends_on": [
         "T-019"
+      ],
+      "comments": [
+        {
+          "author": "CODER",
+          "body": "Starting Epic 3 domain model implementation."
+        }
       ]
     },
     {
@@ -571,6 +577,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "bd2ed550961e1dd7cd04a1c7f51e432e248073ae77cf4dcebb09cf20741385c2"
+    "checksum": "026ebcaa78bcea8b8802e4768869e61fd43787a0b831630e991cf2616a618716"
   }
 }
