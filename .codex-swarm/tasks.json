@@ -4,7 +4,7 @@
       "id": "T-001",
       "title": "E00 Spike: choose region/Eventarc routing for Firestore trigger",
       "description": "Epic 0 (Cloud environment + deploy pipeline): decide and document region alignment (Firestore DB, Eventarc trigger, Cloud Functions gen2) and update @docs/questions/open_questions.md / @docs/spec/deploy_and_envs.md if needed.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "low",
       "owner": "DOCS",
       "tags": [
@@ -13,7 +13,11 @@
         "gcp",
         "eventarc"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "d8ad63a33a83253942c89b3808f6661e9ad5c4e1",
+        "message": "🗺️ T-001 align region routing"
+      }
     },
     {
       "id": "T-002",
@@ -104,6 +108,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "856109c50bb6510b491f148bf26be20ac6916a767d30493c3d4c8da8f2b4ab88"
+    "checksum": "79c0fdac80be54f5b414b9c2bf3c8cedeed23be584623c5326392c0c8deaf7e8"
   }
 }
