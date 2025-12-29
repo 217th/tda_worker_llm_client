@@ -412,7 +412,7 @@
       "id": "T-017",
       "title": "E02 Dev verify logging chain",
       "description": "Deploy updated function in dev and verify Cloud Logging event chain is observable by runId/stepId/eventId with no prompt/raw output leakage; record evidence in @.codex-swarm/workspace/T-017/README.md.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -423,6 +423,16 @@
       "depends_on": [
         "T-015",
         "T-016"
+      ],
+      "comments": [
+        {
+          "author": "TESTER",
+          "body": "Start: deploy updated logging and verify Cloud Logging event chain in dev."
+        },
+        {
+          "author": "TESTER",
+          "body": "Ran Firestore PATCH on flow_runs/20251224-061000_LINKUSDT_demo92 (debug.lastPing). Request log shows POST 200 at 2025-12-29T13:38:22Z; no cloud_event_received app logs found in last 30m. Pending follow-up."
+        }
       ]
     },
     {
@@ -446,6 +456,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "d4be87f3bf810c826aad9e764bd75a60f2b7ce963f47930297b37c957f59666a"
+    "checksum": "2fcbc830ced620061a4f37f76567c48da052c86b92d455c22e1748524018e027"
   }
 }
