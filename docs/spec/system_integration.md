@@ -61,6 +61,7 @@ Key rules (MVP decisions):
 - Versioning is encoded into `promptId` by convention (e.g. `llm_report_1m_v1`).
 - Prompt doc stores only **instruction texts** (`systemInstruction`, `userPrompt`). Effective Gemini request config (including structured output schema reference) is taken from `inputs.llm.llmProfile`.
 - Structured output schema naming convention: `llmProfile.structuredOutput.schemaId` uses `llm_report_output_v{N}`; the worker writes `metadata.schemaVersion=N` into the report artifact.
+- Orchestrator must **pin explicit versions** in `promptId` / `schemaId` (no “latest” resolution in MVP).
 
 Future (optional, post-MVP):
 - `llm_profiles/{profileId}`:
@@ -68,6 +69,51 @@ Future (optional, post-MVP):
   - not required for MVP (MVP uses inline `llmProfile` in the step)
 
 See also: `spec/prompt_storage_and_context.md` for context-injection + UserInput assembly rules.
+
+### Firestore seed docs (dev/debug)
+
+To develop and demo Epic 5, seed **at least** these documents in Firestore.
+
+1) `llm_prompts/{promptId}` (valid)
+   - Must conform to `contracts/llm_prompt.schema.json` and `contracts/llm_prompt.md`.
+   - Required fields: `schemaVersion=1`, `systemInstruction` (string), `userPrompt` (string).
+   - Example source: `contracts/examples/llm_prompt.example.json`.
+
+2) `llm_schemas/{schemaId}` (valid)
+   - Must conform to `contracts/llm_schema.schema.json` and invariants in `contracts/llm_schema.md`.
+   - For `kind=LLM_REPORT_OUTPUT`, the embedded `jsonSchema` must require:
+     - top-level `summary` and `details`
+     - `summary.markdown` (string)
+   - Example source: `contracts/examples/llm_schema.example.json`.
+
+3) `flow_runs/{runId}` (valid)
+   - Must conform to `contracts/flow_run.schema.json`.
+   - Must contain at least one `LLM_REPORT` step with:
+     - `status=READY`
+     - `inputs.llm.promptId` referencing the prompt doc above
+     - `inputs.llm.llmProfile.structuredOutput.schemaId` referencing the schema doc above
+     - `inputs.ohlcvStepId` and `inputs.chartsManifestStepId` referencing steps with `outputs.gcs_uri`
+   - Example source: `contracts/examples/flow_run.example.json`.
+
+Negative cases for demo:
+- Missing prompt: create a run or step variant that references a non-existent `promptId` → expect `PROMPT_NOT_FOUND`.
+- Invalid schema: create a schema doc that violates the invariants above (e.g., missing `summary.markdown`) and reference it → expect `LLM_PROFILE_INVALID`.
+
+### Seed verification checklist
+
+Use one of these methods (console or REST) to confirm documents are present and valid:
+
+- Console: Firestore → locate `llm_prompts`, `llm_schemas`, `flow_runs` and inspect required fields.
+- REST (example):
+  - `GET https://firestore.googleapis.com/v1/projects/<PROJECT_ID>/databases/<DB_ID>/documents/llm_prompts/<promptId>`
+  - `GET https://firestore.googleapis.com/v1/projects/<PROJECT_ID>/databases/<DB_ID>/documents/llm_schemas/<schemaId>`
+  - `GET https://firestore.googleapis.com/v1/projects/<PROJECT_ID>/databases/<DB_ID>/documents/flow_runs/<runId>`
+
+Validation rules (quick check):
+- Prompt doc: `schemaVersion=1`, `systemInstruction` and `userPrompt` are non-empty strings.
+- Schema doc: `schemaVersion=1`, `kind=LLM_REPORT_OUTPUT`, `jsonSchema` present and enforces `summary/details` and `summary.markdown`.
+  - `sha256` matches the canonical hash of `jsonSchema` (see `contracts/llm_schema.md`).
+- Flow run: `status=RUNNING`, a `READY` LLM step exists and references the prompt/schema IDs above, and referenced steps have `outputs.gcs_uri`.
 
 ## Outbound interfaces
 

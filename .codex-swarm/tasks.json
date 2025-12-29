@@ -747,7 +747,7 @@
       "id": "T-029",
       "title": "E05 Spike: prompt/schema registry invariants",
       "description": "Epic 5 spikes (SPK-006, SPK-016): document schema validation/tooling, schemaSha256 policy, and prompt/schema versioning/immutability; update specs/contracts as needed. Include a checklist of Firestore seed docs for dev/debug (llm_prompts/{promptId} valid + missing cases, llm_schemas/{schemaId} valid + invalid cases, and sample flow_runs/{runId} referencing them) to support the T-033 demo.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
@@ -756,7 +756,13 @@
         "schema",
         "prompt"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "comments": [
+        {
+          "author": "DOCS",
+          "body": "Starting prompt/schema registry invariant docs + Firestore seed checklist."
+        }
+      ]
     },
     {
       "id": "T-030",
@@ -829,6 +835,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "71e5238ae460dbe66ce75fd465a2ac8baf7fe7a3fafcb5cace3be0a45b40549a"
+    "checksum": "6ab69574ec9cea59905f74209c66a1cc6dd2e36eda82a0acf0a3e8a4ceff9e26"
   }
 }

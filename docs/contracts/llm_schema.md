@@ -19,6 +19,28 @@ Canonical schema:
 - Changes create a new `schemaId` (e.g., `llm_report_output_v1`, `llm_report_output_v2`).
 - Naming convention (MVP): `llm_report_output_v{N}` where `N` matches the report artifact `metadata.schemaVersion` written by the worker.
 
+## SHA-256 policy (MVP)
+
+`llm_schemas/{schemaId}.sha256` is the SHA-256 hex of the **canonical JSON encoding** of `jsonSchema`.
+
+Canonicalization rules (authoring time):
+- serialize `jsonSchema` with stable key ordering and no extra whitespace
+- UTF-8 bytes are hashed
+
+Reference implementation (Python):
+
+```py
+import hashlib, json
+
+def schema_sha256(json_schema: dict) -> str:
+    payload = json.dumps(json_schema, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+```
+
+Policy:
+- `sha256` is computed and stored when the schema doc is authored.
+- the worker **does not** recompute or enforce the hash in MVP; it logs/propagates it for drift detection.
+
 ## Usage (MVP)
 
 Steps reference the schema via `steps.<stepId>.inputs.llm.llmProfile.structuredOutput.schemaId`.

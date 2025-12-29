@@ -12,6 +12,8 @@
   - `SPK-019` (see `docs/spec/error_and_retry_model.md` “Mapping rules (run vs step)”, 2025-12-29)
   - `SPK-003` (see `docs/spec/implementation_contract.md` “Firestore step claim/finalize”, 2025-12-29)
   - `SPK-005` (see `docs/spec/implementation_contract.md` “Self-trigger loops”, 2025-12-29)
+  - `SPK-006` (see `docs/contracts/llm_schema.md` “SHA-256 policy (MVP)”, 2025-12-29)
+  - `SPK-016` (see `docs/spec/system_integration.md` “Orchestrator must pin explicit versions”, 2025-12-29)
 - Scope analyzed (no allowlist):
   - `docs/README.md`
   - `docs/spec/**`
