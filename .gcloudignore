@@ -1,3 +1,4 @@
 # Exclude local tooling and swarm metadata
 .git
 .codex-swarm
+docs
