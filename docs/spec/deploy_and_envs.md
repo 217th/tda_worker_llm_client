@@ -140,7 +140,8 @@ It follows the gcp-functions-gen2-python-deploy playbook and supports:
 - first-time vs update deploys,
 - Firestore trigger config,
 - inline or file-based env vars,
-- optional Secret Manager injection.
+- optional Secret Manager injection,
+- optional explicit Cloud Build service account (`BUILD_SA_EMAIL`).
 
 Before running, export the Deploy request block values as environment variables.
 For update deploys, set `CONFIRM_TRIGGER_UNCHANGED=true` unless you intend to change the trigger.

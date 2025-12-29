@@ -2,7 +2,7 @@
 
 ## Summary
 
-- Added a deploy helper script for Cloud Functions gen2.
+- Added a deploy helper script for Cloud Functions gen2 (with optional build SA override).
 - Documented how to use the deploy pipeline in the deployment spec.
 
 ## Goal
@@ -25,6 +25,7 @@
 
 - Review script defaults and placeholders before running.
 - Ensure deploy request env vars are provided (inline or file).
+- If default compute SA is missing, set `BUILD_SA_EMAIL` for Cloud Build.
 
 ## Rollback Plan
 

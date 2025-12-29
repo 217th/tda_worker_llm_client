@@ -17,6 +17,7 @@ set -euo pipefail
 #   export FIRESTORE_TRIGGER_DOCUMENT_PATH="flow_runs/{runId}"
 #   export RUNTIME_SA_EMAIL="<RUNTIME_SA_EMAIL>"
 #   export TRIGGER_SA_EMAIL="<TRIGGER_SA_EMAIL>"   # optional; defaults to runtime SA
+#   export BUILD_SA_EMAIL="<BUILD_SA_EMAIL>"       # optional; Cloud Build SA for deployments
 #   export ENV_VARS_MODE="inline"                   # file|inline
 #   export ENV_VARS_INLINE="KEY=VALUE,KEY=VALUE"    # required if inline
 #   export SECRET_ENV_VARS="KEY=projects/.../secrets/<NAME>:<VERSION>"  # optional
@@ -55,6 +56,7 @@ FIRESTORE_TRIGGER_DOCUMENT_PATH="${FIRESTORE_TRIGGER_DOCUMENT_PATH:-flow_runs/{r
 
 require_var RUNTIME_SA_EMAIL
 TRIGGER_SA_EMAIL="${TRIGGER_SA_EMAIL:-${RUNTIME_SA_EMAIL}}"
+BUILD_SA_EMAIL="${BUILD_SA_EMAIL:-}"
 
 ENV_VARS_MODE="${ENV_VARS_MODE:-inline}"
 ENV_VARS_INLINE="${ENV_VARS_INLINE:-}"
@@ -74,6 +76,11 @@ fi
 SECRET_FLAGS=()
 if [[ -n "${SECRET_ENV_VARS}" ]]; then
   SECRET_FLAGS=("--set-secrets" "${SECRET_ENV_VARS}")
+fi
+
+BUILD_FLAGS=()
+if [[ -n "${BUILD_SA_EMAIL}" ]]; then
+  BUILD_FLAGS=("--build-service-account" "${BUILD_SA_EMAIL}")
 fi
 
 command -v gcloud >/dev/null 2>&1 || fail "gcloud is not installed"
@@ -201,7 +208,8 @@ gcloud functions deploy "${FUNCTION_NAME}" \
   --trigger-event-filters "namespace=${FIRESTORE_NAMESPACE}" \
   --trigger-event-filters-path-pattern "document=${FIRESTORE_TRIGGER_DOCUMENT_PATH}" \
   "${ENV_FLAGS[@]}" \
-  "${SECRET_FLAGS[@]}"
+  "${SECRET_FLAGS[@]}" \
+  "${BUILD_FLAGS[@]}"
 
 # Confirm deploy status (playbook Section 4.10/5.4)
 gcloud functions describe "${FUNCTION_NAME}" \
