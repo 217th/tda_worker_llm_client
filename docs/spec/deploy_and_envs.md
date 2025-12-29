@@ -19,7 +19,10 @@ Environment differences (minimum):
 Target runtime: **Google Cloud Functions (gen2)** with an **Eventarc Firestore trigger**:
 - event type: Firestore document update
 - document: `flow_runs/{runId}`
-- region: same as Firestore / Eventarc routing policy (decision TBD)
+- region: must match the Firestore database location; Eventarc trigger location must be the same region as the function
+
+Region alignment rule (MVP): Firestore DB location, Eventarc trigger location, and function region must be identical.
+If they differ, stop and create/select a Firestore DB in the target region before deploying.
 
 Timeouts (MVP recommendation):
 - Cloud Function timeout: `780s` (13 minutes)

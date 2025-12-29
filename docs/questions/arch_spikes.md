@@ -5,6 +5,7 @@
 - Repo root: `/home/dd-user/projects/tda_llm_client`
 - Resolved spikes since generation:
   - `SPK-001` (see `docs/questions/open_questions.md` decision `#50`, 2025-12-27)
+  - `SPK-017` (see `docs/questions/open_questions.md` decision `#51`, 2025-12-29)
 - Scope analyzed (no allowlist):
   - `docs/README.md`
   - `docs/spec/**`
