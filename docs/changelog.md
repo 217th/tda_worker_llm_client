@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Documented Gemini model allowlist policy and validation rules (`spec/deploy_and_envs.md`, `spec/system_integration.md`, `questions/open_questions.md`).
 - Confirmed Gemini endpoint/SDK constraints for Epic 1: keep AI Studio for MVP, document GenAI SDK usage for structured output + image inputs, and note Vertex AI path for future hardening (`spec/system_integration.md`, `spec/deploy_and_envs.md`, `questions/open_questions.md`).
 - Added a dev smoke-check runbook with Cloud Logging queries and GCS verification steps (spec/deploy_and_envs.md).
 - Documented dev deploy lessons learned (build SA selection/format, trigger SA IAM, secret access, Cloud Run name conflicts, Python 3.13 functions-framework pin) (spec/deploy_and_envs.md).

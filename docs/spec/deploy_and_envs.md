@@ -177,6 +177,7 @@ Configuration via environment variables (draft):
 - `GEMINI_API_KEYS_JSON` (optional; MVP/AI Studio; prefer injecting from Secret Manager; multi-key mode)
 - `GEMINI_API_KEY_ID` (optional; required when `GEMINI_API_KEYS_JSON` is used; selects active key by id)
 - `GEMINI_LOCATION` (future/Vertex; if applicable)
+- `GEMINI_ALLOWED_MODELS` (optional; comma-separated allowlist of model names)
 - `GEMINI_TIMEOUT_SECONDS` (MVP, default `600`)
 - `FINALIZE_BUDGET_SECONDS` (MVP, default `120`)
 - `LOG_LEVEL`
@@ -191,6 +192,10 @@ Validation rules (minimum):
 - `FLOW_RUNS_COLLECTION` must be non-empty (default `flow_runs`)
 - collection names must not contain `/`
 - `LOG_LEVEL` must be one of `DEBUG|INFO|WARNING|ERROR`
+- if `GEMINI_ALLOWED_MODELS` is set:
+  - it must parse into at least one non-empty model name (comma-separated, trimmed)
+  - `steps.<stepId>.inputs.llm.llmProfile.modelName` (or `model`) must be in the allowlist
+  - otherwise, fail the step with `LLM_PROFILE_INVALID` (non-retryable)
 
 Secrets:
 - MVP uses an API key for AI Studio. Store it in Secret Manager and inject into the function as an environment variable (do not commit it, do not log it).

@@ -90,6 +90,8 @@ MVP endpoint choice:
   - Vertex AI uses the same SDK with `vertexai=True` plus explicit project/location.
 - Constraint note: structured output and image inputs are documented separately; validate the combined
   multimodal + response schema path in Epic 7 (SPK-010).
+- Model allowlist (MVP): when `GEMINI_ALLOWED_MODELS` is set, the worker must reject any step whose
+  `llmProfile.modelName` (or `model`) is not in the allowlist with `LLM_PROFILE_INVALID`.
 
 ### Cloud Storage artifacts
 
