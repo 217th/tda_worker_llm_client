@@ -324,7 +324,7 @@
       "id": "T-014",
       "title": "E02 Spike: define minimal logging schema + safety gates",
       "description": "Epic 2 spike (SPK-013): confirm minimal structured logging envelope requirements and safe-field gating; update @docs/spec/observability.md if needed.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
@@ -337,8 +337,16 @@
         {
           "author": "DOCS",
           "body": "Start: confirm minimal logging schema and safety gates; update observability spec if needed."
+        },
+        {
+          "author": "DOCS",
+          "body": "Verified: logging safety gates documented; SPK-013 resolved in arch spikes backlog."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "e11c97eea1235b915bc7ab2924aee59b96becfeb",
+        "message": "📝 T-014 define logging safety gates"
+      }
     },
     {
       "id": "T-015",
@@ -410,6 +418,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "aba947b024fa18074d0f4ddea844630bf1aeaf0f6bfe7dab8ec1e0446255324b"
+    "checksum": "352495152f7b670a2f962db0e951636d9e5192dd89d34e9d3bf74218696b047c"
   }
 }
