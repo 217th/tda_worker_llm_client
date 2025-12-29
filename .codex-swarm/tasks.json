@@ -142,12 +142,105 @@
         "hash": "901d498be7a6ee0883a99ba17b5b544fe5d83d80",
         "message": "🧹 T-007 ignore gcloud config"
       }
+    },
+    {
+      "id": "T-008",
+      "title": "E01 Spike: confirm Gemini endpoint + SDK constraints",
+      "description": "Epic 1 spike (SPK-007): confirm the production endpoint decision (AI Studio vs Vertex AI) and SDK support for structured output + image parts; update @docs/spec/system_integration.md, @docs/spec/deploy_and_envs.md, and @docs/questions/open_questions.md if any decision changes are needed.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "DOCS",
+      "tags": [
+        "epic1",
+        "spike",
+        "gemini"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-009",
+      "title": "E01 Spike: define model allowlist policy",
+      "description": "Epic 1 spike (SPK-020): define and document the allowed-models policy (format/location of allowlist, enforcement strategy, and error mapping for disallowed models) and update @docs/spec/deploy_and_envs.md and @docs/spec/system_integration.md accordingly.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "DOCS",
+      "tags": [
+        "epic1",
+        "spike",
+        "config"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-010",
+      "title": "E01 Implement WorkerConfig + Gemini auth config",
+      "description": "Implement Epic 1 classes: WorkerConfig, GeminiApiKey, GeminiAuthConfig. Validate env config (collections, bucket, timeouts, log level) and support single-key (GEMINI_API_KEY) + rotation-friendly multi-key (GEMINI_API_KEYS_JSON + GEMINI_API_KEY_ID) without leaking secrets; wire config into the runtime entrypoint.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "CODER",
+      "tags": [
+        "epic1",
+        "config",
+        "runtime"
+      ],
+      "depends_on": [
+        "T-008",
+        "T-009"
+      ]
+    },
+    {
+      "id": "T-011",
+      "title": "E01 Add unit tests for runtime config",
+      "description": "Add unit tests for WorkerConfig.from_env() and Gemini auth parsing: single-key happy path, multi-key happy path, invalid JSON/missing fields/unknown key id; assert error messages do not include apiKey or its hash.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "TESTER",
+      "tags": [
+        "epic1",
+        "tests"
+      ],
+      "depends_on": [
+        "T-010"
+      ]
+    },
+    {
+      "id": "T-012",
+      "title": "E01 Dev verify secret injection + logging",
+      "description": "Using the dev deploy pipeline from Epic 0, verify Secret Manager → env var injection for Gemini keys and confirm logs only include llm.auth.mode and (optional) llm.auth.keyId; record evidence in @.codex-swarm/workspace/T-012/README.md.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "TESTER",
+      "tags": [
+        "epic1",
+        "verify",
+        "cloud"
+      ],
+      "depends_on": [
+        "T-010",
+        "T-011"
+      ]
+    },
+    {
+      "id": "T-013",
+      "title": "E01 Epic 1 DoD verification + stabilization",
+      "description": "Final Epic 1 verification: run local test suite for config/auth and confirm dev smoke results meet Epic 1 DoD (validated config, no secret leakage, rotation-friendly auth). Update @.codex-swarm/workspace/T-013/README.md with results and any stabilization notes.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic1",
+        "verify",
+        "stabilization"
+      ],
+      "depends_on": [
+        "T-012"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "1573dc19aedbd989a14685ec64079e1da331aa884811d29fe7c15af9d15f2c2d"
+    "checksum": "8adf284951a74c796ec5851ad984b6a2b6b8f507b88550cdd76442a17e1deffb"
   }
 }

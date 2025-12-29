@@ -22,7 +22,7 @@
 
 ### Epic 0 — Cloud environment + deploy pipeline (MVP)
 
-- Epic Status: `READY`
+- Epic Status: `DONE`
 - Classes: — (инфраструктурный эпик; классы из `static_model.md` не добавляет)
 - Spikes (from `questions/arch_spikes.md`): `SPK-017`, `SPK-018`
 - What changes:
@@ -42,7 +42,7 @@
 
 ### Epic 1 — Runtime config + secrets (MVP)
 
-- Epic Status: `PENDING`
+- Epic Status: `READY`
 - Classes: `WorkerConfig`, `GeminiApiKey`, `GeminiAuthConfig`
 - Spikes (from `questions/arch_spikes.md`): `SPK-001` (done), `SPK-007`, `SPK-020`
 - What changes:
