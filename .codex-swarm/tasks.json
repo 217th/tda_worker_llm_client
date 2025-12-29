@@ -42,7 +42,7 @@
       "id": "T-003",
       "title": "E00 Define dev GCP bootstrap checklist and required resources",
       "description": "Epic 0 (Cloud environment + deploy pipeline): produce a concrete dev-environment bootstrap checklist (project/region/Firestore DB/buckets/SA/Secret Manager) aligned to decisions from SPK-017/018; update @docs/spec/deploy_and_envs.md and add a runbook entry.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
@@ -53,7 +53,11 @@
       "depends_on": [
         "T-001",
         "T-002"
-      ]
+      ],
+      "commit": {
+        "hash": "c183c0d7e2291c8f14c1f10fae904272b19c49c8",
+        "message": "🧰 T-003 dev bootstrap checklist"
+      }
     },
     {
       "id": "T-004",
@@ -112,6 +116,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "4c2683efe7b6c14d750859b0f4419dcae4739292fa7a9a804282edb26e99894a"
+    "checksum": "beb8a4f61c8c33c12912c50248645a69dd04449c7c6f2c77028d6ef15ea5d1c4"
   }
 }
