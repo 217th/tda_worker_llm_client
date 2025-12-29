@@ -352,7 +352,7 @@
       "id": "T-015",
       "title": "E02 Implement structured EventLogger",
       "description": "Implement Epic 2 classes EventLogger + CloudLoggingEventLogger with required envelope fields, safe field filtering, and stable event taxonomy; integrate into entrypoint stub for visibility.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "CODER",
       "tags": [
@@ -362,7 +362,21 @@
       ],
       "depends_on": [
         "T-014"
-      ]
+      ],
+      "comments": [
+        {
+          "author": "CODER",
+          "body": "Start: implement EventLogger + CloudLoggingEventLogger with safety gates; wire into entrypoint."
+        },
+        {
+          "author": "CODER",
+          "body": "Verified: EventLogger wired into stub; emits cloud_event_received with required envelope fields."
+        }
+      ],
+      "commit": {
+        "hash": "198abf3f50f17641e94adbb6a950f9695c36a7d1",
+        "message": "✨ T-015 implement EventLogger"
+      }
     },
     {
       "id": "T-016",
@@ -418,6 +432,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "352495152f7b670a2f962db0e951636d9e5192dd89d34e9d3bf74218696b047c"
+    "checksum": "8f982d1278c0c71777434398d55fd9ef90c68dfe188a5b9ebbc3736675578217"
   }
 }
