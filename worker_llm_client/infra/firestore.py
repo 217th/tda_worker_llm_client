@@ -1,0 +1,147 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+import time
+from typing import Any, Mapping
+
+from worker_llm_client.app.services import (
+    ClaimResult,
+    FinalizeResult,
+    FlowRunRecord,
+    FlowRunRepository,
+    build_claim_patch,
+    build_finalize_patch,
+    is_precondition_or_aborted,
+)
+from worker_llm_client.workflow.domain import FlowRun, FlowRunInvalid
+
+
+def _get_step_status(flow_run: Mapping[str, Any], step_id: str) -> str | None:
+    steps = flow_run.get("steps")
+    if not isinstance(steps, Mapping):
+        return None
+    step = steps.get(step_id)
+    if not isinstance(step, Mapping):
+        return None
+    status = step.get("status")
+    return status if isinstance(status, str) else None
+
+
+@dataclass(slots=True)
+class FirestoreFlowRunRepository(FlowRunRepository):
+    client: Any
+    flow_runs_collection: str = "flow_runs"
+    max_attempts: int = 3
+    base_backoff_seconds: float = 0.2
+
+    def get(self, run_id: str) -> FlowRunRecord | None:
+        doc_ref = self.client.collection(self.flow_runs_collection).document(run_id)
+        snapshot = doc_ref.get()
+        if not getattr(snapshot, "exists", False):
+            return None
+        flow_run_raw = snapshot.to_dict() if snapshot is not None else None
+        flow_run_raw = flow_run_raw if isinstance(flow_run_raw, Mapping) else {}
+        flow_run = FlowRun.from_raw(flow_run_raw, run_id=run_id)
+        update_time = getattr(snapshot, "update_time", None)
+        return FlowRunRecord(flow_run=flow_run, update_time=update_time)
+
+    def patch(
+        self, run_id: str, patch: Mapping[str, Any], *, precondition_update_time: Any
+    ) -> None:
+        if not isinstance(patch, Mapping):
+            raise ValueError("patch must be a mapping")
+        doc_ref = self.client.collection(self.flow_runs_collection).document(run_id)
+        if precondition_update_time is not None and hasattr(self.client, "write_option"):
+            option = self.client.write_option(last_update_time=precondition_update_time)
+            doc_ref.update(dict(patch), option=option)
+        else:
+            doc_ref.update(dict(patch))
+
+    def claim_step(self, run_id: str, step_id: str, started_at_rfc3339: str) -> ClaimResult:
+        doc_ref = self.client.collection(self.flow_runs_collection).document(run_id)
+        last_status: str | None = None
+
+        for attempt in range(self.max_attempts):
+            snapshot = doc_ref.get()
+            flow_run_raw = snapshot.to_dict() if snapshot is not None else None
+            flow_run_raw = flow_run_raw if isinstance(flow_run_raw, Mapping) else {}
+            try:
+                FlowRun.from_raw(flow_run_raw, run_id=run_id)
+            except FlowRunInvalid:
+                raise
+
+            status = _get_step_status(flow_run_raw, step_id)
+            last_status = status
+            if status != "READY":
+                return ClaimResult(claimed=False, status=status, reason="not_ready")
+
+            patch = build_claim_patch(step_id, started_at_rfc3339)
+            try:
+                update_time = getattr(snapshot, "update_time", None)
+                self.patch(run_id, patch, precondition_update_time=update_time)
+                return ClaimResult(claimed=True, status=status)
+            except Exception as exc:
+                if is_precondition_or_aborted(exc):
+                    if attempt < self.max_attempts - 1:
+                        time.sleep(self.base_backoff_seconds * (2**attempt))
+                        continue
+                    return ClaimResult(
+                        claimed=False, status=last_status, reason="precondition_failed"
+                    )
+                raise
+
+        return ClaimResult(claimed=False, status=last_status, reason="precondition_failed")
+
+    def finalize_step(
+        self,
+        run_id: str,
+        step_id: str,
+        status: str,
+        finished_at_rfc3339: str,
+        *,
+        outputs_gcs_uri: str | None = None,
+        execution: Mapping[str, Any] | None = None,
+        error: Any | None = None,
+    ) -> FinalizeResult:
+        doc_ref = self.client.collection(self.flow_runs_collection).document(run_id)
+        last_status: str | None = None
+
+        for attempt in range(self.max_attempts):
+            snapshot = doc_ref.get()
+            flow_run_raw = snapshot.to_dict() if snapshot is not None else None
+            flow_run_raw = flow_run_raw if isinstance(flow_run_raw, Mapping) else {}
+            try:
+                FlowRun.from_raw(flow_run_raw, run_id=run_id)
+            except FlowRunInvalid:
+                raise
+
+            current_status = _get_step_status(flow_run_raw, step_id)
+            last_status = current_status
+            if current_status in ("SUCCEEDED", "FAILED"):
+                return FinalizeResult(updated=False, status=current_status, reason="already_final")
+            if current_status != "RUNNING":
+                return FinalizeResult(updated=False, status=current_status, reason="not_running")
+
+            patch = build_finalize_patch(
+                step_id=step_id,
+                status=status,
+                finished_at_rfc3339=finished_at_rfc3339,
+                outputs_gcs_uri=outputs_gcs_uri,
+                execution=execution,
+                error=error,
+            )
+            try:
+                update_time = getattr(snapshot, "update_time", None)
+                self.patch(run_id, patch, precondition_update_time=update_time)
+                return FinalizeResult(updated=True, status=current_status)
+            except Exception as exc:
+                if is_precondition_or_aborted(exc):
+                    if attempt < self.max_attempts - 1:
+                        time.sleep(self.base_backoff_seconds * (2**attempt))
+                        continue
+                    return FinalizeResult(
+                        updated=False, status=last_status, reason="precondition_failed"
+                    )
+                raise
+
+        return FinalizeResult(updated=False, status=last_status, reason="precondition_failed")

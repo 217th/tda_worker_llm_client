@@ -663,7 +663,7 @@
       "id": "T-026",
       "title": "E04 Implement FirestoreFlowRunRepository",
       "description": "Add FirestoreFlowRunRepository with get/claim/finalize using update_time preconditions; handle retries for FailedPrecondition/Conflict/Aborted; enforce stepId safety.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -672,6 +672,12 @@
       ],
       "depends_on": [
         "T-025"
+      ],
+      "comments": [
+        {
+          "author": "CODER",
+          "body": "Starting FirestoreFlowRunRepository implementation."
+        }
       ]
     },
     {
@@ -714,6 +720,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "eeb76f71efce5a322c9f23b798537079baaa95299c658ee496b6d0d68a0545a5"
+    "checksum": "73d06b9dd0461348ad2f5dc03da420b1b2c125f67cf5f867d1a5a7c50a3adf23"
   }
 }
