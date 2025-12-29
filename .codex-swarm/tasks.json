@@ -638,7 +638,7 @@
       "id": "T-025",
       "title": "E04 Implement FlowRunRepository port + claim/finalize models",
       "description": "Implement FlowRunRepository interface + ClaimResult/FinalizeResult models and helper update builders; define dotted-path updates and precondition error mapping.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -653,7 +653,11 @@
           "author": "CODER",
           "body": "Starting FlowRunRepository port + claim/finalize models."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "97446f688df52224d1aa481d6dab19a45aab4b87",
+        "message": "🧩 T-025 add FlowRunRepository port"
+      }
     },
     {
       "id": "T-026",
@@ -710,6 +714,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "e0d579d3d5103db9a821961846b7c054e64449cf001562a157a86ebaf33d4490"
+    "checksum": "eeb76f71efce5a322c9f23b798537079baaa95299c658ee496b6d0d68a0545a5"
   }
 }
