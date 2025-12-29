@@ -614,7 +614,7 @@
       "id": "T-024",
       "title": "E04 Spike: claim/finalize precondition handling",
       "description": "Epic 4 spike (SPK-003/004/005): document Firestore update_time precondition strategy, stepId storage-safety, and no-op vs error behavior for claim/finalize; update specs if needed.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
@@ -622,7 +622,13 @@
         "spike",
         "firestore"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "comments": [
+        {
+          "author": "DOCS",
+          "body": "Starting SPK-003/005 doc updates for claim/finalize behavior."
+        }
+      ]
     },
     {
       "id": "T-025",
@@ -694,6 +700,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "0a76784ee7e75f07dfec78fcea55c6088486d06039765a5e3a1ff0a667a44938"
+    "checksum": "1f1f0ccf02ba7177f2bd7a75ce63c607f14acdb6631d53fc364d6f359ef884e6"
   }
 }

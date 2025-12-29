@@ -59,6 +59,10 @@ Structured output config note (MVP):
 - `STEP_CLAIM_CONFLICT`: Firestore precondition failed during claim (expected under race)
 - `STEP_FINALIZE_CONFLICT`: step is already finalized by another invocation (treat as no-op)
 
+Policy:
+- Conflicts are **no-op** outcomes; do not set `steps.<stepId>.error`.
+- Log the conflict and exit without overwriting any step fields.
+
 ## Domain error codes (stable set proposal)
 
 These are values for `steps.<stepId>.error.code` (and occasionally for `flow_run.error.code`).

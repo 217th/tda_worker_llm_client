@@ -527,6 +527,22 @@ If Firestore precondition fails during `READY → RUNNING`:
 - treat as a benign race
 - retry a few times with short jitter (do not use a Firestore transaction)
 - if still failing, exit (next invocation will pick it up)
+- do **not** set `steps.<stepId>.error` for this case (`STEP_CLAIM_CONFLICT` is a no-op)
+
+### Finalize conflict (concurrency)
+
+If Firestore precondition fails during `RUNNING → SUCCEEDED/FAILED`:
+- treat as a benign race (another invocation likely finalized)
+- retry a few times with short jitter
+- if still failing, exit without overwriting (`STEP_FINALIZE_CONFLICT` is a no-op)
+
+### Self-trigger loops
+
+Firestore update events include the whole document snapshot, not a diff.
+We do **not** attempt to filter events by “changed fields”.
+Instead, rely on deterministic selection + no-op paths:
+- if there is no READY `LLM_REPORT` step, exit without writes
+- if claim/finalize preconditions fail, exit without writes
 
 ### Dependency graph inconsistencies
 
