@@ -5,6 +5,7 @@
 - Added a deploy helper script for Cloud Functions gen2 (with optional build SA override).
 - Fixed Firestore trigger path default handling in the deploy script.
 - Normalized build SA formatting (email or full resource name).
+- Captured deploy lessons learned for playbook integration.
 - Documented how to use the deploy pipeline in the deployment spec.
 
 ## Goal
@@ -28,10 +29,19 @@
 - Review script defaults and placeholders before running.
 - Ensure deploy request env vars are provided (inline or file).
 - If default compute SA is missing, set `BUILD_SA_EMAIL` for Cloud Build.
+- Ensure Trigger SA has `roles/eventarc.eventReceiver` and runtime SA has `roles/secretmanager.secretAccessor`.
 
 ## Rollback Plan
 
 - Revert the script and documentation changes.
+
+## Lessons Learned (for playbook integration)
+
+- Missing default compute SA breaks deploy; use explicit build SA.
+- Build SA formatting requires full resource name (or email that can be normalized).
+- Name conflict with existing Cloud Run service blocks Functions gen2 creation.
+- Firestore trigger requires Eventarc receiver + Run invoker on Trigger SA.
+- Secret Manager envs require Secret Accessor on runtime SA.
 
 ## Changes Summary (auto)
 

@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Documented dev deploy lessons learned (build SA selection/format, trigger SA IAM, secret access, Cloud Run name conflicts, Python 3.13 functions-framework pin) (spec/deploy_and_envs.md).
 - Normalized build service account formatting in deploy script (accepts email or full resource name) (scripts/deploy_dev.sh).
 - Fixed Firestore trigger path default handling in deploy script to avoid invalid braces (scripts/deploy_dev.sh).
 - Added an optional build service account override to the deploy helper script and noted it in deploy docs (scripts/deploy_dev.sh, spec/deploy_and_envs.md).

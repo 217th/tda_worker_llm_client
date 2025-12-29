@@ -19,10 +19,15 @@
 ## Risks
 
 - Stub does not implement business logic; it only logs basic CloudEvent fields.
+- Pinned functions-framework can fail on Python 3.13 runtimes (ImportError).
 
 ## Verify Steps
 
 - Deploy the function using @scripts/deploy_dev.sh and confirm it becomes ACTIVE.
+
+## Lessons Learned (for playbook integration)
+
+- Avoid pinning `functions-framework` for Python 3.13 in early stubs; rely on runtime-provided framework.
 
 ## Rollback Plan
 
