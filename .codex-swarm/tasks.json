@@ -556,7 +556,7 @@
       "id": "T-022",
       "title": "E03 Add unit tests for step selection + inputs",
       "description": "Add unit tests for ReadyStepSelector and LLMReportInputs resolution/error mapping using flow_run fixtures; cover no-op/READY/blocked/deterministic selection.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -572,7 +572,11 @@
           "author": "TESTER",
           "body": "Starting unit tests for selector and inputs."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "1ea362dd13d9784e32a21ce14f52bc7f06812129",
+        "message": "🧪 T-022 add workflow domain tests"
+      }
     },
     {
       "id": "T-023",
@@ -597,6 +601,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "9bf575af47d360bdccc04d3971ca00e39b04484a455b97fe2e9d25106772ceb7"
+    "checksum": "7dd45d1cb97120b59ede8786dcb87caad75b1c46433930dd32e7b27727dec7e3"
   }
 }
