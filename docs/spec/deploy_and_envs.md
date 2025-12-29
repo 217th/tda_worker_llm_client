@@ -81,6 +81,56 @@ gcloud run services add-iam-policy-binding "<FUNCTION_NAME>" \
 3) If Eventarc delivery returns 403, check the actual caller identity before granting additional roles
    (e.g., Eventarc service agent). Only grant `roles/run.invoker` to the observed caller.
 
+## Dev bootstrap checklist (MVP)
+
+Use placeholders in tracked docs. Do not commit real project IDs, bucket names, or secret names.
+
+### Resources to prepare
+
+- Project + region selected (Firestore DB location must equal function region).
+- Firestore database created in the target region.
+- Artifacts bucket created (per environment).
+- Runtime service account created.
+- Trigger service account created (or reuse runtime SA if acceptable).
+- Secret Manager secret created for Gemini API key (single-key `GEMINI_API_KEY` or rotation-friendly `GEMINI_API_KEYS_JSON`).
+
+### API enablement (first time per project)
+
+```bash
+gcloud services enable \
+  cloudfunctions.googleapis.com \
+  run.googleapis.com \
+  eventarc.googleapis.com \
+  cloudbuild.googleapis.com \
+  artifactregistry.googleapis.com \
+  logging.googleapis.com \
+  firestore.googleapis.com \
+  storage.googleapis.com \
+  secretmanager.googleapis.com \
+  --project "<PROJECT_ID>"
+```
+
+### Firestore DB region check
+
+```bash
+gcloud firestore databases list \
+  --project "<PROJECT_ID>" \
+  --format="table(name,locationId,type)"
+```
+
+### IAM bindings
+
+- Apply the **Runtime SA** and **Trigger SA** bindings from the IAM runbook above.
+- Prefer bucket/secret-level bindings over project-level grants.
+
+### Deployment inputs (dev)
+
+- Confirm env vars are defined for:
+  - `GCP_PROJECT`, `GCP_REGION`, `FIRESTORE_DATABASE`, `FLOW_RUNS_COLLECTION`
+  - `LLM_PROMPTS_COLLECTION`, `LLM_MODELS_COLLECTION`
+  - `ARTIFACTS_BUCKET`, `GEMINI_TIMEOUT_SECONDS`, `FINALIZE_BUDGET_SECONDS`, `LOG_LEVEL`
+- Secrets injected via `--set-secrets` (single-key or rotation-friendly mode).
+
 Configuration via environment variables (draft):
 - `GCP_PROJECT`
 - `GCP_REGION`
