@@ -746,7 +746,7 @@
     {
       "id": "T-029",
       "title": "E05 Spike: prompt/schema registry invariants",
-      "description": "Epic 5 spikes (SPK-006, SPK-016): document schema validation/tooling, schemaSha256 policy, and prompt/schema versioning/immutability; update specs/contracts as needed. Include a checklist of Firestore seed docs for dev/debug (llm_prompts/{promptId}, llm_schemas/{schemaId}, and a sample flow_runs/{runId} referencing them).",
+      "description": "Epic 5 spikes (SPK-006, SPK-016): document schema validation/tooling, schemaSha256 policy, and prompt/schema versioning/immutability; update specs/contracts as needed. Include a checklist of Firestore seed docs for dev/debug (llm_prompts/{promptId} valid + missing cases, llm_schemas/{schemaId} valid + invalid cases, and sample flow_runs/{runId} referencing them) to support the T-033 demo.",
       "status": "TODO",
       "priority": "med",
       "owner": "DOCS",
@@ -761,7 +761,7 @@
     {
       "id": "T-030",
       "title": "E05 Implement PromptRepository + FirestorePromptRepository",
-      "description": "Add PromptRepository port and Firestore implementation for llm_prompts/{promptId}, with error mapping and safe logging rules.",
+      "description": "Implement PromptRepository port + FirestorePromptRepository for llm_prompts/{promptId}, with error mapping and safe logging rules. Also add minimal handler wiring to fetch prompt for the selected READY LLM_REPORT step and emit prompt_fetch_started/prompt_fetch_finished or PROMPT_NOT_FOUND logs (no LLM call yet) so the Epic 5 prod demo in T-033 is possible.",
       "status": "TODO",
       "priority": "med",
       "owner": "CODER",
@@ -777,7 +777,7 @@
     {
       "id": "T-031",
       "title": "E05 Implement SchemaRepository + FirestoreSchemaRepository",
-      "description": "Add SchemaRepository port and Firestore implementation for llm_schemas/{schemaId}, including minimal schema invariants validation and schemaSha256 policy.",
+      "description": "Implement SchemaRepository port + FirestoreSchemaRepository for llm_schemas/{schemaId}, including minimal schema invariants validation and schemaSha256 policy. Extend the same handler wiring to fetch schema and emit structured_output_schema_invalid / LLM_PROFILE_INVALID logs on invalid schema so the Epic 5 prod demo in T-033 is possible (no LLM call yet).",
       "status": "TODO",
       "priority": "med",
       "owner": "CODER",
@@ -793,7 +793,7 @@
     {
       "id": "T-032",
       "title": "E05 Add unit tests for prompt/schema repositories",
-      "description": "Unit tests for PromptRepository/SchemaRepository (missing docs, invalid schema invariants, transient errors).",
+      "description": "Unit tests for PromptRepository/SchemaRepository (missing docs, invalid schema invariants, transient errors) plus coverage for prompt/schema fetch logging paths used by the demo wiring.",
       "status": "TODO",
       "priority": "med",
       "owner": "TESTER",
@@ -829,6 +829,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "70e77a845ab306bab63a7388a7e76a90d62a6edaeddf3263b2b243d415ac8950"
+    "checksum": "71e5238ae460dbe66ce75fd465a2ac8baf7fe7a3fafcb5cace3be0a45b40549a"
   }
 }
