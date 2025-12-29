@@ -106,7 +106,7 @@
       "id": "T-006",
       "title": "E00 Verify dev deploy pipeline + smoke scenario (DoD)",
       "description": "Epic 0 (Cloud environment + deploy pipeline): run the deploy/update flow in dev and execute the smoke-check runbook; use gcp-functions-gen2-python-deploy playbook verification steps; record evidence in @.codex-swarm/workspace/T-006/README.md.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -117,7 +117,11 @@
       "depends_on": [
         "T-004",
         "T-005"
-      ]
+      ],
+      "commit": {
+        "hash": "85d244ce58853bb39661e1cc41ff8d3142739b05",
+        "message": "🧪 T-006 record smoke verification"
+      }
     },
     {
       "id": "T-007",
@@ -144,6 +148,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "5a8c7fb5c95d5834a4415dca32927ec10d242a703ea564da3cefd55442ee2984"
+    "checksum": "1573dc19aedbd989a14685ec64079e1da331aa884811d29fe7c15af9d15f2c2d"
   }
 }
