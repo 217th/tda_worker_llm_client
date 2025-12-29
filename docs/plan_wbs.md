@@ -22,6 +22,7 @@
 
 ### Epic 0 — Cloud environment + deploy pipeline (MVP)
 
+- Epic Status: `READY`
 - Classes: — (инфраструктурный эпик; классы из `static_model.md` не добавляет)
 - Spikes (from `questions/arch_spikes.md`): `SPK-017`, `SPK-018`
 - What changes:
@@ -41,6 +42,7 @@
 
 ### Epic 1 — Runtime config + secrets (MVP)
 
+- Epic Status: `PENDING`
 - Classes: `WorkerConfig`, `GeminiApiKey`, `GeminiAuthConfig`
 - Spikes (from `questions/arch_spikes.md`): `SPK-001` (done), `SPK-007`, `SPK-020`
 - What changes:
@@ -62,6 +64,7 @@
 
 ### Epic 2 — Observability baseline (MVP)
 
+- Epic Status: `PENDING`
 - Classes: `EventLogger`, `CloudLoggingEventLogger`
 - Spikes (from `questions/arch_spikes.md`): `SPK-013`
 - What changes:
@@ -81,6 +84,7 @@
 
 ### Epic 3 — Workflow domain + step selection (MVP)
 
+- Epic Status: `PENDING`
 - Classes: `FlowRun`, `FlowStep`, `LLMReportStep`, `LLMReportInputs`, `ReadyStepSelector`, `StepError`, `ErrorCode`
 - Spikes (from `questions/arch_spikes.md`): `SPK-011`, `SPK-019`
 - What changes:
@@ -102,6 +106,7 @@
 
 ### Epic 4 — Firestore FlowRun I/O + optimistic concurrency (MVP)
 
+- Epic Status: `PENDING`
 - Classes: `FlowRunRepository`, `FirestoreFlowRunRepository`, `ClaimResult`, `FinalizeResult`
 - Spikes (from `questions/arch_spikes.md`): `SPK-003`, `SPK-004`, `SPK-005`
 - What changes:
@@ -123,6 +128,7 @@
 
 ### Epic 5 — Prompt + schema registry integration (MVP)
 
+- Epic Status: `PENDING`
 - Classes: `PromptRepository`, `FirestorePromptRepository`, `SchemaRepository`, `FirestoreSchemaRepository`, `LLMPrompt`, `LLMSchema`
 - Spikes (from `questions/arch_spikes.md`): `SPK-006`, `SPK-016`
 - What changes:
@@ -143,6 +149,7 @@
 
 ### Epic 6 — Artifacts (GCS) + canonical report file (MVP)
 
+- Epic Status: `PENDING`
 - Classes: `GcsUri`, `ArtifactPathPolicy`, `ArtifactStore`, `GcsArtifactStore`, `LLMReportFile`
 - Spikes (from `questions/arch_spikes.md`): `SPK-002`, `SPK-012`
 - What changes:
@@ -163,6 +170,7 @@
 
 ### Epic 7 — LLM execution + structured output validation/repair (MVP)
 
+- Epic Status: `PENDING`
 - Classes: `LLMClient`, `GeminiClientAdapter`, `LLMProfile`, `StructuredOutputSpec`, `UserInputAssembler`, `StructuredOutputValidator`, `StructuredOutputInvalid`
 - Spikes (from `questions/arch_spikes.md`): `SPK-007`, `SPK-009`, `SPK-010`, `SPK-014`, `SPK-020`
 - What changes:
@@ -185,6 +193,7 @@
 
 ### Epic 8 — Invocation orchestration + time budgets (MVP)
 
+- Epic Status: `PENDING`
 - Classes: `CloudEventParser`, `FlowRunEventHandler`, `TimeBudgetPolicy`
 - Spikes (from `questions/arch_spikes.md`): `SPK-008`, `SPK-014`, `SPK-015`
 - What changes:

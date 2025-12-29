@@ -1,0 +1,109 @@
+{
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "E00 Spike: choose region/Eventarc routing for Firestore trigger",
+      "description": "Epic 0 (Cloud environment + deploy pipeline): decide and document region alignment (Firestore DB, Eventarc trigger, Cloud Functions gen2) and update @docs/questions/open_questions.md / @docs/spec/deploy_and_envs.md if needed.",
+      "status": "TODO",
+      "priority": "low",
+      "owner": "DOCS",
+      "tags": [
+        "epic0",
+        "spike",
+        "gcp",
+        "eventarc"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-002",
+      "title": "E00 Spike: define least-privilege IAM for runtime/trigger SAs",
+      "description": "Epic 0 (Cloud environment + deploy pipeline): enumerate minimal IAM roles for runtime SA and Eventarc trigger SA (Firestore, GCS, Secret Manager, Eventarc) and document in @docs/spec/deploy_and_envs.md + runbook.",
+      "status": "TODO",
+      "priority": "low",
+      "owner": "DOCS",
+      "tags": [
+        "epic0",
+        "spike",
+        "iam",
+        "gcp"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-003",
+      "title": "E00 Define dev GCP bootstrap checklist and required resources",
+      "description": "Epic 0 (Cloud environment + deploy pipeline): produce a concrete dev-environment bootstrap checklist (project/region/Firestore DB/buckets/SA/Secret Manager) aligned to decisions from SPK-017/018; update @docs/spec/deploy_and_envs.md and add a runbook entry.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "DOCS",
+      "tags": [
+        "epic0",
+        "docs",
+        "gcp"
+      ],
+      "depends_on": [
+        "T-001",
+        "T-002"
+      ]
+    },
+    {
+      "id": "T-004",
+      "title": "E00 Add deploy pipeline command/script for Cloud Functions gen2",
+      "description": "Epic 0 (Cloud environment + deploy pipeline): implement a repeatable deploy/update command (e.g. Makefile target or script) using the gcp-functions-gen2-python-deploy playbook; keep placeholders for secrets/IDs; include env vars file handling.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic0",
+        "deploy",
+        "gcp",
+        "pipeline"
+      ],
+      "depends_on": [
+        "T-003"
+      ]
+    },
+    {
+      "id": "T-005",
+      "title": "E00 Add smoke-check runbook + Cloud Logging queries",
+      "description": "Epic 0 (Cloud environment + deploy pipeline): document smoke scenario and log queries (jsonPayload.event chain, runId/stepId filters) plus GCS artifact checks; align with deploy pipeline.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "DOCS",
+      "tags": [
+        "epic0",
+        "docs",
+        "logging",
+        "smoke"
+      ],
+      "depends_on": [
+        "T-003",
+        "T-004"
+      ]
+    },
+    {
+      "id": "T-006",
+      "title": "E00 Verify dev deploy pipeline + smoke scenario (DoD)",
+      "description": "Epic 0 (Cloud environment + deploy pipeline): run the deploy/update flow in dev and execute the smoke-check runbook; use gcp-functions-gen2-python-deploy playbook verification steps; record evidence in @.codex-swarm/workspace/T-006/README.md.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "TESTER",
+      "tags": [
+        "epic0",
+        "verify",
+        "cloud"
+      ],
+      "depends_on": [
+        "T-004",
+        "T-005"
+      ]
+    }
+  ],
+  "meta": {
+    "schema_version": 1,
+    "managed_by": "agentctl",
+    "checksum_algo": "sha256",
+    "checksum": "856109c50bb6510b491f148bf26be20ac6916a767d30493c3d4c8da8f2b4ab88"
+  }
+}
