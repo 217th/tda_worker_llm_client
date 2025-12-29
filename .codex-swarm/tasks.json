@@ -147,7 +147,7 @@
       "id": "T-008",
       "title": "E01 Spike: confirm Gemini endpoint + SDK constraints",
       "description": "Epic 1 spike (SPK-007): confirm the production endpoint decision (AI Studio vs Vertex AI) and SDK support for structured output + image parts; update @docs/spec/system_integration.md, @docs/spec/deploy_and_envs.md, and @docs/questions/open_questions.md if any decision changes are needed.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
@@ -160,8 +160,16 @@
         {
           "author": "DOCS",
           "body": "Start: review official Gemini API + Google GenAI SDK docs to confirm endpoint choice and SDK constraints for structured output + image inputs; update docs per Epic 1 spike."
+        },
+        {
+          "author": "DOCS",
+          "body": "Verified: docs-only update; no runtime changes; no tests run."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "b01f399f8ac79236a7962d1ae4a007b3fd6e3df2",
+        "message": "📝 T-008 confirm Gemini endpoint + SDK constraints"
+      }
     },
     {
       "id": "T-009",
@@ -247,6 +255,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "4d3d9f2b2cb6a043907eec27c22a35e7b6853608a9c1967400cea042b9962448"
+    "checksum": "360196db156e7de560271a4b58492f3ed3a7e16d40bbb4d04b076be490506954"
   }
 }
