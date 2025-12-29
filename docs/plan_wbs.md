@@ -83,7 +83,7 @@
 
 ### Epic 3 — Workflow domain + step selection (MVP)
 
-- Epic Status: `READY`
+- Epic Status: `DONE`
 - Classes: `FlowRun`, `FlowStep`, `LLMReportStep`, `LLMReportInputs`, `ReadyStepSelector`, `StepError`, `ErrorCode`
 - Spikes (from `questions/arch_spikes.md`): `SPK-011`, `SPK-019`
 - What changes:
@@ -105,7 +105,7 @@
 
 ### Epic 4 — Firestore FlowRun I/O + optimistic concurrency (MVP)
 
-- Epic Status: `PENDING`
+- Epic Status: `READY`
 - Classes: `FlowRunRepository`, `FirestoreFlowRunRepository`, `ClaimResult`, `FinalizeResult`
 - Spikes (from `questions/arch_spikes.md`): `SPK-003`, `SPK-004`, `SPK-005`
 - What changes:

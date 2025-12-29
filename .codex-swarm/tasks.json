@@ -609,12 +609,91 @@
         "hash": "1560d812f501febd89c148140fddcd8f1d1ba1ce",
         "message": "🧪 T-023 verify epic3 tests"
       }
+    },
+    {
+      "id": "T-024",
+      "title": "E04 Spike: claim/finalize precondition handling",
+      "description": "Epic 4 spike (SPK-003/004/005): document Firestore update_time precondition strategy, stepId storage-safety, and no-op vs error behavior for claim/finalize; update specs if needed.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "DOCS",
+      "tags": [
+        "epic4",
+        "spike",
+        "firestore"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-025",
+      "title": "E04 Implement FlowRunRepository port + claim/finalize models",
+      "description": "Implement FlowRunRepository interface + ClaimResult/FinalizeResult models and helper update builders; define dotted-path updates and precondition error mapping.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic4",
+        "firestore"
+      ],
+      "depends_on": [
+        "T-024"
+      ]
+    },
+    {
+      "id": "T-026",
+      "title": "E04 Implement FirestoreFlowRunRepository",
+      "description": "Add FirestoreFlowRunRepository with get/claim/finalize using update_time preconditions; handle retries for FailedPrecondition/Conflict/Aborted; enforce stepId safety.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic4",
+        "firestore"
+      ],
+      "depends_on": [
+        "T-025"
+      ]
+    },
+    {
+      "id": "T-027",
+      "title": "E04 Add unit tests for claim/finalize",
+      "description": "Unit tests for FlowRunRepository claim/finalize semantics with fake snapshots/update_time; cover claim conflict, finalize already_final/not_running, and stepId invalid cases.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "TESTER",
+      "tags": [
+        "epic4",
+        "firestore",
+        "tests"
+      ],
+      "depends_on": [
+        "T-025",
+        "T-026"
+      ]
+    },
+    {
+      "id": "T-028",
+      "title": "E04 Epic 4 DoD verification + stabilization",
+      "description": "Run local tests for Epic 4 claim/finalize behavior and document results in @.codex-swarm/workspace/T-028/README.md.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic4",
+        "verify"
+      ],
+      "depends_on": [
+        "T-027"
+      ],
+      "verify": [
+        "python3 -m pytest -q"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "f1ac6f8a75560604e3fbb2161655cb4b3805477250952596724600020f14545b"
+    "checksum": "0a76784ee7e75f07dfec78fcea55c6088486d06039765a5e3a1ff0a667a44938"
   }
 }
