@@ -2,7 +2,8 @@
 
 ## Summary
 
-- Added a minimal Cloud Functions entrypoint and requirements for deploy testing.
+- Added a minimal Cloud Functions entrypoint for deploy testing.
+- Adjusted requirements to rely on the runtime-provided functions-framework.
 
 ## Goal
 
