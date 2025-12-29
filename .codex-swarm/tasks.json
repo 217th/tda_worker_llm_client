@@ -688,7 +688,7 @@
       "id": "T-027",
       "title": "E04 Add unit tests for claim/finalize",
       "description": "Unit tests for FlowRunRepository claim/finalize semantics with fake snapshots/update_time; cover claim conflict, finalize already_final/not_running, and stepId invalid cases.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -705,7 +705,11 @@
           "author": "TESTER",
           "body": "Starting claim/finalize unit tests."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "937bb40e8cea45aa479956c7b093668537c61d04",
+        "message": "🧪 T-027 add claim/finalize tests"
+      }
     },
     {
       "id": "T-028",
@@ -730,6 +734,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "1bc4af171934bf8e479385a947f0ea177f4facbfb9fe27a34e9587759a544687"
+    "checksum": "8fd09e60eb9f6cd1a8f21a56617a242eefb62ebe6b7471615bf0497a77c4da8e"
   }
 }
