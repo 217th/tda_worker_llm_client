@@ -234,7 +234,7 @@
       "id": "T-011",
       "title": "E01 Add unit tests for runtime config",
       "description": "Add unit tests for WorkerConfig.from_env() and Gemini auth parsing: single-key happy path, missing/empty key errors; assert error messages do not include the API key or its hash.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -243,7 +243,21 @@
       ],
       "depends_on": [
         "T-010"
-      ]
+      ],
+      "comments": [
+        {
+          "author": "TESTER",
+          "body": "Start: add unit tests for WorkerConfig single-key validation and safe error messaging."
+        },
+        {
+          "author": "TESTER",
+          "body": "Verified: python3 -m unittest tests.test_config ran OK; 4 tests passed."
+        }
+      ],
+      "commit": {
+        "hash": "d39626de9fcd425bdb699c67172f098b6d1d1fd7",
+        "message": "🧪 T-011 add WorkerConfig tests"
+      }
     },
     {
       "id": "T-012",
@@ -283,6 +297,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "bbc05ebc408d9e3a6c111ff94276a66455992bff00689f275f547321f565592d"
+    "checksum": "fb5112f8846d0fd34d573c34692d99f371eb7cf76a50189d13f7d2e58dfe5526"
   }
 }
