@@ -123,11 +123,10 @@ class CloudLoggingEventLogger(EventLogger):
 
         payload.setdefault("eventId", "unknown")
         payload.setdefault("runId", "unknown")
-        payload.setdefault("stepId", "unknown")
 
         _validate_required(
             payload,
-            ("service", "env", "component", "event", "severity", "message", "time", "eventId", "runId", "stepId"),
+            ("service", "env", "component", "event", "severity", "message", "time", "eventId", "runId"),
         )
         _check_forbidden_keys(payload)
         _check_sizes(payload)
