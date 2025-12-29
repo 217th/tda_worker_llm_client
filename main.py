@@ -2,7 +2,15 @@ import logging
 
 import functions_framework
 
+from worker_llm_client.ops.config import ConfigurationError, WorkerConfig
+
 logger = logging.getLogger(__name__)
+
+try:
+    CONFIG = WorkerConfig.from_env()
+except ConfigurationError as exc:
+    logger.error("Configuration error: %s", exc)
+    raise
 
 
 @functions_framework.cloud_event
