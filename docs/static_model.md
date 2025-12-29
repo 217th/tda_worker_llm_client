@@ -94,8 +94,8 @@ No questions
 | `GeminiClientAdapter` | Client (impl) | Gemini AI Studio adapter |
 | `EventLogger` | Adapter (port) | Structured log events (`jsonPayload.event`) |
 | `CloudLoggingEventLogger` | Adapter (impl) | Python `logging` JSON envelope |
-| `GeminiApiKey` | Value Object | One Gemini API key record (`id`, `api_key`) from `GEMINI_API_KEYS_JSON` |
-| `GeminiAuthConfig` | Value Object | Auth mode + selected key id (never logs key) |
+| `GeminiApiKey` | Value Object | Single Gemini API key from `GEMINI_API_KEY` (never log) |
+| `GeminiAuthConfig` | Value Object | Auth mode + API key (never logs key) |
 | `WorkerConfig` | Value Object | Validated env config |
 | `TimeBudgetPolicy` | Policy | Enforces finalize budget + external call cutoffs |
 
@@ -135,7 +135,7 @@ No questions
 | `GeminiClientAdapter` | Infra / `infra/gemini.py` | Client (impl) | Gemini AI Studio call adapter | `spec/implementation_contract.md` (AI Studio MVP) |
 | `EventLogger` | Ops / `ops/logging.py` | Adapter (port) | Structured event logging API | `spec/observability.md` |
 | `CloudLoggingEventLogger` | Ops / `ops/logging.py` | Adapter (impl) | Emit JSON logs with stable taxonomy | `spec/observability.md` |
-| `GeminiApiKey` | Ops / `ops/config.py` | Value Object | One Gemini API key record parsed from `GEMINI_API_KEYS_JSON` | `spec/deploy_and_envs.md` (Gemini API key management) |
+| `GeminiApiKey` | Ops / `ops/config.py` | Value Object | Single Gemini API key parsed from `GEMINI_API_KEY` | `spec/deploy_and_envs.md` (Gemini API key management) |
 | `GeminiAuthConfig` | Ops / `ops/config.py` | Value Object | Selected Gemini auth config (mode + key id) | `spec/deploy_and_envs.md`, `spec/observability.md` |
 | `WorkerConfig` | Ops / `ops/config.py` | Value Object | Env config validation | `spec/deploy_and_envs.md` |
 | `TimeBudgetPolicy` | Ops / `ops/time_budget.py` | Policy | Enforce finalize reserve + deadlines | Timeout policy (`spec/implementation_contract.md`) |
@@ -665,7 +665,7 @@ No questions
     - Gemini SDK (implementation detail; per spec hint).
   - Notes on data flows:
     - Must not log prompt or raw output.
-    - Must never log the API key (or its hash). For correlation, logs may include only `llm.auth.mode` and optional `llm.auth.keyId` per `spec/observability.md`.
+    - Must never log the API key (or its hash). Logs may include only `llm.auth.mode` per `spec/observability.md`.
 
 **4.29 EventLogger**
 - Conceptual:
@@ -720,19 +720,17 @@ No questions
   - Notes on data flows:
     - Drives CloudEvent parsing, Firestore collection names, and artifact naming.
     - Selects Gemini auth config (AI Studio MVP):
-      - single-key mode: `GEMINI_API_KEY`
-      - multi-key mode (recommended for rotation): `GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID`
-      - the selected `keyId` is safe to log (`llm.auth.keyId`); the key itself is never logged/persisted.
+      - single-key mode only: `GEMINI_API_KEY`
+      - the key itself is never logged/persisted.
 
 **4.31.1 GeminiApiKey**
 - Conceptual:
-  - Meaning in the domain: One API key record used for rotation-friendly configuration.
+  - Meaning in the domain: The single API key used for Gemini authentication in MVP.
 - Specification-level:
   - Fields:
-    - `id` (str): stable identifier (safe to log)
     - `api_key` (str): secret (never log/persist)
   - Construction:
-    - Parsed from `GEMINI_API_KEYS_JSON` (JSON array of `{id, apiKey}`).
+    - Parsed from `GEMINI_API_KEY`.
 
 **4.31.2 GeminiAuthConfig**
 - Conceptual:
@@ -742,7 +740,6 @@ No questions
 - Specification-level:
   - Fields:
     - `mode` (e.g. `ai_studio_api_key`)
-    - `key_id` (str|None): selected key id when multi-key mode is used
     - `api_key` (str): secret (never log/persist)
 
 **4.32 TimeBudgetPolicy**

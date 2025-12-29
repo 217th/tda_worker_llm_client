@@ -39,7 +39,6 @@ Baseline goals:
 - `firestore.document`: `flow_runs/{runId}` (or full doc path if useful)
 - `llm.promptId`, `llm.modelName`
 - `llm.auth.mode`: `ai_studio_api_key|vertex_adc` (or similar; never log the key itself)
-- `llm.auth.keyId` (optional; only when `GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID` is used)
 - `llm.schemaId`, `llm.schemaSha256` (when structured output schema registry is used)
 - `llm.schemaVersion` (when known; derived from `llm.schemaId` naming)
 - `llm.generationConfig` (sanitized; no secrets; summary is OK)

@@ -202,7 +202,7 @@
     {
       "id": "T-010",
       "title": "E01 Implement WorkerConfig + Gemini auth config",
-      "description": "Implement Epic 1 classes: WorkerConfig, GeminiApiKey, GeminiAuthConfig. Validate env config (collections, bucket, timeouts, log level) and support single-key (GEMINI_API_KEY) + rotation-friendly multi-key (GEMINI_API_KEYS_JSON + GEMINI_API_KEY_ID) without leaking secrets; wire config into the runtime entrypoint.",
+      "description": "Implement Epic 1 classes: WorkerConfig, GeminiApiKey, GeminiAuthConfig. Validate env config (collections, bucket, timeouts, log level) and support single-key auth via GEMINI_API_KEY only; do not leak secrets; wire config into the runtime entrypoint.",
       "status": "TODO",
       "priority": "high",
       "owner": "CODER",
@@ -219,7 +219,7 @@
     {
       "id": "T-011",
       "title": "E01 Add unit tests for runtime config",
-      "description": "Add unit tests for WorkerConfig.from_env() and Gemini auth parsing: single-key happy path, multi-key happy path, invalid JSON/missing fields/unknown key id; assert error messages do not include apiKey or its hash.",
+      "description": "Add unit tests for WorkerConfig.from_env() and Gemini auth parsing: single-key happy path, missing/empty key errors; assert error messages do not include the API key or its hash.",
       "status": "TODO",
       "priority": "med",
       "owner": "TESTER",
@@ -234,7 +234,7 @@
     {
       "id": "T-012",
       "title": "E01 Dev verify secret injection + logging",
-      "description": "Using the dev deploy pipeline from Epic 0, verify Secret Manager → env var injection for Gemini keys and confirm logs only include llm.auth.mode and (optional) llm.auth.keyId; record evidence in @.codex-swarm/workspace/T-012/README.md.",
+      "description": "Using the dev deploy pipeline from Epic 0, verify Secret Manager → env var injection for GEMINI_API_KEY and confirm logs include only llm.auth.mode (no key or keyId); record evidence in @.codex-swarm/workspace/T-012/README.md.",
       "status": "TODO",
       "priority": "med",
       "owner": "TESTER",
@@ -251,7 +251,7 @@
     {
       "id": "T-013",
       "title": "E01 Epic 1 DoD verification + stabilization",
-      "description": "Final Epic 1 verification: run local test suite for config/auth and confirm dev smoke results meet Epic 1 DoD (validated config, no secret leakage, rotation-friendly auth). Update @.codex-swarm/workspace/T-013/README.md with results and any stabilization notes.",
+      "description": "Final Epic 1 verification: run local test suite for config/auth and confirm dev smoke results meet Epic 1 DoD (validated config, no secret leakage, single-key auth). Update @.codex-swarm/workspace/T-013/README.md with results and any stabilization notes.",
       "status": "TODO",
       "priority": "med",
       "owner": "INTEGRATOR",
@@ -269,6 +269,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "23bc9dd5640ed0b5d4cb3c7d5abb84758357fcf7438753ac467f767587653f80"
+    "checksum": "49555c69ad47267d97286b04c69736e817a22219510a3f48b5d1c0d20453c65d"
   }
 }

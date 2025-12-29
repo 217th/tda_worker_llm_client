@@ -99,7 +99,7 @@ Use placeholders in tracked docs. Do not commit real project IDs, bucket names, 
 - Artifacts bucket created (per environment).
 - Runtime service account created.
 - Trigger service account created (or reuse runtime SA if acceptable).
-- Secret Manager secret created for Gemini API key (single-key `GEMINI_API_KEY` or rotation-friendly `GEMINI_API_KEYS_JSON`).
+- Secret Manager secret created for the Gemini API key (`GEMINI_API_KEY`).
 
 ### API enablement (first time per project)
 
@@ -136,7 +136,7 @@ gcloud firestore databases list \
   - `GCP_PROJECT`, `GCP_REGION`, `FIRESTORE_DATABASE`, `FLOW_RUNS_COLLECTION`
   - `LLM_PROMPTS_COLLECTION`, `LLM_MODELS_COLLECTION`
   - `ARTIFACTS_BUCKET`, `GEMINI_TIMEOUT_SECONDS`, `FINALIZE_BUDGET_SECONDS`, `LOG_LEVEL`
-- Secrets injected via `--set-secrets` (single-key or rotation-friendly mode).
+- Secrets injected via `--set-secrets` (single-key only in MVP).
 
 ## Deploy pipeline (dev)
 
@@ -173,9 +173,7 @@ Configuration via environment variables (draft):
 - `LLM_MODELS_COLLECTION` (default `llm_models`)
 - `ARTIFACTS_BUCKET`
 - `ARTIFACTS_PREFIX` (optional)
-- `GEMINI_API_KEY` (optional; MVP/AI Studio; prefer injecting from Secret Manager; single-key mode)
-- `GEMINI_API_KEYS_JSON` (optional; MVP/AI Studio; prefer injecting from Secret Manager; multi-key mode)
-- `GEMINI_API_KEY_ID` (optional; required when `GEMINI_API_KEYS_JSON` is used; selects active key by id)
+- `GEMINI_API_KEY` (optional; MVP/AI Studio; prefer injecting from Secret Manager; single-key mode only)
 - `GEMINI_LOCATION` (future/Vertex; if applicable)
 - `GEMINI_ALLOWED_MODELS` (optional; comma-separated allowlist of model names)
 - `GEMINI_TIMEOUT_SECONDS` (MVP, default `600`)
@@ -202,47 +200,20 @@ Secrets:
 
 ### Gemini API key management (MVP / AI Studio)
 
-Goal: (1) keep the API key out of code/commits, (2) support safe rotation, (3) guarantee the key is never emitted in logs or persisted artifacts.
+Goal: keep the API key out of code/commits and guarantee the key is never emitted in logs or persisted artifacts.
 
-#### Recommended secret shape (rotation-friendly): `GEMINI_API_KEYS_JSON`
-
-Store a single Secret Manager secret whose value is a JSON array (string) of keys:
-
-```json
-[
-  { "id": "primary_v1", "apiKey": "AIza..." },
-  { "id": "primary_v2", "apiKey": "AIza..." }
-]
-```
-
-Runtime selection:
-- if `GEMINI_API_KEY` is set: use it (simple single-key mode; mainly for local dev)
-- else: require `GEMINI_API_KEYS_JSON` and require `GEMINI_API_KEY_ID` to select the active key by `id`
-
-Validation rules (implementation guidance; strict, “by analogy” with other workers):
-- `GEMINI_API_KEYS_JSON` must be a valid JSON array of objects with non-empty `id` and `apiKey`
-- no duplicate `id`
-- `GEMINI_API_KEY_ID` must exist in the array
-- do not include the key (or its hash) in error messages/logs
+Single-key only (MVP):
+- `GEMINI_API_KEY` is the only supported secret input.
+- Inject it via Secret Manager → env var; do not commit or log it.
 
 #### Deployment: Secret Manager → env var injection (Cloud Functions gen2)
 
 Inject secrets via deployment config, not via committed files.
 
 Example (illustrative; exact flags may vary by environment):
-- set secret env var: `GEMINI_API_KEYS_JSON` from Secret Manager (`:latest` or pinned version)
-- set non-secret env var: `GEMINI_API_KEY_ID=primary_v2`
-
-#### Rotation runbook (MVP)
-
-1) Create a new API key in the provider console (AI Studio).
-2) Add a new Secret Manager version updating `GEMINI_API_KEYS_JSON` to include the new key (new `id`).
-3) Redeploy / roll a new revision so new instances read the updated secret at startup (no hot-reload is assumed).
-4) Switch `GEMINI_API_KEY_ID` to the new `id` (canary in `dev`/`staging` first).
-5) After verification, remove/disable the old key (rotate by updating the secret again).
+- set secret env var: `GEMINI_API_KEY` from Secret Manager (`:latest` or pinned version)
 
 Notes:
-- Treat “rotation” as a controlled rollout: the worker should log only `llm.auth.keyId` (not the key) so you can correlate which key was active during incidents.
 - Never persist the API key (or derived values) into Firestore step outputs or GCS artifacts.
 
 ## Rollback plan

@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- MVP change: dropped multi-key/rotation support; single-key `GEMINI_API_KEY` only (updated specs, static model, and plan).
 - Documented Gemini model allowlist policy and validation rules (`spec/deploy_and_envs.md`, `spec/system_integration.md`, `questions/open_questions.md`).
 - Confirmed Gemini endpoint/SDK constraints for Epic 1: keep AI Studio for MVP, document GenAI SDK usage for structured output + image inputs, and note Vertex AI path for future hardening (`spec/system_integration.md`, `spec/deploy_and_envs.md`, `questions/open_questions.md`).
 - Added a dev smoke-check runbook with Cloud Logging queries and GCS verification steps (spec/deploy_and_envs.md).
@@ -22,10 +23,10 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 - Added a deploy helper script for dev and documented the pipeline usage (scripts/deploy_dev.sh, spec/deploy_and_envs.md).
 - Rewrote `plan_wbs.md` to align with the latest `static_model.md`, explicitly allocate every class to a concrete MVP epic, and attach the required architectural spikes per epic (from `questions/arch_spikes.md`) (`plan_wbs.md`, `static_model.md`, `questions/arch_spikes.md`).
 - Expanded each epic’s definition-of-done with concrete local vs cloud demo/test scenarios and introduced an explicit “Cloud environment + deploy pipeline” prerequisite epic for Cloud-based acceptance (`plan_wbs.md`).
-- Updated the static model to reflect Secret Manager–injected Gemini API key configuration (single-key `GEMINI_API_KEY` vs rotation-friendly `GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID`) and the rule that only `llm.auth.mode/keyId` are loggable (`static_model.md`, `spec/deploy_and_envs.md`, `spec/observability.md`).
+- Updated the static model to reflect Secret Manager–injected Gemini API key configuration (single-key `GEMINI_API_KEY`) and the rule that only `llm.auth.mode` is loggable (`static_model.md`, `spec/deploy_and_envs.md`, `spec/observability.md`).
 - Updated the static model to explicitly include `ClaimResult`/`FinalizeResult` and the recommended `FlowRunRepository.claim_step/finalize_step` API aligned with the Firestore `update_time` precondition implementation (`static_model.md`, `spec/implementation_contract.md`).
 - Documented a concrete recommended Firestore claim/finalize implementation for `READY → RUNNING → SUCCEEDED/FAILED` using optimistic `update_time` preconditions (by analogy with other workers) (`spec/implementation_contract.md`).
-- Closed SPK-001 (Gemini API key handling): documented Secret Manager → env var injection, rotation runbook, and multi-key config (`GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID`) with strict “never log/persist secrets” rules (`spec/deploy_and_envs.md`, `spec/observability.md`, `questions/open_questions.md`, `questions/arch_spikes.md`).
+- Closed SPK-001 (Gemini API key handling): documented Secret Manager → env var injection and strict “never log/persist secrets” rules (`spec/deploy_and_envs.md`, `spec/observability.md`, `questions/open_questions.md`, `questions/arch_spikes.md`).
 - Closed structured output open question #44: added 3 negative structured-output fixtures + expected failure patches (truncated JSON, missing required, wrong type) and fixed expected `error.code` mapping (`questions/open_questions.md`, `fixtures/structured_output_invalid/*`, `test_vectors/outputs/*`).
 - Closed structured output open questions #35 and #39: persist only `attempts.total` (no per-attempt histories) and do not require/generate `output.summary.html` on MVP (`questions/open_questions.md`, `spec/implementation_contract.md`).
 - Closed structured output open question #32: made `llm_schemas/{schemaId}.jsonSchema` the single source of truth for output validation (no Pydantic-as-authority on MVP), and aligned validation/logging wording accordingly (`questions/open_questions.md`, `contracts/llm_schema.md`, `spec/implementation_contract.md`, `spec/error_and_retry_model.md`, `spec/observability.md`).

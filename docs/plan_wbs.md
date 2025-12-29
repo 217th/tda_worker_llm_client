@@ -9,7 +9,7 @@
 | Epic | Phase | Value | How to accept |
 | --- | --- | --- | --- |
 | Epic 0 — Cloud environment + deploy pipeline | MVP | Возможность повторяемо деплоить/обновлять сервис в Cloud (Cloud Functions gen2 / Cloud Run) и проверять результаты по Cloud Logging | В `dev` окружении есть пайплайн деплоя + smoke-check сценарии + чеклист верификации через логи/артефакты |
-| Epic 1 — Runtime config + secrets | MVP | Безопасная конфигурация сервиса и аутентификации Gemini (Secret Manager → env vars, ротация) | Конфиг валидируется на старте; ключи не логируются/не персистятся; поддержана ротация через `GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID` |
+| Epic 1 — Runtime config + secrets | MVP | Безопасная конфигурация сервиса и аутентификации Gemini (Secret Manager → env vars) | Конфиг валидируется на старте; ключи не логируются/не персистятся; single-key `GEMINI_API_KEY` |
 | Epic 2 — Observability baseline | MVP | Структурированные логи с устойчивой таксономией событий и полями корреляции | Любой run/step можно найти по `runId/stepId/eventId`; отсутствуют prompt/raw output/секреты |
 | Epic 3 — Workflow domain + step selection | MVP | Доменная модель `flow_runs/{runId}` и детерминированный выбор исполняемого `LLM_REPORT` шага | На входных векторах (READY/no-op/blocked) корректно выбирается/не выбирается шаг; ошибки мапятся на стабильные `error.code` |
 | Epic 4 — Firestore FlowRun I/O + optimistic concurrency | MVP | Надёжные `READY→RUNNING` claim и `RUNNING→SUCCEEDED/FAILED` finalize с `update_time` preconditions (без транзакций) | При гонке claim/finalize второй воркер не портит состояние и не создаёт side effects |
@@ -46,18 +46,17 @@
 - Classes: `WorkerConfig`, `GeminiApiKey`, `GeminiAuthConfig`
 - Spikes (from `questions/arch_spikes.md`): `SPK-001` (done), `SPK-007`, `SPK-020`
 - What changes:
-  - Валидация env-конфига и секретов на старте процесса.
-  - Поддержка single-key (`GEMINI_API_KEY`) и rotation-friendly multi-key (`GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID`).
-- Why it matters: безопасная эксплуатация и управляемая ротация без утечек.
+  - Валидация env-конфига и секрета на старте процесса.
+  - Поддержка single-key (`GEMINI_API_KEY`) в MVP.
+- Why it matters: безопасная эксплуатация без утечек.
 - Definition of done — local:
   - Unit tests на `WorkerConfig.from_env()` покрывают:
     - single-key (`GEMINI_API_KEY`) happy-path,
-    - multi-key (`GEMINI_API_KEYS_JSON` + `GEMINI_API_KEY_ID`) happy-path,
-    - ошибки валидации (битый JSON/пустые поля/неизвестный keyId) без утечки значения секрета.
+    - ошибки валидации (пустое значение/отсутствие ключа) без утечки значения секрета.
   - Негативный тест: в тексте исключений/логов нет `apiKey` и нет его хеша.
 - Definition of done — cloud (dev; requires Epic 0):
   - Секрет инжектится через Secret Manager → env var, и сервис стартует без ручной подмены.
-  - В Cloud Logging подтверждается, что логируется только `llm.auth.mode` и опционально `llm.auth.keyId`.
+  - В Cloud Logging подтверждается, что логируется только `llm.auth.mode`.
 - Where to test/demo:
   - Local: да (юнит-тесты/линтинг).
   - Cloud: да, `dev` (через деплой из Epic 0).
