@@ -110,12 +110,28 @@
         "T-004",
         "T-005"
       ]
+    },
+    {
+      "id": "T-007",
+      "title": "E00 Add minimal Cloud Functions stub for deploy testing",
+      "description": "Epic 0 (Cloud environment + deploy pipeline): add a minimal main.py + requirements.txt (+ .gcloudignore) so the deploy script can be exercised safely before real implementation.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic0",
+        "deploy",
+        "stub"
+      ],
+      "depends_on": [
+        "T-004"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "beb8a4f61c8c33c12912c50248645a69dd04449c7c6f2c77028d6ef15ea5d1c4"
+    "checksum": "f7b2d1697edd8fab24854e38d1ee76241a777384e7b797ec0d94b67f9fe4bcde"
   }
 }
