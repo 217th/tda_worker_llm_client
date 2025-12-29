@@ -84,7 +84,7 @@
       "id": "T-005",
       "title": "E00 Add smoke-check runbook + Cloud Logging queries",
       "description": "Epic 0 (Cloud environment + deploy pipeline): document smoke scenario and log queries (jsonPayload.event chain, runId/stepId filters) plus GCS artifact checks; align with deploy pipeline.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
@@ -96,7 +96,11 @@
       "depends_on": [
         "T-003",
         "T-004"
-      ]
+      ],
+      "commit": {
+        "hash": "341ddaa580095f0ce885655fd3fd24b1d84ce277",
+        "message": "🧪 T-005 smoke runbook"
+      }
     },
     {
       "id": "T-006",
@@ -140,6 +144,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "d2fd5c7cb2e85a62b2b20abeb09b1418d91929b7a541f7d5c6b68becf12b9a99"
+    "checksum": "5a8c7fb5c95d5834a4415dca32927ec10d242a703ea564da3cefd55442ee2984"
   }
 }
