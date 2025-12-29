@@ -715,7 +715,7 @@
       "id": "T-028",
       "title": "E04 Epic 4 DoD verification + stabilization",
       "description": "Run local tests for Epic 4 claim/finalize behavior and document results in @.codex-swarm/workspace/T-028/README.md.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "INTEGRATOR",
       "tags": [
@@ -727,6 +727,16 @@
       ],
       "verify": [
         "python3 -m pytest -q"
+      ],
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Starting Epic 4 DoD verification + stabilization."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: python3 -m pytest -q (31 passed). Warning: google.api_core Python 3.10 EOL notice."
+        }
       ]
     }
   ],
@@ -734,6 +744,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "8fd09e60eb9f6cd1a8f21a56617a242eefb62ebe6b7471615bf0497a77c4da8e"
+    "checksum": "a2ca1b90e09feacba19b7b663d3268c6eacfb92f85c64be06a5c6efb3c4bcf98"
   }
 }
