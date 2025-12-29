@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Clarified EventLogger safety gates and required field checks for MVP observability (`spec/observability.md`).
 - MVP change: dropped multi-key/rotation support; single-key `GEMINI_API_KEY` only (updated specs, static model, and plan).
 - Documented Gemini model allowlist policy and validation rules (`spec/deploy_and_envs.md`, `spec/system_integration.md`, `questions/open_questions.md`).
 - Confirmed Gemini endpoint/SDK constraints for Epic 1: keep AI Studio for MVP, document GenAI SDK usage for structured output + image inputs, and note Vertex AI path for future hardening (`spec/system_integration.md`, `spec/deploy_and_envs.md`, `questions/open_questions.md`).

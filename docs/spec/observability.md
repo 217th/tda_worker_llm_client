@@ -50,6 +50,28 @@ Baseline goals:
 - `error.code`, `error.message` (sanitized), `error.retryable`
 - `exception` (exception info/stack trace when applicable)
 
+### Logger safety gates (MVP)
+
+To keep logs safe and consistent, `EventLogger` must enforce:
+
+- Required field presence and types:
+  - `service/env/component/event/severity/message/time` are non-empty strings.
+  - `severity` must be one of `DEBUG|INFO|WARNING|ERROR`.
+  - `env` is a short environment label (string), never an env dump or dict.
+- Safe-field filtering:
+  - Reject any payload containing secret-like keys anywhere in nested objects:
+    - `apiKey`, `api_key`, `token`, `secret`, `authorization`, `credentials`.
+  - Reject any payload containing prompt/raw-output keys:
+    - `systemInstruction`, `userPrompt`, `promptText`, `candidateText`, `rawOutput`, `outputText`.
+  - Allow `llm.promptId` and `llm.modelName`, but never prompt text.
+- Size limits (per field; to avoid large payloads):
+  - Strings: max 4096 chars (truncate or reject; MVP prefers reject).
+  - Arrays: max 200 items (truncate or reject; MVP prefers reject).
+- Serialization:
+  - All fields must be JSON-serializable; if not, replace with a safe string summary.
+
+These gates are enforced at logging time and must not be bypassed.
+
 ### Event names (baseline proposal)
 
 Event names are a stable API for dashboards/alerts; keep them in **snake_case**.
