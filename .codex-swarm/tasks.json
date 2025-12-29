@@ -451,7 +451,7 @@
       "id": "T-018",
       "title": "E02 Epic 2 DoD verification + stabilization",
       "description": "Final Epic 2 verification: run local logging tests and confirm dev smoke/log chain meets observability DoD; update @.codex-swarm/workspace/T-018/README.md with results and any stabilization notes.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "INTEGRATOR",
       "tags": [
@@ -461,6 +461,16 @@
       ],
       "depends_on": [
         "T-017"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Starting Epic 2 DoD verification + stabilization."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified logging tests: pytest tests/test_logging.py (6 passed). Dev log chain verified: Firestore PATCH at 2025-12-29T14:13:01Z, cloud_event_received log at 2025-12-29T14:13:02Z."
+        }
       ]
     }
   ],
@@ -468,6 +478,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "2cd03352a9469919769902bba11ac722e9acbb4aeaa30e0362b95d0b74e350df"
+    "checksum": "265b11d3eb429526a820676c48132a046c73721ef14f9f58ac9c7f72419badf2"
   }
 }

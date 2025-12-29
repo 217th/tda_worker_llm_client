@@ -8,10 +8,10 @@ from worker_llm_client.ops.logging import CloudLoggingEventLogger, LogPayloadErr
 class ListHandler(logging.Handler):
     def __init__(self) -> None:
         super().__init__()
-        self.records: list[str] = []
+        self.records: list[object] = []
 
     def emit(self, record: logging.LogRecord) -> None:
-        self.records.append(record.getMessage())
+        self.records.append(record.msg)
 
 
 class EventLoggerTests(unittest.TestCase):
@@ -40,7 +40,8 @@ class EventLoggerTests(unittest.TestCase):
         )
 
         self.assertEqual(len(self.handler.records), 1)
-        payload = json.loads(self.handler.records[0])
+        raw = self.handler.records[0]
+        payload = raw if isinstance(raw, dict) else json.loads(str(raw))
         self.assertEqual(payload["event"], "cloud_event_received")
         self.assertEqual(payload["eventId"], "evt-1")
         self.assertEqual(payload["runId"], "run-1")
