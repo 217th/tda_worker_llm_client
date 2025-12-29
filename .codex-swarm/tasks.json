@@ -263,7 +263,7 @@
       "id": "T-012",
       "title": "E01 Dev verify secret injection + logging",
       "description": "Using the dev deploy pipeline from Epic 0, verify Secret Manager → env var injection for GEMINI_API_KEY and confirm logs include only llm.auth.mode (no key or keyId); record evidence in @.codex-swarm/workspace/T-012/README.md.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -274,6 +274,12 @@
       "depends_on": [
         "T-010",
         "T-011"
+      ],
+      "comments": [
+        {
+          "author": "TESTER",
+          "body": "Start: verify Secret Manager → GEMINI_API_KEY injection and log fields in dev (cloud)."
+        }
       ]
     },
     {
@@ -297,6 +303,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "fb5112f8846d0fd34d573c34692d99f371eb7cf76a50189d13f7d2e58dfe5526"
+    "checksum": "d6a43a3f98ff1f0bc892de06814324b3b4c1a0494e14b6c0217ef2bfa44b4602"
   }
 }
