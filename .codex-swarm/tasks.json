@@ -809,7 +809,7 @@
     {
       "id": "T-033",
       "title": "E05 Epic 5 DoD verification + stabilization",
-      "description": "Run local tests for Epic 5 prompt/schema repositories and document results in @.codex-swarm/workspace/T-033/README.md.",
+      "description": "Epic 5 DoD verification (prod demo + local tests). Prereqs: prod deploy of worker; Firestore has seed docs llm_prompts/{promptId} and llm_schemas/{schemaId}; a flow_runs/{runId} with READY LLM_REPORT referencing those IDs; runtime SA has Firestore/Secret Manager access; logs enabled. Prep steps: (1) confirm prod function active, (2) insert/verify prompt+schema docs, (3) create/update flow_runs/{runId} with READY step and valid inputs. Demo steps: (1) update flow_runs/{runId} to trigger Firestore event, (2) watch Cloud Logging for cloud_event_received → cloud_event_parsed → prompt_fetch_* / structured_output_schema_invalid (negative) or later steps if implemented, (3) confirm no prompt/raw output in logs. Expected result: logs show prompt/schema fetch behavior consistent with spec; missing/invalid docs yield PROMPT_NOT_FOUND or LLM_PROFILE_INVALID with sanitized error; no secrets/payloads in logs. Record output in @.codex-swarm/workspace/T-033/README.md.",
       "status": "TODO",
       "priority": "med",
       "owner": "INTEGRATOR",
@@ -829,6 +829,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "025df02d625bab760110f5cf4296d5985f4560f9c724d36caf56ae552f27194b"
+    "checksum": "5aa2cad83822abd8c68180079dbe2105197e2bca0aad25b06eff7d33059f99a8"
   }
 }
