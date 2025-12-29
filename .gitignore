@@ -10,3 +10,4 @@ __pycache__
 .codex-swarm/worktrees
 .codex-resume
 docs/inbox
+docs/fixtures/external_refs/

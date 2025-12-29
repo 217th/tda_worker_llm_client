@@ -8,6 +8,22 @@ Where errors are persisted:
 - step-level errors: `steps.<stepId>.error.code` + `steps.<stepId>.error.message`
 - run-level errors (rare): `flow_run.error.*` (only if the whole run is invalid/unrecoverable for all steps)
 
+### Mapping rules (run vs step)
+
+Use these rules to keep error codes consistent and predictable:
+
+Run-level (set `flow_run.error` when possible):
+- `FLOW_RUN_NOT_FOUND`: document missing → **no write**, log `cloud_event_ignored` and exit.
+- `FLOW_RUN_INVALID`: missing/invalid run status, missing/invalid `steps` map, invalid `runId`, or step IDs not storage-safe (contain `.` or `/`). If the document exists and is writable, set `flow_run.error` and exit; otherwise, log and exit.
+
+Step-level (set `steps.<stepId>.error`):
+- `INVALID_STEP_INPUTS`: missing `inputs.*` references or missing referenced `outputs.gcs_uri`.
+- `LLM_PROFILE_INVALID`: invalid `inputs.llm.llmProfile` for `LLM_REPORT` (response type, candidateCount, or schema rules).
+- `PROMPT_NOT_FOUND`, `INVALID_STRUCTURED_OUTPUT`, `LLM_SAFETY_BLOCK`, `GEMINI_REQUEST_FAILED`, `RATE_LIMITED`, `GCS_WRITE_FAILED`, `FIRESTORE_FINALIZE_FAILED` (when a step was claimed and execution started).
+
+No-op (no `error` field should be written):
+- `NO_READY_STEP`, `DEPENDENCY_NOT_SUCCEEDED`, `STEP_CLAIM_CONFLICT`, `STEP_FINALIZE_CONFLICT` (expected races or non-executable states).
+
 ### 1) Non-retryable (configuration / contract)
 
 - `FLOW_RUN_NOT_FOUND`: `flow_runs/{runId}` does not exist (stale trigger)

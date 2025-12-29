@@ -8,6 +8,8 @@
   - `SPK-017` (see `docs/questions/open_questions.md` decision `#51`, 2025-12-29)
   - `SPK-018` (see `docs/questions/open_questions.md` decision `#52`, 2025-12-29)
   - `SPK-013` (see `docs/spec/observability.md` “Logger safety gates (MVP)”, 2025-12-29)
+  - `SPK-011` (see `docs/spec/implementation_contract.md` “Required subset (MVP)”, 2025-12-29)
+  - `SPK-019` (see `docs/spec/error_and_retry_model.md` “Mapping rules (run vs step)”, 2025-12-29)
 - Scope analyzed (no allowlist):
   - `docs/README.md`
   - `docs/spec/**`

@@ -67,3 +67,21 @@ Execution metadata is stored alongside outputs (exact structure is defined in `s
 Even though `contracts/flow_run.schema.json` is strict, the worker must tolerate extra fields beyond the schema (prototype reality):
 - ignore unknown fields and additional properties
 - validate only the subset required for execution and safe failure modes
+
+## Required subset for worker validation (MVP)
+
+Run-level required fields (missing/wrong type → `FLOW_RUN_INVALID`):
+- `status` (string; must be a known run status)
+- `steps` (object/map)
+- step IDs must be storage-safe (no `.` or `/`) because Firestore updates use dotted field paths
+
+Step-level required fields for an executable `LLM_REPORT`:
+- `stepType` (`LLM_REPORT`)
+- `status` (`READY` for selection)
+- `dependsOn` (array of step IDs; missing treated as empty)
+- `inputs.llm.promptId` (string)
+- `inputs.llm.llmProfile` (object; must pass `LLM_PROFILE_INVALID` checks)
+- `inputs.ohlcvStepId` and `inputs.chartsManifestStepId` (string; referenced steps must exist with `outputs.gcs_uri`)
+- optional `inputs.previousReportStepIds` (if present, each referenced step must be `LLM_REPORT` with `outputs.gcs_uri`)
+
+If a candidate READY step is missing required inputs, the worker fails that step with `INVALID_STEP_INPUTS` (step-level error).

@@ -63,6 +63,40 @@ Rules:
 - validate only the subset required for this worker’s behavior (run status, step graph, `LLM_REPORT` inputs, and referenced `outputs.gcs_uri`)
 - treat missing required fields / wrong types in the required subset as `FLOW_RUN_INVALID` (run-level) or `INVALID_STEP_INPUTS` (step-level), depending on where the violation occurs
 
+### Required subset (MVP)
+
+This subset is the minimum required to select and execute one `LLM_REPORT` step safely.
+
+**Run-level required fields (reject as `FLOW_RUN_INVALID`):**
+- `status`: string, one of `PENDING|RUNNING|SUCCEEDED|FAILED|CANCELLED`
+- `steps`: object (map of `stepId -> step`)
+- Step IDs must be storage-safe for Firestore dotted paths (must not contain `.` or `/`)
+
+**Step-level required fields for selection (reject step as invalid; no-op if no valid READY step):**
+- `stepType`: string (must be `LLM_REPORT` to be eligible)
+- `status`: string
+- `dependsOn`: array of strings (may be empty; missing → treated as empty)
+
+**Step-level required fields for execution (reject selected step as `INVALID_STEP_INPUTS` or `LLM_PROFILE_INVALID`):**
+- `inputs.llm.promptId`: string (missing → `INVALID_STEP_INPUTS`)
+- `inputs.llm.llmProfile`: object
+  - `responseMimeType` must be `application/json` → otherwise `LLM_PROFILE_INVALID`
+  - `candidateCount` (if present) must be `1` → otherwise `LLM_PROFILE_INVALID`
+  - `structuredOutput.schemaId` must be present and valid for `LLM_REPORT` → otherwise `LLM_PROFILE_INVALID`
+- `inputs.ohlcvStepId`: string; referenced step must exist and contain `outputs.gcs_uri`
+- `inputs.chartsManifestStepId`: string; referenced step must exist and contain `outputs.gcs_uri`
+- `inputs.previousReportStepIds` (optional): each referenced step must be `LLM_REPORT` and contain `outputs.gcs_uri`
+
+**FlowRun identity fields (optional but recommended):**
+- `runId` inside the document should match the document ID (if present); mismatch → `FLOW_RUN_INVALID`
+
+### Error mapping (run vs step)
+
+- `FLOW_RUN_INVALID` (run-level): missing/invalid run status, missing `steps` map, invalid step ID (contains `.` or `/`), or inconsistent run identity.
+- `INVALID_STEP_INPUTS` (step-level): missing `inputs.*` references or referenced steps missing `outputs.gcs_uri`.
+- `LLM_PROFILE_INVALID` (step-level): invalid `inputs.llm.llmProfile` for `LLM_REPORT` (response type / candidate count / schema).
+- `FLOW_RUN_NOT_FOUND`: Firestore doc missing; log `cloud_event_ignored` and exit without writes.
+
 ## Invariants
 
 1. **No silent execution:** worker must never execute a step unless it is `READY` and dependencies are satisfied.

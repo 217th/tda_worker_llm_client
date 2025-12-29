@@ -481,7 +481,7 @@
       "id": "T-019",
       "title": "E03 Spike: FlowRun validation subset + error codes",
       "description": "Epic 3 spikes (SPK-011, SPK-019): document required-subset validation for flow_runs and explicit error-code mapping (run vs step) aligned to static_model; update @docs/spec/implementation_contract.md, @docs/contracts/flow_run.md, @docs/spec/error_and_retry_model.md as needed.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
@@ -490,7 +490,13 @@
         "contracts",
         "errors"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "comments": [
+        {
+          "author": "DOCS",
+          "body": "Starting SPK-011/019: required subset validation + error-code mapping."
+        }
+      ]
     },
     {
       "id": "T-020",
@@ -561,6 +567,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "d553adcf6c13bb2a7644e5f44a1f8c02d74ecde841af9d57c78e6986cd5eb4e8"
+    "checksum": "87f05841df4a66232304a5a76931602c5ee351ec9c918fbbabd373f9e42e3f64"
   }
 }
