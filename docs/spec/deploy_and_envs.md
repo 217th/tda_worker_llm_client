@@ -163,6 +163,8 @@ For update deploys, set `CONFIRM_TRIGGER_UNCHANGED=true` unless you intend to ch
 - Runtime SA must have `roles/secretmanager.secretAccessor` for any Secret Manager–injected env var.
 - Python 3.13 runtime + pinned `functions-framework` caused `ImportError: cannot import name 'T' from 're'` in startup;
   rely on the runtime-provided functions-framework instead of pinning in `requirements.txt`.
+- Functions Framework can preconfigure the root logger (often at WARNING); ensure INFO logs are emitted by explicitly
+  configuring the root handler/formatter (JSON) and log structured dict payloads.
 
 Configuration via environment variables (draft):
 - `GCP_PROJECT`

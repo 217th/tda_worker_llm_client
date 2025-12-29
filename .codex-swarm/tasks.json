@@ -412,7 +412,7 @@
       "id": "T-017",
       "title": "E02 Dev verify logging chain",
       "description": "Deploy updated function in dev and verify Cloud Logging event chain is observable by runId/stepId/eventId with no prompt/raw output leakage; record evidence in @.codex-swarm/workspace/T-017/README.md.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -441,7 +441,11 @@
           "author": "TESTER",
           "body": "Redeployed (revision worker-llm-client-00006-rop). Firestore PATCH at 2025-12-29T14:13:01Z; cloud_event_received log present at 2025-12-29T14:13:02Z (eventId 33199a62-90cd-4549-8cd5-289b3acaf420)."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "511847073db01809c6b529ec86ffac720b9aafe1",
+        "message": "🧪 T-017 fix logging config"
+      }
     },
     {
       "id": "T-018",
@@ -464,6 +468,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "a13feab8a78abf8d05d8ae6e5818eb79f0801427d0130930bb7b0cd574c8d37e"
+    "checksum": "2cd03352a9469919769902bba11ac722e9acbb4aeaa30e0362b95d0b74e350df"
   }
 }
