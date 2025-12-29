@@ -1,4 +1,5 @@
 .DS_Store
+.gcloud/
 .env
 .env.*
 !.env.example
