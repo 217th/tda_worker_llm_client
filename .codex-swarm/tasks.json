@@ -382,7 +382,7 @@
       "id": "T-016",
       "title": "E02 Add unit tests for logging envelope",
       "description": "Add tests ensuring EventLogger enforces required fields, rejects dangerous payloads, and produces stable JSON for key events (cloud_event_received, cloud_event_parsed, claim_attempt, llm_request_started, gcs_write_finished, step_completed/step_failed).",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -392,7 +392,21 @@
       ],
       "depends_on": [
         "T-015"
-      ]
+      ],
+      "comments": [
+        {
+          "author": "TESTER",
+          "body": "Start: add tests for EventLogger envelope and safety gates."
+        },
+        {
+          "author": "TESTER",
+          "body": "Verified: python3 -m unittest tests.test_logging OK; logging envelope aligns with spec (stepId required only when applicable)."
+        }
+      ],
+      "commit": {
+        "hash": "b8ecfdea4700b1138138458d1b02530a6cc3cf9f",
+        "message": "🧪 T-016 add logging tests"
+      }
     },
     {
       "id": "T-017",
@@ -432,6 +446,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "8f982d1278c0c71777434398d55fd9ef90c68dfe188a5b9ebbc3736675578217"
+    "checksum": "d4be87f3bf810c826aad9e764bd75a60f2b7ce963f47930297b37c957f59666a"
   }
 }
