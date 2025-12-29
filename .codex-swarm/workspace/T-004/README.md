@@ -3,6 +3,7 @@
 ## Summary
 
 - Added a deploy helper script for Cloud Functions gen2 (with optional build SA override).
+- Fixed Firestore trigger path default handling in the deploy script.
 - Documented how to use the deploy pipeline in the deployment spec.
 
 ## Goal

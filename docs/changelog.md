@@ -12,6 +12,7 @@ For every meaningful Git commit that changes this documentation pack, add a new 
 
 ### Unreleased
 
+- Fixed Firestore trigger path default handling in deploy script to avoid invalid braces (scripts/deploy_dev.sh).
 - Added an optional build service account override to the deploy helper script and noted it in deploy docs (scripts/deploy_dev.sh, spec/deploy_and_envs.md).
 - Added a deploy helper script for dev and documented the pipeline usage (scripts/deploy_dev.sh, spec/deploy_and_envs.md).
 - Rewrote `plan_wbs.md` to align with the latest `static_model.md`, explicitly allocate every class to a concrete MVP epic, and attach the required architectural spikes per epic (from `questions/arch_spikes.md`) (`plan_wbs.md`, `static_model.md`, `questions/arch_spikes.md`).
