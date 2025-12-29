@@ -556,7 +556,7 @@
       "id": "T-022",
       "title": "E03 Add unit tests for step selection + inputs",
       "description": "Add unit tests for ReadyStepSelector and LLMReportInputs resolution/error mapping using flow_run fixtures; cover no-op/READY/blocked/deterministic selection.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -566,6 +566,12 @@
       "depends_on": [
         "T-020",
         "T-021"
+      ],
+      "comments": [
+        {
+          "author": "TESTER",
+          "body": "Starting unit tests for selector and inputs."
+        }
       ]
     },
     {
@@ -591,6 +597,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "1f565f367ef03c07e164b8c428abb95fb660cb2130ea9fbd5d28ee5d4acfddc3"
+    "checksum": "9bf575af47d360bdccc04d3971ca00e39b04484a455b97fe2e9d25106772ceb7"
   }
 }
