@@ -63,7 +63,7 @@
       "id": "T-004",
       "title": "E00 Add deploy pipeline command/script for Cloud Functions gen2",
       "description": "Epic 0 (Cloud environment + deploy pipeline): implement a repeatable deploy/update command (e.g. Makefile target or script) using the gcp-functions-gen2-python-deploy playbook; keep placeholders for secrets/IDs; include env vars file handling.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -74,7 +74,11 @@
       ],
       "depends_on": [
         "T-003"
-      ]
+      ],
+      "commit": {
+        "hash": "228ba0c77a421088db7bc107f4a194a1d7a08686",
+        "message": "📝 T-004 T-007 deploy lessons learned"
+      }
     },
     {
       "id": "T-005",
@@ -115,7 +119,7 @@
       "id": "T-007",
       "title": "E00 Add minimal Cloud Functions stub for deploy testing",
       "description": "Epic 0 (Cloud environment + deploy pipeline): add a minimal main.py + requirements.txt (+ .gcloudignore) so the deploy script can be exercised safely before real implementation.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -125,13 +129,17 @@
       ],
       "depends_on": [
         "T-004"
-      ]
+      ],
+      "commit": {
+        "hash": "901d498be7a6ee0883a99ba17b5b544fe5d83d80",
+        "message": "🧹 T-007 ignore gcloud config"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "f7b2d1697edd8fab24854e38d1ee76241a777384e7b797ec0d94b67f9fe4bcde"
+    "checksum": "d2fd5c7cb2e85a62b2b20abeb09b1418d91929b7a541f7d5c6b68becf12b9a99"
   }
 }
