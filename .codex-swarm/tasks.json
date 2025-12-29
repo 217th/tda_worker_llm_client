@@ -531,7 +531,7 @@
       "id": "T-021",
       "title": "E03 Implement ReadyStepSelector policy",
       "description": "Implement ReadyStepSelector in workflow/policies.py: deterministic READY LLM_REPORT selection, run status gate, dependency SUCCEEDED check, and no-op reasons.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -540,6 +540,12 @@
       ],
       "depends_on": [
         "T-020"
+      ],
+      "comments": [
+        {
+          "author": "CODER",
+          "body": "Starting ReadyStepSelector implementation."
+        }
       ]
     },
     {
@@ -581,6 +587,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "97417c5bed6a12e4df716d72f141c45b19d2fc6a1fdc4f54dc20a09fe466f758"
+    "checksum": "bfb2c429d40bdcd632c71956967f65ee233973f33c6413213aedfaedb56636ef"
   }
 }
