@@ -42,7 +42,7 @@
 
 ### Epic 1 — Runtime config + secrets (MVP)
 
-- Epic Status: `READY`
+- Epic Status: `DONE`
 - Classes: `WorkerConfig`, `GeminiApiKey`, `GeminiAuthConfig`
 - Spikes (from `questions/arch_spikes.md`): `SPK-001` (done), `SPK-007`, `SPK-020`
 - What changes:
@@ -63,7 +63,7 @@
 
 ### Epic 2 — Observability baseline (MVP)
 
-- Epic Status: `PENDING`
+- Epic Status: `READY`
 - Classes: `EventLogger`, `CloudLoggingEventLogger`
 - Spikes (from `questions/arch_spikes.md`): `SPK-013`
 - What changes:

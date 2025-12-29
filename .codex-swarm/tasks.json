@@ -319,12 +319,91 @@
         "hash": "b459328a9c7ed1add3fd57a506c6015008d2d47a",
         "message": "🧾 T-013 record Epic 1 verification"
       }
+    },
+    {
+      "id": "T-014",
+      "title": "E02 Spike: define minimal logging schema + safety gates",
+      "description": "Epic 2 spike (SPK-013): confirm minimal structured logging envelope requirements and safe-field gating; update @docs/spec/observability.md if needed.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "DOCS",
+      "tags": [
+        "epic2",
+        "spike",
+        "logging"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-015",
+      "title": "E02 Implement structured EventLogger",
+      "description": "Implement Epic 2 classes EventLogger + CloudLoggingEventLogger with required envelope fields, safe field filtering, and stable event taxonomy; integrate into entrypoint stub for visibility.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "CODER",
+      "tags": [
+        "epic2",
+        "logging",
+        "runtime"
+      ],
+      "depends_on": [
+        "T-014"
+      ]
+    },
+    {
+      "id": "T-016",
+      "title": "E02 Add unit tests for logging envelope",
+      "description": "Add tests ensuring EventLogger enforces required fields, rejects dangerous payloads, and produces stable JSON for key events (cloud_event_received, cloud_event_parsed, claim_attempt, llm_request_started, gcs_write_finished, step_completed/step_failed).",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "TESTER",
+      "tags": [
+        "epic2",
+        "tests",
+        "logging"
+      ],
+      "depends_on": [
+        "T-015"
+      ]
+    },
+    {
+      "id": "T-017",
+      "title": "E02 Dev verify logging chain",
+      "description": "Deploy updated function in dev and verify Cloud Logging event chain is observable by runId/stepId/eventId with no prompt/raw output leakage; record evidence in @.codex-swarm/workspace/T-017/README.md.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "TESTER",
+      "tags": [
+        "epic2",
+        "verify",
+        "cloud"
+      ],
+      "depends_on": [
+        "T-015",
+        "T-016"
+      ]
+    },
+    {
+      "id": "T-018",
+      "title": "E02 Epic 2 DoD verification + stabilization",
+      "description": "Final Epic 2 verification: run local logging tests and confirm dev smoke/log chain meets observability DoD; update @.codex-swarm/workspace/T-018/README.md with results and any stabilization notes.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic2",
+        "verify",
+        "stabilization"
+      ],
+      "depends_on": [
+        "T-017"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "69fc1dae43c22a9795c38e98591107c3a2206f19cc8b44414ee190ea71c6c69c"
+    "checksum": "2fb74aa2892daaeb21612fa552555a5c22df6c9a9cfa1fe40b4b72db687559b1"
   }
 }
