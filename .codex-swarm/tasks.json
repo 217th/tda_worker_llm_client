@@ -476,12 +476,91 @@
         "hash": "a0338d3979d7aaa9f2f67f471a7384000dc220d0",
         "message": "🧪 T-018 update logging test expectations"
       }
+    },
+    {
+      "id": "T-019",
+      "title": "E03 Spike: FlowRun validation subset + error codes",
+      "description": "Epic 3 spikes (SPK-011, SPK-019): document required-subset validation for flow_runs and explicit error-code mapping (run vs step) aligned to static_model; update @docs/spec/implementation_contract.md, @docs/contracts/flow_run.md, @docs/spec/error_and_retry_model.md as needed.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "DOCS",
+      "tags": [
+        "epic3",
+        "spike",
+        "contracts",
+        "errors"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-020",
+      "title": "E03 Implement workflow domain models",
+      "description": "Implement FlowRun, FlowStep, LLMReportStep, LLMReportInputs, StepError, ErrorCode in workflow/domain.py per static_model + implementation_contract; enforce minimal validation and stepId safety.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic3",
+        "domain"
+      ],
+      "depends_on": [
+        "T-019"
+      ]
+    },
+    {
+      "id": "T-021",
+      "title": "E03 Implement ReadyStepSelector policy",
+      "description": "Implement ReadyStepSelector in workflow/policies.py: deterministic READY LLM_REPORT selection, run status gate, dependency SUCCEEDED check, and no-op reasons.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic3",
+        "domain"
+      ],
+      "depends_on": [
+        "T-020"
+      ]
+    },
+    {
+      "id": "T-022",
+      "title": "E03 Add unit tests for step selection + inputs",
+      "description": "Add unit tests for ReadyStepSelector and LLMReportInputs resolution/error mapping using flow_run fixtures; cover no-op/READY/blocked/deterministic selection.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "TESTER",
+      "tags": [
+        "epic3",
+        "tests"
+      ],
+      "depends_on": [
+        "T-020",
+        "T-021"
+      ]
+    },
+    {
+      "id": "T-023",
+      "title": "E03 Epic 3 DoD verification + stabilization",
+      "description": "Run local verification for Epic 3 (domain/selector tests) and document results in @.codex-swarm/workspace/T-023/README.md.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic3",
+        "verify"
+      ],
+      "depends_on": [
+        "T-022"
+      ],
+      "verify": [
+        "python3 -m pytest -q"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "5a7da3cb4c9062ecf7ff4fc2353f7609db3413791bde8a40cbdf9c07f514417e"
+    "checksum": "d553adcf6c13bb2a7644e5f44a1f8c02d74ecde841af9d57c78e6986cd5eb4e8"
   }
 }

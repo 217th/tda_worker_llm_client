@@ -63,7 +63,7 @@
 
 ### Epic 2 — Observability baseline (MVP)
 
-- Epic Status: `READY`
+- Epic Status: `DONE`
 - Classes: `EventLogger`, `CloudLoggingEventLogger`
 - Spikes (from `questions/arch_spikes.md`): `SPK-013`
 - What changes:
@@ -83,7 +83,7 @@
 
 ### Epic 3 — Workflow domain + step selection (MVP)
 
-- Epic Status: `PENDING`
+- Epic Status: `READY`
 - Classes: `FlowRun`, `FlowStep`, `LLMReportStep`, `LLMReportInputs`, `ReadyStepSelector`, `StepError`, `ErrorCode`
 - Spikes (from `questions/arch_spikes.md`): `SPK-011`, `SPK-019`
 - What changes:
