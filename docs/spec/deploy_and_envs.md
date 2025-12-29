@@ -30,10 +30,56 @@ Timeouts (MVP recommendation):
 - Reserve `120s` for cleanup/finalize (GCS write + Firestore patch). See `spec/implementation_contract.md`.
 
 Service account must have (minimum):
-- Firestore read/write access to `flow_runs/*` and prompt/model collections
-- Cloud Storage object write access to artifacts bucket
+- Separate identities:
+  - **Runtime SA**: the identity the function executes as.
+  - **Trigger SA**: the identity Eventarc uses to deliver Firestore events (may be the same as runtime SA).
+- Runtime SA (least privilege):
+  - Firestore read/write: `roles/datastore.user` (project-level) for `flow_runs/*` and prompt/schema collections.
+  - GCS artifacts bucket: bucket-level `roles/storage.objectAdmin`
+    - or stricter: `roles/storage.objectCreator` + `roles/storage.objectViewer` (bucket-level).
+  - Secret Manager: secret-level `roles/secretmanager.secretAccessor` for the Gemini API key secret.
+  - Logging: no IAM role required for stdout/stderr ingestion; add `roles/logging.logWriter` only if calling the Logging API directly.
+- Trigger SA (for Firestore/Eventarc):
+  - `roles/eventarc.eventReceiver` (project-level).
+  - `roles/run.invoker` on the Cloud Run service backing the function.
 - MVP (AI Studio): no special IAM for Gemini invocation (uses API key). Service account should have access to Secret Manager to read the API key.
 - (future, non-MVP) Vertex AI: Gemini invoke permissions via IAM (e.g., appropriate Vertex AI roles) when switching to ADC/IAM auth.
+- Prefer resource-level bindings (bucket/secret) over project-level grants.
+
+### IAM runbook (MVP)
+
+Use placeholders; do not commit real IDs.
+
+1) Runtime SA (Firestore + GCS + Secret Manager):
+```bash
+gcloud projects add-iam-policy-binding "<PROJECT_ID>" \
+  --member="serviceAccount:<RUNTIME_SA_EMAIL>" \
+  --role="roles/datastore.user"
+
+gcloud storage buckets add-iam-policy-binding "gs://<ARTIFACTS_BUCKET>" \
+  --member="serviceAccount:<RUNTIME_SA_EMAIL>" \
+  --role="roles/storage.objectAdmin"
+
+gcloud secrets add-iam-policy-binding "<SECRET_NAME>" \
+  --member="serviceAccount:<RUNTIME_SA_EMAIL>" \
+  --role="roles/secretmanager.secretAccessor"
+```
+
+2) Trigger SA (Eventarc delivery):
+```bash
+gcloud projects add-iam-policy-binding "<PROJECT_ID>" \
+  --member="serviceAccount:<TRIGGER_SA_EMAIL>" \
+  --role="roles/eventarc.eventReceiver"
+
+gcloud run services add-iam-policy-binding "<FUNCTION_NAME>" \
+  --project "<PROJECT_ID>" \
+  --region "<REGION>" \
+  --member="serviceAccount:<TRIGGER_SA_EMAIL>" \
+  --role="roles/run.invoker"
+```
+
+3) If Eventarc delivery returns 403, check the actual caller identity before granting additional roles
+   (e.g., Eventarc service agent). Only grant `roles/run.invoker` to the observed caller.
 
 Configuration via environment variables (draft):
 - `GCP_PROJECT`
