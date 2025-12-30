@@ -138,6 +138,8 @@ MVP endpoint choice:
   works with the Google GenAI Python SDK using `GenerateContentConfig(response_mime_type="application/json",
   response_json_schema=...)` and inline image bytes via `types.Part.from_bytes`. The model still requires
   downstream validation for semantic constraints (e.g., specific field values).
+- Limit sweep (T-048, 2025-12-30): succeeded with 1/4/8 images at 128/512/1024px (PNG), up to ~1.04MB
+  total image bytes. No hard limit hit; upper bounds remain unverified.
 - Model allowlist (MVP): when `GEMINI_ALLOWED_MODELS` is set, the worker must reject any step whose
   `llmProfile.modelName` (or `model`) is not in the allowlist with `LLM_PROFILE_INVALID`.
 

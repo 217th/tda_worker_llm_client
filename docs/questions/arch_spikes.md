@@ -18,6 +18,7 @@
   - `SPK-012` (see `docs/spec/system_integration.md` “ARTIFACTS_PREFIX normalization (MVP)”, 2025-12-30)
   - `SPK-010` (see `docs/spec/system_integration.md` “Google Gemini (LLM)” + `.codex-swarm/workspace/T-040/README.md`, 2025-12-30)
   - `SPK-007` (see `docs/spec/system_integration.md` “MVP endpoint choice”, 2025-12-30)
+  - `SPK-010` limit sweep (see `.codex-swarm/workspace/T-048/README.md`, 2025-12-30): 1/4/8 PNGs at 128/512/1024px ok; max tested ~1.04MB total bytes; no limit hit.
 - Scope analyzed (no allowlist):
   - `docs/README.md`
   - `docs/spec/**`
