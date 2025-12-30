@@ -776,7 +776,7 @@
       "id": "T-030",
       "title": "E05 Implement PromptRepository + FirestorePromptRepository",
       "description": "Implement PromptRepository port + FirestorePromptRepository for llm_prompts/{promptId}, with error mapping and safe logging rules. Also add minimal handler wiring to fetch prompt for the selected READY LLM_REPORT step and emit prompt_fetch_started/prompt_fetch_finished or PROMPT_NOT_FOUND logs (no LLM call yet) so the Epic 5 prod demo in T-033 is possible.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -791,8 +791,16 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Start: prepare fixture docs for Firestore seeds + validation checks."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: not run (not requested); changes are prompt repo + handler wiring only."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "2b42d42fa161563803d0a59f63ceba99a5c730f5",
+        "message": "✨ T-030 prompt repo + prompt fetch logs"
+      }
     },
     {
       "id": "T-031",
@@ -849,6 +857,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "07e6949e03ceb87323b217a305ae620936b8db06fec4a988cafb9c517453c062"
+    "checksum": "6575ca64ed6efe396e5765eda1740a3ef6f740eb0e25a3329817a7b27f640473"
   }
 }
