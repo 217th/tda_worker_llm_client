@@ -249,7 +249,9 @@ def handle_cloud_event(
             payload["reason"] = reason
         event_logger.log(**payload)
 
-    def _finalize_failed(code: ErrorCode, message: str) -> str:
+    def _finalize_failed(
+        code: ErrorCode, message: str, *, allow_ready: bool = False
+    ) -> str:
         finished_at = _now_rfc3339()
         error = StepError.from_error_code(code, message)
         try:
@@ -259,6 +261,7 @@ def handle_cloud_event(
                 "FAILED",
                 finished_at,
                 error=error,
+                allow_ready=allow_ready,
             )
         except Exception:
             _log_cloud_event_finished(
@@ -347,7 +350,7 @@ def handle_cloud_event(
             reason={"message": str(exc)},
             error={"code": ErrorCode.LLM_PROFILE_INVALID.value},
         )
-        return _finalize_failed(ErrorCode.LLM_PROFILE_INVALID, str(exc))
+        return _finalize_failed(ErrorCode.LLM_PROFILE_INVALID, str(exc), allow_ready=True)
 
     event_logger.log(
         event="prompt_fetch_started",
@@ -401,7 +404,9 @@ def handle_cloud_event(
             reason={"message": "schemaId missing in llmProfile"},
             error={"code": ErrorCode.LLM_PROFILE_INVALID.value},
         )
-        _finalize_failed(ErrorCode.LLM_PROFILE_INVALID, "schemaId missing in llmProfile")
+        _finalize_failed(
+            ErrorCode.LLM_PROFILE_INVALID, "schemaId missing in llmProfile", allow_ready=True
+        )
         return "schema_invalid"
 
     schema = schema_repo.get(schema_id)
@@ -416,7 +421,9 @@ def handle_cloud_event(
             reason={"message": "schema missing or violates invariants"},
             error={"code": ErrorCode.LLM_PROFILE_INVALID.value},
         )
-        _finalize_failed(ErrorCode.LLM_PROFILE_INVALID, "schema missing or violates invariants")
+        _finalize_failed(
+            ErrorCode.LLM_PROFILE_INVALID, "schema missing or violates invariants", allow_ready=True
+        )
         return "schema_invalid"
 
     if artifact_store is None or path_policy is None:
@@ -434,7 +441,9 @@ def handle_cloud_event(
             reason={"message": "schemaId must follow llm_report_output_v{N}"},
             error={"code": ErrorCode.LLM_PROFILE_INVALID.value},
         )
-        return _finalize_failed(ErrorCode.LLM_PROFILE_INVALID, "Invalid schemaId format")
+        return _finalize_failed(
+            ErrorCode.LLM_PROFILE_INVALID, "Invalid schemaId format", allow_ready=True
+        )
 
     timeframe = _extract_timeframe(step)
     symbol = _extract_symbol(flow_run)

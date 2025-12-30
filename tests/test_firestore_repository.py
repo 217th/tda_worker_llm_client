@@ -183,6 +183,24 @@ class FirestoreRepositoryTests(unittest.TestCase):
         self.assertFalse(result.updated)
         self.assertEqual(result.reason, "not_running")
 
+    def test_finalize_ready_with_allow_ready(self) -> None:
+        flow_run = self._base_flow_run()
+        flow_run["steps"]["step-1"]["status"] = "READY"
+        snapshot = FakeSnapshot(flow_run)
+        doc_ref = FakeDocRef([snapshot])
+        repo = FirestoreFlowRunRepository(FakeClient(doc_ref))
+        result = repo.finalize_step(
+            "run-1",
+            "step-1",
+            "FAILED",
+            "2025-01-01T00:00:00Z",
+            error={"code": "LLM_PROFILE_INVALID", "message": "schema invalid"},
+            allow_ready=True,
+        )
+        self.assertTrue(result.updated)
+        self.assertEqual(len(doc_ref.updates), 1)
+        self.assertIn("steps.step-1.status", doc_ref.updates[0])
+
     def test_finalize_precondition_conflict(self) -> None:
         flow_run = self._base_flow_run()
         flow_run["steps"]["step-1"]["status"] = "RUNNING"

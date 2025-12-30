@@ -120,6 +120,7 @@ class FirestoreFlowRunRepository(FlowRunRepository):
         outputs_gcs_uri: str | None = None,
         execution: Mapping[str, Any] | None = None,
         error: Any | None = None,
+        allow_ready: bool = False,
     ) -> FinalizeResult:
         doc_ref = self.client.collection(self.flow_runs_collection).document(run_id)
         last_status: str | None = None
@@ -138,7 +139,12 @@ class FirestoreFlowRunRepository(FlowRunRepository):
             if current_status in ("SUCCEEDED", "FAILED"):
                 return FinalizeResult(updated=False, status=current_status, reason="already_final")
             if current_status != "RUNNING":
-                return FinalizeResult(updated=False, status=current_status, reason="not_running")
+                if allow_ready and current_status == "READY":
+                    pass
+                else:
+                    return FinalizeResult(
+                        updated=False, status=current_status, reason="not_running"
+                    )
 
             patch = build_finalize_patch(
                 step_id=step_id,

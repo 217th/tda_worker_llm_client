@@ -57,6 +57,7 @@ class FlowRunRepository(Protocol):
         outputs_gcs_uri: str | None = None,
         execution: Mapping[str, Any] | None = None,
         error: StepError | Mapping[str, Any] | None = None,
+        allow_ready: bool = False,
     ) -> FinalizeResult:
         ...
 
