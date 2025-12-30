@@ -56,6 +56,33 @@ class WorkerConfigTests(unittest.TestCase):
         message = str(ctx.exception)
         self.assertNotIn("sk_test_secret", message)
 
+    def test_artifacts_dry_run_parsed(self) -> None:
+        env = {
+            "ARTIFACTS_BUCKET": "test-bucket",
+            "GEMINI_API_KEY": "sk_test_123",
+            "ARTIFACTS_DRY_RUN": "true",
+        }
+
+        config = WorkerConfig.from_env(env)
+
+        self.assertTrue(config.artifacts_dry_run)
+
+        env["ARTIFACTS_DRY_RUN"] = "0"
+        config = WorkerConfig.from_env(env)
+        self.assertFalse(config.artifacts_dry_run)
+
+    def test_artifacts_dry_run_invalid(self) -> None:
+        env = {
+            "ARTIFACTS_BUCKET": "test-bucket",
+            "GEMINI_API_KEY": "sk_test_123",
+            "ARTIFACTS_DRY_RUN": "maybe",
+        }
+
+        with self.assertRaises(ConfigurationError) as ctx:
+            WorkerConfig.from_env(env)
+
+        self.assertIn("ARTIFACTS_DRY_RUN", str(ctx.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

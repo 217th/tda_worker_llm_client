@@ -1033,7 +1033,7 @@
       "id": "T-039",
       "title": "E06 Add artifact write stub (debug flag)",
       "description": "Add opt-in stub (ARTIFACTS_DRY_RUN=true) to generate a minimal LLMReportFile (metadata + empty output) and write it via ArtifactStore create-only path without calling Gemini. Gate by env flag; default off. Use ArtifactPathPolicy deterministic URI; log gcs_write_started/gcs_write_finished (include ok + reused flag) and patch steps.<stepId>.outputs.gcs_uri via FlowRunRepository.patch (precondition update_time). Intended for Epic 6 demo only.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -1043,6 +1043,12 @@
       ],
       "depends_on": [
         "T-036"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: add ARTIFACTS_DRY_RUN stub to write test report artifact."
+        }
       ]
     }
   ],
@@ -1050,6 +1056,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "b35c7b1411a06b1c73c64fc81167c8bb2d7d7dc414ee8014c95a6cbd11e360cc"
+    "checksum": "20284c7b4c5fc53a9baa1b4e5e638c6756d25b02d622a131467e1ccc00b49985"
   }
 }

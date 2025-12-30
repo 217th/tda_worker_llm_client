@@ -4,11 +4,13 @@ import os
 import functions_framework
 
 from worker_llm_client.app.handler import handle_cloud_event
+from worker_llm_client.artifacts.domain import ArtifactPathPolicy
 from worker_llm_client.infra.firestore import (
     FirestoreFlowRunRepository,
     FirestorePromptRepository,
     FirestoreSchemaRepository,
 )
+from worker_llm_client.infra.gcs import GcsArtifactStore
 from worker_llm_client.ops.config import ConfigurationError, WorkerConfig
 from worker_llm_client.ops.logging import CloudLoggingEventLogger, configure_logging
 
@@ -40,6 +42,19 @@ PROMPT_REPO = FirestorePromptRepository(
 )
 SCHEMA_REPO = FirestoreSchemaRepository(FIRESTORE_CLIENT)
 
+ARTIFACT_STORE = None
+ARTIFACT_PATH_POLICY = None
+if CONFIG.artifacts_dry_run:
+    try:
+        from google.cloud import storage  # type: ignore
+    except Exception as exc:  # pragma: no cover - runtime guard
+        logger.error("GCS client unavailable: %s", exc)
+        raise
+
+    STORAGE_CLIENT = storage.Client(project=CONFIG.gcp_project)
+    ARTIFACT_STORE = GcsArtifactStore(STORAGE_CLIENT)
+    ARTIFACT_PATH_POLICY = ArtifactPathPolicy.from_config(CONFIG)
+
 ENV_LABEL = os.environ.get("ENV") or os.environ.get("ENVIRONMENT") or "dev"
 EVENT_LOGGER = CloudLoggingEventLogger(
     service="worker_llm_client",
@@ -59,4 +74,7 @@ def worker_llm_client(cloud_event):
         schema_repo=SCHEMA_REPO,
         event_logger=EVENT_LOGGER,
         flow_runs_collection=CONFIG.flow_runs_collection,
+        artifact_store=ARTIFACT_STORE,
+        path_policy=ARTIFACT_PATH_POLICY,
+        artifacts_dry_run=CONFIG.artifacts_dry_run,
     )

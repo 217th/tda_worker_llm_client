@@ -1,9 +1,19 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+import re
 from typing import Any, Mapping
 
-from worker_llm_client.app.services import FlowRunRepository, PromptRepository, SchemaRepository
+from worker_llm_client.app.services import (
+    FlowRunRepository,
+    PromptRepository,
+    SchemaRepository,
+    build_step_update,
+)
+from worker_llm_client.artifacts.domain import ArtifactPathPolicy, InvalidIdentifier
+from worker_llm_client.artifacts.services import ArtifactStore, ArtifactWriteFailed
 from worker_llm_client.ops.logging import EventLogger, MAX_ARRAY_LENGTH
+from worker_llm_client.reporting.domain import LLMReportFile, SerializationError
 from worker_llm_client.workflow.domain import ErrorCode, InvalidStepInputs, LLMProfileInvalid
 from worker_llm_client.workflow.policies import ReadyStepSelector
 
@@ -42,6 +52,55 @@ def _step_summaries(steps: list[Any]) -> list[dict[str, Any]]:
     return summaries
 
 
+_SCHEMA_VERSION_RE = re.compile(r"^llm_report_output_v([1-9][0-9]*)$")
+
+
+def _now_rfc3339() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _parse_schema_version(schema_id: str) -> int | None:
+    if not isinstance(schema_id, str):
+        return None
+    match = _SCHEMA_VERSION_RE.fullmatch(schema_id.strip())
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _extract_symbol(flow_run: Any) -> str | None:
+    raw = getattr(flow_run, "raw", None)
+    if not isinstance(raw, Mapping):
+        return None
+    scope = raw.get("scope")
+    if not isinstance(scope, Mapping):
+        return None
+    symbol = scope.get("symbol")
+    if not isinstance(symbol, str) or not symbol.strip():
+        return None
+    return symbol.strip()
+
+
+def _extract_timeframe(step: Any) -> str | None:
+    raw = getattr(step, "raw", None)
+    if not isinstance(raw, Mapping):
+        return None
+    timeframe = raw.get("timeframe")
+    if not isinstance(timeframe, str) or not timeframe.strip():
+        return None
+    return timeframe.strip()
+
+
+def _extract_model_name(llm_profile: Mapping[str, Any]) -> str:
+    model_name = llm_profile.get("modelName")
+    if isinstance(model_name, str) and model_name.strip():
+        return model_name.strip()
+    model_name = llm_profile.get("model")
+    if isinstance(model_name, str) and model_name.strip():
+        return model_name.strip()
+    return "dry_run"
+
+
 def handle_cloud_event(
     cloud_event: Any,
     *,
@@ -50,6 +109,9 @@ def handle_cloud_event(
     schema_repo: SchemaRepository,
     event_logger: EventLogger,
     flow_runs_collection: str,
+    artifact_store: ArtifactStore | None = None,
+    path_policy: ArtifactPathPolicy | None = None,
+    artifacts_dry_run: bool = False,
 ) -> str:
     event_id = _extract_field(cloud_event, "id") or "unknown"
     event_type = _extract_field(cloud_event, "type") or "unknown"
@@ -262,6 +324,216 @@ def handle_cloud_event(
             status="failed",
         )
         return "schema_invalid"
+
+    if artifacts_dry_run:
+        if artifact_store is None or path_policy is None:
+            event_logger.log(
+                event="cloud_event_finished",
+                severity="ERROR",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                status="failed",
+                error={
+                    "code": ErrorCode.GCS_WRITE_FAILED.value,
+                    "message": "Artifact store unavailable for dry-run",
+                },
+            )
+            return "failed"
+
+        schema_version = _parse_schema_version(schema.schema_id)
+        if schema_version is None:
+            event_logger.log(
+                event="structured_output_schema_invalid",
+                severity="ERROR",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                llm={"schemaId": schema.schema_id, "schemaSha256": schema.sha256},
+                reason={"message": "schemaId must follow llm_report_output_v{N}"},
+                error={"code": ErrorCode.LLM_PROFILE_INVALID.value},
+            )
+            event_logger.log(
+                event="cloud_event_finished",
+                severity="ERROR",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                status="failed",
+                error={
+                    "code": ErrorCode.LLM_PROFILE_INVALID.value,
+                    "message": "Invalid schemaId format",
+                },
+            )
+            return "failed"
+
+        timeframe = _extract_timeframe(step)
+        symbol = _extract_symbol(flow_run)
+        if timeframe is None or symbol is None:
+            event_logger.log(
+                event="cloud_event_finished",
+                severity="ERROR",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                status="failed",
+                error={
+                    "code": ErrorCode.INVALID_STEP_INPUTS.value,
+                    "message": "Missing timeframe or scope.symbol",
+                },
+            )
+            return "failed"
+
+        try:
+            report_uri = path_policy.report_uri(run_id, timeframe, step_id)
+        except InvalidIdentifier as exc:
+            event_logger.log(
+                event="cloud_event_finished",
+                severity="ERROR",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                status="failed",
+                error={
+                    "code": ErrorCode.INVALID_STEP_INPUTS.value,
+                    "message": str(exc),
+                },
+            )
+            return "failed"
+
+        llm_profile = (
+            dict(inputs.llm_profile) if isinstance(inputs.llm_profile, Mapping) else {}
+        )
+        model_name = _extract_model_name(llm_profile)
+        created_at = _now_rfc3339()
+        metadata: dict[str, Any] = {
+            "schemaVersion": schema_version,
+            "runId": run_id,
+            "stepId": step_id,
+            "createdAt": created_at,
+            "finishedAt": created_at,
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "llm": {
+                "promptId": inputs.prompt_id,
+                "modelName": model_name,
+                "schemaId": schema.schema_id,
+                "schemaSha256": schema.sha256,
+                "llmProfile": llm_profile,
+                "finishReason": "DRY_RUN",
+            },
+            "inputs": {
+                "ohlcv_gcs_uri": inputs.ohlcv_gcs_uri,
+                "charts_outputsManifestGcsUri": inputs.charts_manifest_gcs_uri,
+            },
+        }
+        if inputs.previous_report_gcs_uris:
+            metadata["inputs"]["report_gcs_uris"] = list(inputs.previous_report_gcs_uris)
+
+        report = LLMReportFile(
+            metadata=metadata,
+            output={
+                "summary": {"markdown": "DRY_RUN"},
+                "details": {},
+            },
+        )
+        try:
+            payload = report.to_json_bytes()
+        except SerializationError as exc:
+            event_logger.log(
+                event="cloud_event_finished",
+                severity="ERROR",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                status="failed",
+                error={
+                    "code": ErrorCode.INVALID_STEP_INPUTS.value,
+                    "message": str(exc),
+                },
+            )
+            return "failed"
+
+        payload_bytes = len(payload)
+        event_logger.log(
+            event="gcs_write_started",
+            severity="INFO",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            artifact={"gcs_uri": str(report_uri)},
+            bytes=payload_bytes,
+        )
+
+        try:
+            write_result = artifact_store.write_bytes_create_only(
+                report_uri, payload, content_type="application/json"
+            )
+        except ArtifactWriteFailed as exc:
+            event_logger.log(
+                event="gcs_write_finished",
+                severity="ERROR",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                artifact={"gcs_uri": str(report_uri)},
+                ok=False,
+                bytes=payload_bytes,
+                error={"code": ErrorCode.GCS_WRITE_FAILED.value, "retryable": exc.retryable},
+            )
+            event_logger.log(
+                event="cloud_event_finished",
+                severity="ERROR",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                status="failed",
+                error={
+                    "code": ErrorCode.GCS_WRITE_FAILED.value,
+                    "message": "Artifact write failed",
+                },
+            )
+            return "failed"
+
+        event_logger.log(
+            event="gcs_write_finished",
+            severity="INFO",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            artifact={"gcs_uri": str(report_uri)},
+            ok=True,
+            bytes=payload_bytes,
+            reused=write_result.reused,
+        )
+
+        patch = build_step_update(step_id, {"outputs.gcs_uri": str(report_uri)})
+        try:
+            flow_repo.patch(run_id, patch, precondition_update_time=record.update_time)
+        except Exception:
+            event_logger.log(
+                event="cloud_event_finished",
+                severity="ERROR",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                status="failed",
+                error={
+                    "code": ErrorCode.FIRESTORE_FINALIZE_FAILED.value,
+                    "message": "Failed to update outputs.gcs_uri",
+                },
+            )
+            return "failed"
+
+        event_logger.log(
+            event="cloud_event_finished",
+            severity="INFO",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            status="ok",
+        )
+        return "ok"
     event_logger.log(
         event="cloud_event_finished",
         severity="INFO",

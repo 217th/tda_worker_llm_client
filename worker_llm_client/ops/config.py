@@ -40,6 +40,20 @@ def _parse_int(env: Mapping[str, str], name: str, default: int) -> int:
     return parsed
 
 
+def _parse_bool(env: Mapping[str, str], name: str, default: bool) -> bool:
+    raw = env.get(name)
+    if raw is None:
+        return default
+    value = raw.strip().lower()
+    if not value:
+        return default
+    if value in {"1", "true", "yes", "y", "on"}:
+        return True
+    if value in {"0", "false", "no", "n", "off"}:
+        return False
+    raise ConfigurationError(f"Invalid boolean for {name}")
+
+
 def _parse_allowlist(raw: str) -> tuple[str, ...]:
     items = [item.strip() for item in raw.split(",")]
     items = [item for item in items if item]
@@ -89,6 +103,7 @@ class WorkerConfig:
     llm_models_collection: str
     artifacts_bucket: str
     artifacts_prefix: str | None
+    artifacts_dry_run: bool
     gemini_api_key: GeminiApiKey
     gemini_auth: GeminiAuthConfig
     gemini_timeout_seconds: int
@@ -108,6 +123,7 @@ class WorkerConfig:
         llm_models_collection = _optional_env(env, "LLM_MODELS_COLLECTION", "llm_models") or "llm_models"
         artifacts_bucket = _require_env(env, "ARTIFACTS_BUCKET")
         artifacts_prefix = _optional_env(env, "ARTIFACTS_PREFIX")
+        artifacts_dry_run = _parse_bool(env, "ARTIFACTS_DRY_RUN", False)
 
         if "/" in flow_runs_collection:
             raise ConfigurationError("FLOW_RUNS_COLLECTION must not contain '/'")
@@ -141,6 +157,7 @@ class WorkerConfig:
             llm_models_collection=llm_models_collection,
             artifacts_bucket=artifacts_bucket,
             artifacts_prefix=artifacts_prefix,
+            artifacts_dry_run=artifacts_dry_run,
             gemini_api_key=gemini_api_key,
             gemini_auth=gemini_auth,
             gemini_timeout_seconds=gemini_timeout_seconds,
