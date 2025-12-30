@@ -1399,12 +1399,33 @@
           "body": "Observed 2025-12-30T17:54:46Z: step SUCCEEDED but error.code=INVALID_STEP_INPUTS persisted from earlier failure."
         }
       ]
+    },
+    {
+      "id": "T-053",
+      "title": "E07 Deviation: chart manifest uses png_gcs_uri key",
+      "description": "UserInputAssembler does not recognize chart manifest image key png_gcs_uri; context resolution failed with 'charts manifest contains no valid image URIs'. Add support for snake_case key or normalize manifest export. Ensure charts manifest parsing accepts png_gcs_uri (and possibly other aliases) and add tests.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic7",
+        "deviation"
+      ],
+      "depends_on": [
+        "T-047"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Observed 2025-12-30T17:53:20Z: INVALID_STEP_INPUTS 'charts manifest contains no valid image URIs' using manifest.json with png_gcs_uri."
+        }
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "be0034c94669c1fc96b43af7c326050d5ef8d0c66b0a082698b16f3e3f08f35e"
+    "checksum": "96f6da6a9e22b006783212d4fd4b506c34b3da3d44c18172a48e2d1c1724063d"
   }
 }
