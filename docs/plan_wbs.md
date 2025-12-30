@@ -148,7 +148,7 @@
 
 ### Epic 6 — Artifacts (GCS) + canonical report file (MVP)
 
-- Epic Status: `READY`
+- Epic Status: `DONE`
 - Classes: `GcsUri`, `ArtifactPathPolicy`, `ArtifactStore`, `GcsArtifactStore`, `LLMReportFile`
 - Spikes (from `questions/arch_spikes.md`): `SPK-002`, `SPK-012`
 - What changes:
@@ -169,7 +169,7 @@
 
 ### Epic 7 — LLM execution + structured output validation/repair (MVP)
 
-- Epic Status: `PENDING`
+- Epic Status: `READY`
 - Classes: `LLMClient`, `GeminiClientAdapter`, `LLMProfile`, `StructuredOutputSpec`, `UserInputAssembler`, `StructuredOutputValidator`, `StructuredOutputInvalid`
 - Spikes (from `questions/arch_spikes.md`): `SPK-007`, `SPK-009`, `SPK-010`, `SPK-014`, `SPK-020`
 - What changes:
