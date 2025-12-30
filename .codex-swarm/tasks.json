@@ -1204,7 +1204,7 @@
       "id": "T-048",
       "title": "E07 Spike: Gemini image limits (size/count)",
       "description": "Extend SPK-010 with explicit limits on image size and count for multimodal + response_json_schema.\\n\\nDeliverables:\\n- Spike script to sweep image sizes and image counts against gemini-2.5-flash-lite (AI Studio).\\n- Capture max working size/count, error modes/messages, and approximate token usage.\\n- Update @docs/questions/arch_spikes.md with limits summary and any constraints.\\n- Update @docs/spec/system_integration.md if new constraints affect integration guidance.\\n- Record results in @.codex-swarm/workspace/T-048/README.md.\\n- No secrets committed; use placeholders in any recorded commands or notes.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
@@ -1218,14 +1218,22 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Start: extend SPK-010 with image size/count limit sweep for multimodal + JSON schema."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: ran size/count sweep for inline PNGs + response_json_schema; all tested (1/4/8 images at 128/512/1024px) succeeded; no limit hit; semantic constraints still require validation."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "b4c01a5d2584964b1d339580f48305f9fdaa9e35",
+        "message": "✨ T-048 extend image limit spike"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "ff4d57eb25de0cdcf0636ccf9aca6a39dfafd3755c8be4cb7d09e26804f63c78"
+    "checksum": "1ee88dc3645f91009ad31f83d69798b70f06921464f87bffd17b3f4df52ed0cd"
   }
 }
