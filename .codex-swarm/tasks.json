@@ -927,7 +927,7 @@
       "id": "T-035",
       "title": "E06 Implement GcsUri + ArtifactPathPolicy + LLMReportFile",
       "description": "Implement artifacts domain: GcsUri value object (parse/validate gs:// URIs) and ArtifactPathPolicy (deterministic <prefix>/<runId>/<timeframe>/<stepId>.json with prefix normalization + invariant checks incl. timeframe vs stepId). Add LLMReportFile DTO matching contracts/llm_report_file.schema.json. Place per static_model: artifacts/domain.py + reporting/domain.py. No I/O yet.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -937,6 +937,12 @@
       ],
       "depends_on": [
         "T-034"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: implement GcsUri + ArtifactPathPolicy + LLMReportFile DTO."
+        }
       ]
     },
     {
@@ -1008,6 +1014,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "46d533d9780c068189749d27678cd976415c3e5ec9a9eb45b9a92948fa9b4f7a"
+    "checksum": "b490840e5d37df140d5a869788795bb6e7548173e8088c314a00d7c28c793b91"
   }
 }
