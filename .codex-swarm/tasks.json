@@ -1069,14 +1069,28 @@
       "id": "T-040",
       "title": "E07 Spike: Gemini multimodal + JSON schema path",
       "description": "Validate Gemini SDK/endpoint constraints for combined image inputs + response JSON schema (SPK-010) and confirm AI Studio vs Vertex choice (SPK-007).\\n\\nDeliverables:\\n- Prototype request using google-genai with: system instruction + user parts + 1-3 PNGs + response_json_schema.\\n- Capture SDK version, model(s) tested, limits (image size/count), and error modes.\\n- Update @docs/questions/arch_spikes.md with results (mark SPK-010/SPK-007 resolved) and update @docs/spec/system_integration.md if constraints change.\\n- Record whether the demo in T-047 can rely on image+schema in one request; note any fallbacks.\\n- No secrets committed; use placeholders in any recorded commands or notes.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
         "epic7",
         "spike"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: run Epic 7 spike to validate Gemini multimodal + JSON schema path (SPK-010/007), then update docs with findings."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: ran spike script with SPIKE_VERBOSE=1 using gemini-2.5-flash-lite; image+response_json_schema path returned valid JSON; model may ignore semantic constraints (details.model mismatch)."
+        }
+      ],
+      "commit": {
+        "hash": "9659b2ea9d96b50e0aa4b8adf4bf9bcbe9d97b10",
+        "message": "✨ T-040 validate multimodal schema spike"
+      }
     },
     {
       "id": "T-041",
@@ -1191,6 +1205,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "a9649fffffcf37a120776814348276e0fb39687a31456ed57a31ea34d6b3eae0"
+    "checksum": "78fb1390cf92c063895e05b3e5e4939cb04339dcb5b3edbc75e7ae5915b2300e"
   }
 }
