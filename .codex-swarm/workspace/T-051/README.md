@@ -24,3 +24,5 @@
 ## Notes
 
 - Error observed: 403 Forbidden on `storage.objects.get` for runtime SA.
+- Fix applied: `gcloud storage buckets add-iam-policy-binding gs://tda-artifacts-test --member serviceAccount:tda-worker-llm-client@kb-agent-479608.iam.gserviceaccount.com --role roles/storage.objectViewer`.
+- Post-fix evidence: context_resolve succeeded in T-047 positive run (see @.codex-swarm/workspace/T-047/README.md).
