@@ -2,6 +2,7 @@ from worker_llm_client.reporting.domain import (
     LLMProfile,
     LLMReportFile,
     SerializationError,
+    StructuredOutputInvalid,
     StructuredOutputSpec,
 )
 from worker_llm_client.reporting.services import (
@@ -12,11 +13,13 @@ from worker_llm_client.reporting.services import (
     UserInputAssembler,
     UserInputPayload,
 )
+from worker_llm_client.reporting.structured_output import ExtractedText, StructuredOutputValidator
 
 __all__ = [
     "LLMProfile",
     "LLMReportFile",
     "SerializationError",
+    "StructuredOutputInvalid",
     "StructuredOutputSpec",
     "ChartImage",
     "JsonArtifact",
@@ -24,4 +27,6 @@ __all__ = [
     "ResolvedUserInput",
     "UserInputAssembler",
     "UserInputPayload",
+    "ExtractedText",
+    "StructuredOutputValidator",
 ]

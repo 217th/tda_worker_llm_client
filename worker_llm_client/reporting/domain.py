@@ -213,3 +213,20 @@ class LLMReportFile:
         except (TypeError, ValueError) as exc:
             raise SerializationError("Failed to serialize LLMReportFile") from exc
         return payload.encode("utf-8")
+
+
+@dataclass(frozen=True, slots=True)
+class StructuredOutputInvalid:
+    kind: str
+    message: str
+    text_bytes: int
+    text_sha256: str
+    finish_reason: str | None = None
+
+    def to_error_message(self) -> str:
+        parts = [f"structured_output_invalid kind={self.kind}"]
+        if self.message:
+            parts.append(self.message)
+        if self.finish_reason and "finishReason=" not in self.message:
+            parts.append(f"finishReason={self.finish_reason}")
+        return " ".join(parts)
