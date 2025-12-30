@@ -1096,14 +1096,28 @@
       "id": "T-041",
       "title": "E07 Spike: LLM retry/backoff within time budget",
       "description": "Define retry/backoff policy for Gemini calls and structured-output repair within finalize budget (SPK-014).\\n\\nDeliverables:\\n- Map google-genai exceptions to retryable vs non-retryable per @docs/spec/error_and_retry_model.md.\\n- Decide retry approach (tenacity vs custom minimal loop) compatible with finalize budget (no unbounded retries).\\n- Document attempt caps for primary call and repair call (maxRepairAttempts=1).\\n- Update @docs/spec/error_and_retry_model.md and/or @docs/spec/implementation_contract.md with the chosen policy.\\n- Record decisions in @docs/questions/arch_spikes.md (mark SPK-014 resolved).",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "DOCS",
       "tags": [
         "epic7",
         "spike"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: spike retry/backoff within time budget; map retryable errors and propose policy."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: documented Gemini SDK error mapping + retry envelope (maxGeminiAttempts=1, maxRepairAttempts=1) and marked SPK-014 resolved."
+        }
+      ],
+      "commit": {
+        "hash": "a5ceeb80ea1895d61679f2d2da15b79802ce65e4",
+        "message": "✨ T-041 define Gemini retry envelope"
+      }
     },
     {
       "id": "T-042",
@@ -1234,6 +1248,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "1ee88dc3645f91009ad31f83d69798b70f06921464f87bffd17b3f4df52ed0cd"
+    "checksum": "cc96940cdde3991713cd70054a7c5b7d3e6a8f562433cb4f9d27253708ada6c5"
   }
 }
