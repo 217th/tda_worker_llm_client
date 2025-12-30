@@ -893,12 +893,90 @@
         "hash": "2767320bbcae9848235c1384db83ce54ab26e134",
         "message": "🛠️ T-033 deploy fix + demo report"
       }
+    },
+    {
+      "id": "T-034",
+      "title": "E06 Spike: artifact idempotency + path policy",
+      "description": "Resolve SPK-002/SPK-012: document GCS create-only semantics (ifGenerationMatch=0 + AlreadyExists reuse) and split-brain recovery behavior; define ArtifactPathPolicy rules (prefix normalization, timeframe/stepId validation) per spec. Update relevant docs/arch_spikes as needed.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "DOCS",
+      "tags": [
+        "epic6",
+        "spike",
+        "gcs",
+        "artifacts"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-035",
+      "title": "E06 Implement GcsUri + ArtifactPathPolicy + LLMReportFile",
+      "description": "Implement artifacts domain: GcsUri value object (parse/validate gs:// URIs), ArtifactPathPolicy (deterministic <prefix>/<runId>/<timeframe>/<stepId>.json with prefix normalization + invariant checks), and LLMReportFile DTO matching contracts/llm_report_file.schema.json. No I/O yet.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic6",
+        "gcs",
+        "artifacts"
+      ],
+      "depends_on": [
+        "T-034"
+      ]
+    },
+    {
+      "id": "T-036",
+      "title": "E06 Implement ArtifactStore + GcsArtifactStore",
+      "description": "Add ArtifactStore port and GcsArtifactStore adapter with create-only writes (ifGenerationMatch=0). Treat AlreadyExists as success/reuse to support split-brain recovery. Include read/exists helpers and safe error mapping.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic6",
+        "gcs",
+        "artifacts"
+      ],
+      "depends_on": [
+        "T-035"
+      ]
+    },
+    {
+      "id": "T-037",
+      "title": "E06 Tests: ArtifactPathPolicy + ArtifactStore",
+      "description": "Unit tests for ArtifactPathPolicy (prefix normalization, gs:// validation, deterministic path, timeframe/stepId invariants) and ArtifactStore create-only semantics (AlreadyExists -> reuse).",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "TESTER",
+      "tags": [
+        "epic6",
+        "tests"
+      ],
+      "depends_on": [
+        "T-035",
+        "T-036"
+      ]
+    },
+    {
+      "id": "T-038",
+      "title": "E06 Epic 6 DoD verification (dev)",
+      "description": "Cloud demo: deploy latest, run a READY LLM_REPORT flow to produce report artifact in GCS, verify outputs.gcs_uri set, and repeat trigger to confirm no duplicate object (reuse path / no second LLM call). Capture logs + GCS evidence in workspace README.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic6",
+        "verify"
+      ],
+      "depends_on": [
+        "T-037"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "800aaa10fba1e39c721b676be310a65dc5a7fb4c25294999d38dbbe9b3f6df4d"
+    "checksum": "e37e2b7039346f3c2225f3b97fc3ef765005148d6c529d0a01d4f1138516cd60"
   }
 }

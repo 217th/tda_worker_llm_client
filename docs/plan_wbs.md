@@ -127,7 +127,7 @@
 
 ### Epic 5 — Prompt + schema registry integration (MVP)
 
-- Epic Status: `READY`
+- Epic Status: `DONE`
 - Classes: `PromptRepository`, `FirestorePromptRepository`, `SchemaRepository`, `FirestoreSchemaRepository`, `LLMPrompt`, `LLMSchema`
 - Spikes (from `questions/arch_spikes.md`): `SPK-006`, `SPK-016`
 - What changes:
@@ -148,7 +148,7 @@
 
 ### Epic 6 — Artifacts (GCS) + canonical report file (MVP)
 
-- Epic Status: `PENDING`
+- Epic Status: `READY`
 - Classes: `GcsUri`, `ArtifactPathPolicy`, `ArtifactStore`, `GcsArtifactStore`, `LLMReportFile`
 - Spikes (from `questions/arch_spikes.md`): `SPK-002`, `SPK-012`
 - What changes:
