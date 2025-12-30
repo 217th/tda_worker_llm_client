@@ -1208,7 +1208,7 @@
       "id": "T-045",
       "title": "E07 Implement LLMClient port + GeminiClientAdapter",
       "description": "Add provider-neutral LLM client interface and Gemini AI Studio adapter.\\n\\nScope:\\n- Define LLMClient port in @worker_llm_client/app/services.py (or reporting services).\\n- Implement GeminiClientAdapter in @worker_llm_client/infra/gemini.py using google-genai SDK (AI Studio API key).\\n- Support response JSON schema (structured output) and optional image parts; map finishReason + usage metadata.\\n- Add dependency updates in requirements.txt (google-genai, jsonschema).\\n- Map SDK exceptions to retryable/non-retryable errors per @docs/spec/error_and_retry_model.md (no retries yet).\\n- Enforce allowlist via WorkerConfig.is_model_allowed (LLM_PROFILE_INVALID if disallowed).\\n- Keep secrets out of logs; log only llm.auth.mode + modelName + promptId.\\n\\nOutcome: Gemini adapter can execute real requests with structured output and return a provider response DTO for validation.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -1217,7 +1217,21 @@
       "depends_on": [
         "T-040",
         "T-042"
-      ]
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: implement LLMClient port + GeminiClientAdapter; wire google-genai usage."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: added LLMClient port + GeminiClientAdapter, provider response DTO, and SDK dependency."
+        }
+      ],
+      "commit": {
+        "hash": "fec76366c600f9188ef70fe05152340c877c61cf",
+        "message": "✨ T-045 add Gemini LLM adapter"
+      }
     },
     {
       "id": "T-046",
@@ -1290,6 +1304,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "2f54f2aa2ea85fee877986e08cfd542bbb08a455e4620ca7616a62ead2b8e796"
+    "checksum": "bd3f43e347b2b5efd654c233aad79f69d6ff5fb2552340427e050ea9fcec13b0"
   }
 }
