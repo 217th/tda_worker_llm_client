@@ -836,7 +836,7 @@
       "id": "T-032",
       "title": "E05 Add unit tests for prompt/schema repositories",
       "description": "Unit tests for PromptRepository/SchemaRepository (missing docs, invalid schema invariants, transient errors) plus coverage for prompt/schema fetch logging paths used by the demo wiring.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -851,8 +851,16 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Start: add unit tests for prompt/schema repositories and logging paths."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: unittest discover ran; 45 tests OK (warning about py3.10 EOL)."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "9714bf7691581cc79b7f50be02dfcbafcced4b74",
+        "message": "🧪 T-032 fix handler test"
+      }
     },
     {
       "id": "T-033",
@@ -877,6 +885,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "cf0cde178b611ba5364c475ef2db51d0deada972162258d417da553df3884287"
+    "checksum": "9daf9b483f4a03c459f306c5e5d41084a7e4383617091a2a946e640bc7d53562"
   }
 }
