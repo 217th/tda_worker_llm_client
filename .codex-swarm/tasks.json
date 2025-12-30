@@ -960,7 +960,7 @@
     {
       "id": "T-038",
       "title": "E06 Epic 6 DoD verification (dev)",
-      "description": "Epic 6 cloud DoD verification (dev).\\n\\nPrerequisites:\\n- Latest function revision deployed (post Epic 6 code) and ACTIVE.\\n- Firestore seed docs exist (prompt + schema + flow_runs with READY LLM_REPORT) from Epic 5 demo.\\n- Runtime SA has Firestore + GCS access; ARTIFACTS_BUCKET configured.\\n- GCS bucket reachable and empty path for target runId/timeframe/stepId is known.\\n\\nPreparation steps:\\n1) Confirm deployed revision and env vars (LOG_LEVEL=INFO, ARTIFACTS_BUCKET set).\\n2) Ensure target flow_runs/{runId} has READY LLM_REPORT step with valid inputs and outputs.gcs_uri for ohlcv/charts steps.\\n3) Determine deterministic artifact URI via ArtifactPathPolicy for (runId, timeframe, stepId).\\n4) Ensure object does NOT exist at that URI before positive run (or use a new runId to guarantee).\\n\\nScenario steps (positive):\\n1) Patch flow_runs/{runId}.updatedAt to trigger Firestore update.\\n2) Observe logs for handler flow (ready_step_selected → prompt/schema fetch → (later LLM in Epic 7) but in Epic 6 expect artifact write path) and artifact write logs (gcs_write_started/gcs_write_finished).\\n3) Verify GCS object exists at deterministic URI.\\n4) Verify Firestore step outputs.gcs_uri equals that deterministic URI.\\n\\nScenario steps (negative / split-brain idempotency):\\nA) Re-trigger same runId (patch updatedAt again) after artifact already exists.\\nB) Expect create-only write to detect AlreadyExists and reuse object (no duplicate object).\\nC) If available, simulate split-brain: artifact exists but Firestore outputs.gcs_uri missing → retrigger and ensure outputs.gcs_uri is set without new object.\\n\\nExpected results (positive):\\n- Single object created at deterministic GCS URI (<prefix>/<runId>/<timeframe>/<stepId>.json).\\n- Firestore outputs.gcs_uri set to that URI.\\n- Logs show artifact write success (no errors).\\n\\nExpected results (negative / idempotency):\\n- Re-trigger does NOT create a new object; logs show reuse/AlreadyExists path.\\n- Firestore outputs.gcs_uri remains same; no duplicate LLM calls implied by logs.\\n- If split-brain simulated: outputs.gcs_uri is repaired without new object creation.",
+      "description": "Epic 6 cloud DoD verification (dev).\\n\\nPrerequisites:\\n- Latest function revision deployed (post Epic 6 code + ARTIFACTS_DRY_RUN stub) and ACTIVE.\\n- Firestore seed docs exist (prompt + schema + flow_runs with READY LLM_REPORT) from Epic 5 demo.\\n- Runtime SA has Firestore + GCS access; ARTIFACTS_BUCKET configured.\\n- ARTIFACTS_DRY_RUN=true set in env for demo (stub writes test artifact without Gemini).\\n- GCS bucket reachable and empty path for target runId/timeframe/stepId is known.\\n\\nPreparation steps:\\n1) Confirm deployed revision and env vars (LOG_LEVEL=INFO, ARTIFACTS_BUCKET set, ARTIFACTS_DRY_RUN=true).\\n2) Ensure target flow_runs/{runId} has READY LLM_REPORT step with valid inputs and outputs.gcs_uri for ohlcv/charts steps.\\n3) Determine deterministic artifact URI via ArtifactPathPolicy for (runId, timeframe, stepId).\\n4) Ensure object does NOT exist at that URI before positive run (or use a new runId to guarantee).\\n\\nScenario steps (positive):\\n1) Patch flow_runs/{runId}.updatedAt to trigger Firestore update.\\n2) Observe logs for handler flow (ready_step_selected → prompt/schema fetch → gcs_write_started/gcs_write_finished).\\n3) Verify GCS object exists at deterministic URI.\\n4) Verify Firestore step outputs.gcs_uri equals that deterministic URI.\\n\\nScenario steps (negative / split-brain idempotency):\\nA) Re-trigger same runId (patch updatedAt again) after artifact already exists.\\nB) Expect create-only write to detect AlreadyExists and reuse object (no duplicate object).\\nC) If available, simulate split-brain: artifact exists but Firestore outputs.gcs_uri missing → retrigger and ensure outputs.gcs_uri is set without new object.\\n\\nExpected results (positive):\\n- Single object created at deterministic GCS URI (<prefix>/<runId>/<timeframe>/<stepId>.json).\\n- Firestore outputs.gcs_uri set to that URI.\\n- Logs show artifact write success (no errors).\\n\\nExpected results (negative / idempotency):\\n- Re-trigger does NOT create a new object; logs show reuse/AlreadyExists path.\\n- Firestore outputs.gcs_uri remains same; no duplicate LLM calls implied by logs.\\n- If split-brain simulated: outputs.gcs_uri is repaired without new object creation.",
       "status": "TODO",
       "priority": "med",
       "owner": "INTEGRATOR",
@@ -971,12 +971,28 @@
       "depends_on": [
         "T-037"
       ]
+    },
+    {
+      "id": "T-039",
+      "title": "E06 Add artifact write stub (debug flag)",
+      "description": "Add opt-in stub (e.g., ARTIFACTS_DRY_RUN=true) to generate a minimal LLMReportFile and write it via ArtifactStore create-only path without calling Gemini. Gate by env flag; default off. Log gcs_write_started/gcs_write_finished and patch outputs.gcs_uri for demo.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic6",
+        "artifacts",
+        "debug"
+      ],
+      "depends_on": [
+        "T-036"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "66f1fa917748cc4a88c2c3f570f131b844a9eb0ece0f20ddf260a8df1080ec1e"
+    "checksum": "5103f56b65fc129d57d3ebfab9aaf34484f77d5691dff4b28c3240b2e7121646"
   }
 }
