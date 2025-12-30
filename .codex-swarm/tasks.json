@@ -960,7 +960,7 @@
     {
       "id": "T-038",
       "title": "E06 Epic 6 DoD verification (dev)",
-      "description": "Cloud demo: deploy latest, run a READY LLM_REPORT flow to produce report artifact in GCS, verify outputs.gcs_uri set, and repeat trigger to confirm no duplicate object (reuse path / no second LLM call). Capture logs + GCS evidence in workspace README.",
+      "description": "Epic 6 cloud DoD verification (dev).\\n\\nPrerequisites:\\n- Latest function revision deployed (post Epic 6 code) and ACTIVE.\\n- Firestore seed docs exist (prompt + schema + flow_runs with READY LLM_REPORT) from Epic 5 demo.\\n- Runtime SA has Firestore + GCS access; ARTIFACTS_BUCKET configured.\\n- GCS bucket reachable and empty path for target runId/timeframe/stepId is known.\\n\\nPreparation steps:\\n1) Confirm deployed revision and env vars (LOG_LEVEL=INFO, ARTIFACTS_BUCKET set).\\n2) Ensure target flow_runs/{runId} has READY LLM_REPORT step with valid inputs and outputs.gcs_uri for ohlcv/charts steps.\\n3) Determine deterministic artifact URI via ArtifactPathPolicy for (runId, timeframe, stepId).\\n4) Ensure object does NOT exist at that URI before positive run (or use a new runId to guarantee).\\n\\nScenario steps (positive):\\n1) Patch flow_runs/{runId}.updatedAt to trigger Firestore update.\\n2) Observe logs for handler flow (ready_step_selected → prompt/schema fetch → (later LLM in Epic 7) but in Epic 6 expect artifact write path) and artifact write logs (gcs_write_started/gcs_write_finished).\\n3) Verify GCS object exists at deterministic URI.\\n4) Verify Firestore step outputs.gcs_uri equals that deterministic URI.\\n\\nScenario steps (negative / split-brain idempotency):\\nA) Re-trigger same runId (patch updatedAt again) after artifact already exists.\\nB) Expect create-only write to detect AlreadyExists and reuse object (no duplicate object).\\nC) If available, simulate split-brain: artifact exists but Firestore outputs.gcs_uri missing → retrigger and ensure outputs.gcs_uri is set without new object.\\n\\nExpected results (positive):\\n- Single object created at deterministic GCS URI (<prefix>/<runId>/<timeframe>/<stepId>.json).\\n- Firestore outputs.gcs_uri set to that URI.\\n- Logs show artifact write success (no errors).\\n\\nExpected results (negative / idempotency):\\n- Re-trigger does NOT create a new object; logs show reuse/AlreadyExists path.\\n- Firestore outputs.gcs_uri remains same; no duplicate LLM calls implied by logs.\\n- If split-brain simulated: outputs.gcs_uri is repaired without new object creation.",
       "status": "TODO",
       "priority": "med",
       "owner": "INTEGRATOR",
@@ -977,6 +977,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "e37e2b7039346f3c2225f3b97fc3ef765005148d6c529d0a01d4f1138516cd60"
+    "checksum": "66f1fa917748cc4a88c2c3f570f131b844a9eb0ece0f20ddf260a8df1080ec1e"
   }
 }
