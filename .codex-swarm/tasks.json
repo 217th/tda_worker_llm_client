@@ -1151,7 +1151,7 @@
       "id": "T-043",
       "title": "E07 Implement UserInputAssembler + context resolution",
       "description": "Implement UserInput assembly and context loading per @docs/spec/prompt_storage_and_context.md.\\n\\nScope:\\n- Add UserInputAssembler in @worker_llm_client/reporting/services.py.\\n- Resolve and load context artifacts via ArtifactStore (OHLCV JSON, charts manifest JSON, previous reports).\\n- Enforce size limits: JSON <= 64KB, chart images <= 256KB; violations -> INVALID_STEP_INPUTS.\\n- Produce UserInput text with scope.symbol + step.timeframe and include JSON blocks + chart list.\\n- Return user content parts suitable for Gemini (text parts + optional image bytes) for use in T-045 and demo T-047.\\n- Do not log raw artifact payloads; only sizes/URIs/hashes.\\n\\nOutcome: deterministic UserInput builder that the Gemini adapter can consume.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -1160,7 +1160,21 @@
       "depends_on": [
         "T-036",
         "T-042"
-      ]
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: implement UserInputAssembler + context resolution pipeline."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: added UserInputAssembler with GCS context resolution + size limits and UserInput assembly."
+        }
+      ],
+      "commit": {
+        "hash": "c7c0ae955c6940a4ed29999af1662604b5c5f24a",
+        "message": "✨ T-043 add UserInputAssembler"
+      }
     },
     {
       "id": "T-044",
@@ -1262,6 +1276,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "aee5bf25ec78e0978a76758581465dbdaa200307a6465cc9ec39141a37aff6cb"
+    "checksum": "dacc39bcae18a1712c98a517dc8f1e540eb435c649e7a2da0bb855c3a8514663"
   }
 }
