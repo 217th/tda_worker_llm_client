@@ -836,7 +836,7 @@
       "id": "T-032",
       "title": "E05 Add unit tests for prompt/schema repositories",
       "description": "Unit tests for PromptRepository/SchemaRepository (missing docs, invalid schema invariants, transient errors) plus coverage for prompt/schema fetch logging paths used by the demo wiring.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -846,6 +846,12 @@
       "depends_on": [
         "T-030",
         "T-031"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: add unit tests for prompt/schema repositories and logging paths."
+        }
       ]
     },
     {
@@ -871,6 +877,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "7e2c922b84304553a6a55614a47d3b423cd834e739b6159f5feb4761c21b4731"
+    "checksum": "cf0cde178b611ba5364c475ef2db51d0deada972162258d417da553df3884287"
   }
 }
