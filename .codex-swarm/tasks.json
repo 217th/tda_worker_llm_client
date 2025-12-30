@@ -1312,12 +1312,34 @@
         "hash": "b4c01a5d2584964b1d339580f48305f9fdaa9e35",
         "message": "✨ T-048 extend image limit spike"
       }
+    },
+    {
+      "id": "T-049",
+      "title": "E07 Deviation: schema invalid does not finalize step",
+      "description": "During T-047 negative scenario 4.1 (invalid schema), handler logs structured_output_schema_invalid and cloud_event_finished status=failed, but Firestore step remains READY and no error is written. Expected: step finalized FAILED with error.code=LLM_PROFILE_INVALID and no LLM/GCS side effects. Fix should patch Firestore to FAILED + error, ensure log/metrics consistency, and add/adjust tests to cover this behavior.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic7",
+        "deviation",
+        "verify"
+      ],
+      "depends_on": [
+        "T-047"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Observed in dev at 2025-12-30T17:12:37Z during T-047 4.1 (schemaId=llm_report_output_v99)."
+        }
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "344055418a8429811fc3c20ae9e90a66c00b2b89a60c6a49312f5ca0942a2c74"
+    "checksum": "959bd092be49fec8ccb7f2e7f2cc89adba1a39f01487a37b8b0134bcc8430a4d"
   }
 }
