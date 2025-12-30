@@ -912,7 +912,7 @@
     {
       "id": "T-035",
       "title": "E06 Implement GcsUri + ArtifactPathPolicy + LLMReportFile",
-      "description": "Implement artifacts domain: GcsUri value object (parse/validate gs:// URIs), ArtifactPathPolicy (deterministic <prefix>/<runId>/<timeframe>/<stepId>.json with prefix normalization + invariant checks), and LLMReportFile DTO matching contracts/llm_report_file.schema.json. No I/O yet.",
+      "description": "Implement artifacts domain: GcsUri value object (parse/validate gs:// URIs), ArtifactPathPolicy (deterministic <prefix>/<runId>/<timeframe>/<stepId>.json with prefix normalization + invariant checks incl. timeframe vs stepId), and LLMReportFile DTO matching contracts/llm_report_file.schema.json (metadata + output shape). No I/O yet.",
       "status": "TODO",
       "priority": "med",
       "owner": "CODER",
@@ -928,7 +928,7 @@
     {
       "id": "T-036",
       "title": "E06 Implement ArtifactStore + GcsArtifactStore",
-      "description": "Add ArtifactStore port and GcsArtifactStore adapter with create-only writes (ifGenerationMatch=0). Treat AlreadyExists as success/reuse to support split-brain recovery. Include read/exists helpers and safe error mapping.",
+      "description": "Add ArtifactStore port and GcsArtifactStore adapter with create-only writes (ifGenerationMatch=0). Treat AlreadyExists as success/reuse to support split-brain recovery. Include read/exists helpers and contentType support; return write result indicating created vs reused and map transient errors to retryable codes.",
       "status": "TODO",
       "priority": "med",
       "owner": "CODER",
@@ -969,13 +969,14 @@
         "verify"
       ],
       "depends_on": [
-        "T-037"
+        "T-037",
+        "T-039"
       ]
     },
     {
       "id": "T-039",
       "title": "E06 Add artifact write stub (debug flag)",
-      "description": "Add opt-in stub (e.g., ARTIFACTS_DRY_RUN=true) to generate a minimal LLMReportFile and write it via ArtifactStore create-only path without calling Gemini. Gate by env flag; default off. Log gcs_write_started/gcs_write_finished and patch outputs.gcs_uri for demo.",
+      "description": "Add opt-in stub (ARTIFACTS_DRY_RUN=true) to generate a minimal LLMReportFile and write it via ArtifactStore create-only path without calling Gemini. Gate by env flag; default off. Use ArtifactPathPolicy deterministic URI; log gcs_write_started/gcs_write_finished (include ok + reused flag) and patch steps.<stepId>.outputs.gcs_uri via FlowRunRepository.patch (precondition update_time). Intended for Epic 6 demo only.",
       "status": "TODO",
       "priority": "med",
       "owner": "CODER",
@@ -993,6 +994,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "5103f56b65fc129d57d3ebfab9aaf34484f77d5691dff4b28c3240b2e7121646"
+    "checksum": "6c3a005c8afeadc739cbdcdb2c8b27d0e82a71b5bdf0733af3ceff56f6c9dc8d"
   }
 }
