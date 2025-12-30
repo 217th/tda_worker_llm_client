@@ -123,6 +123,9 @@ class LLMSchema:
             sha256=sha256,
         )
 
+    def provider_schema(self) -> Mapping[str, Any]:
+        return self.json_schema
+
 
 class SchemaRepository(Protocol):
     def get(self, schema_id: str) -> LLMSchema | None:

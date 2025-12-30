@@ -12,6 +12,13 @@ from worker_llm_client.app.services import (
     build_step_update,
     is_precondition_or_aborted,
 )
+from worker_llm_client.app.llm_client import (
+    LLMClient,
+    ProviderResponse,
+    RateLimited,
+    RequestFailed,
+    SafetyBlocked,
+)
 
 __all__ = [
     "ClaimResult",
@@ -22,6 +29,11 @@ __all__ = [
     "LLMSchema",
     "PromptRepository",
     "SchemaRepository",
+    "LLMClient",
+    "ProviderResponse",
+    "RateLimited",
+    "RequestFailed",
+    "SafetyBlocked",
     "build_claim_patch",
     "build_finalize_patch",
     "build_step_update",

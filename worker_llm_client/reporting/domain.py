@@ -136,19 +136,19 @@ class LLMProfile:
         if self.temperature is not None:
             config["temperature"] = self.temperature
         if self.top_p is not None:
-            config["top_p"] = self.top_p
+            config["topP"] = self.top_p
         if self.top_k is not None:
-            config["top_k"] = self.top_k
+            config["topK"] = self.top_k
         if self.max_output_tokens is not None:
-            config["max_output_tokens"] = self.max_output_tokens
+            config["maxOutputTokens"] = self.max_output_tokens
         if self.stop_sequences:
-            config["stop_sequences"] = list(self.stop_sequences)
+            config["stopSequences"] = list(self.stop_sequences)
         if self.candidate_count is not None:
-            config["candidate_count"] = self.candidate_count
+            config["candidateCount"] = self.candidate_count
         if self.response_mime_type:
-            config["response_mime_type"] = self.response_mime_type
+            config["responseMimeType"] = self.response_mime_type
         if self.thinking_config is not None:
-            config["thinking_config"] = dict(self.thinking_config)
+            config["thinkingConfig"] = dict(self.thinking_config)
         return {"model": self.model_name, "config": config}
 
 
