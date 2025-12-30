@@ -4,7 +4,11 @@ import os
 import functions_framework
 
 from worker_llm_client.app.handler import handle_cloud_event
-from worker_llm_client.infra.firestore import FirestoreFlowRunRepository, FirestorePromptRepository
+from worker_llm_client.infra.firestore import (
+    FirestoreFlowRunRepository,
+    FirestorePromptRepository,
+    FirestoreSchemaRepository,
+)
 from worker_llm_client.ops.config import ConfigurationError, WorkerConfig
 from worker_llm_client.ops.logging import CloudLoggingEventLogger, configure_logging
 
@@ -34,6 +38,7 @@ FLOW_RUN_REPO = FirestoreFlowRunRepository(
 PROMPT_REPO = FirestorePromptRepository(
     FIRESTORE_CLIENT, prompts_collection=CONFIG.llm_prompts_collection
 )
+SCHEMA_REPO = FirestoreSchemaRepository(FIRESTORE_CLIENT)
 
 ENV_LABEL = os.environ.get("ENV") or os.environ.get("ENVIRONMENT") or "dev"
 EVENT_LOGGER = CloudLoggingEventLogger(
@@ -51,6 +56,7 @@ def worker_llm_client(cloud_event):
         cloud_event,
         flow_repo=FLOW_RUN_REPO,
         prompt_repo=PROMPT_REPO,
+        schema_repo=SCHEMA_REPO,
         event_logger=EVENT_LOGGER,
         flow_runs_collection=CONFIG.flow_runs_collection,
     )

@@ -12,7 +12,9 @@ from worker_llm_client.app.services import (
     FlowRunRecord,
     FlowRunRepository,
     LLMPrompt,
+    LLMSchema,
     PromptRepository,
+    SchemaRepository,
     build_claim_patch,
     build_finalize_patch,
     is_precondition_or_aborted,
@@ -32,10 +34,15 @@ def _get_step_status(flow_run: Mapping[str, Any], step_id: str) -> str | None:
 
 
 _PROMPT_ID_RE = re.compile(r"^[a-z0-9_]{1,128}$")
+_SCHEMA_ID_RE = re.compile(r"^llm_report_output_v[1-9][0-9]*$")
 
 
 def _is_prompt_id_safe(prompt_id: str) -> bool:
     return bool(_PROMPT_ID_RE.fullmatch(prompt_id))
+
+
+def _is_schema_id_safe(schema_id: str) -> bool:
+    return bool(_SCHEMA_ID_RE.fullmatch(schema_id))
 
 
 @dataclass(slots=True)
@@ -177,5 +184,28 @@ class FirestorePromptRepository(PromptRepository):
         raw = raw if isinstance(raw, Mapping) else {}
         try:
             return LLMPrompt.from_raw(raw, prompt_id=prompt_id)
+        except ValueError:
+            return None
+
+
+@dataclass(slots=True)
+class FirestoreSchemaRepository(SchemaRepository):
+    client: Any
+    schemas_collection: str = "llm_schemas"
+
+    def get(self, schema_id: str) -> LLMSchema | None:
+        if not isinstance(schema_id, str) or not schema_id.strip():
+            raise ValueError("schema_id must be a non-empty string")
+        if not _is_schema_id_safe(schema_id):
+            raise ValueError("schema_id must match ^llm_report_output_v[1-9][0-9]*$")
+
+        doc_ref = self.client.collection(self.schemas_collection).document(schema_id)
+        snapshot = doc_ref.get()
+        if not getattr(snapshot, "exists", False):
+            return None
+        raw = snapshot.to_dict() if snapshot is not None else None
+        raw = raw if isinstance(raw, Mapping) else {}
+        try:
+            return LLMSchema.from_raw(raw, schema_id=schema_id)
         except ValueError:
             return None

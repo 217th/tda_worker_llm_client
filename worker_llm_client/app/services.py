@@ -89,6 +89,46 @@ class PromptRepository(Protocol):
         ...
 
 
+@dataclass(frozen=True, slots=True)
+class LLMSchema:
+    schema_id: str
+    kind: str
+    json_schema: Mapping[str, Any]
+    sha256: str
+
+    @classmethod
+    def from_raw(cls, raw: Mapping[str, Any], *, schema_id: str) -> "LLMSchema":
+        if not isinstance(raw, Mapping):
+            raise ValueError("schema document must be an object")
+        raw_schema_id = raw.get("schemaId")
+        if raw_schema_id is not None:
+            if not isinstance(raw_schema_id, str) or not raw_schema_id.strip():
+                raise ValueError("schemaId must be a non-empty string")
+            if raw_schema_id != schema_id:
+                raise ValueError("schemaId mismatch between doc id and payload")
+        kind = raw.get("kind")
+        if kind != "LLM_REPORT_OUTPUT":
+            raise ValueError("schema kind must be LLM_REPORT_OUTPUT")
+        json_schema = raw.get("jsonSchema")
+        if not isinstance(json_schema, Mapping):
+            raise ValueError("jsonSchema must be an object")
+        sha256 = raw.get("sha256")
+        if not _is_hex_sha256(sha256):
+            raise ValueError("sha256 must be a 64-char lowercase hex string")
+        _validate_llm_report_schema(json_schema)
+        return cls(
+            schema_id=schema_id,
+            kind=kind,
+            json_schema=json_schema,
+            sha256=sha256,
+        )
+
+
+class SchemaRepository(Protocol):
+    def get(self, schema_id: str) -> LLMSchema | None:
+        ...
+
+
 def build_step_update(step_id: str, updates: Mapping[str, Any]) -> dict[str, Any]:
     _require_step_id_safe(step_id)
     return {f"steps.{step_id}.{key}": value for key, value in updates.items()}
@@ -158,3 +198,39 @@ def _require_step_id_safe(step_id: str) -> None:
         raise FlowRunInvalid("stepId must be a non-empty string")
     if "." in step_id or "/" in step_id:
         raise FlowRunInvalid("stepId must not contain '.' or '/'")
+
+
+def _is_hex_sha256(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    if len(value) != 64:
+        return False
+    allowed = set("0123456789abcdef")
+    return all(ch in allowed for ch in value)
+
+
+def _validate_llm_report_schema(json_schema: Mapping[str, Any]) -> None:
+    required = json_schema.get("required")
+    if not isinstance(required, list) or not all(isinstance(item, str) for item in required):
+        raise ValueError("jsonSchema.required must be an array of strings")
+    if "summary" not in required or "details" not in required:
+        raise ValueError("jsonSchema must require summary and details")
+
+    properties = json_schema.get("properties")
+    if not isinstance(properties, Mapping):
+        raise ValueError("jsonSchema.properties must be an object")
+    summary = properties.get("summary")
+    if not isinstance(summary, Mapping):
+        raise ValueError("jsonSchema.properties.summary must be an object")
+    summary_required = summary.get("required")
+    if not isinstance(summary_required, list) or "markdown" not in summary_required:
+        raise ValueError("jsonSchema.properties.summary.required must include markdown")
+    summary_props = summary.get("properties")
+    if not isinstance(summary_props, Mapping):
+        raise ValueError("jsonSchema.properties.summary.properties must be an object")
+    markdown = summary_props.get("markdown")
+    if not isinstance(markdown, Mapping):
+        raise ValueError("jsonSchema.properties.summary.properties.markdown must be an object")
+    markdown_type = markdown.get("type")
+    if markdown_type != "string":
+        raise ValueError("jsonSchema.summary.markdown must be a string type")

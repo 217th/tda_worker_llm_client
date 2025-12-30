@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from worker_llm_client.app.services import FlowRunRepository, PromptRepository
+from worker_llm_client.app.services import FlowRunRepository, PromptRepository, SchemaRepository
 from worker_llm_client.ops.logging import EventLogger, MAX_ARRAY_LENGTH
 from worker_llm_client.workflow.domain import ErrorCode, InvalidStepInputs, LLMProfileInvalid
 from worker_llm_client.workflow.policies import ReadyStepSelector
@@ -47,6 +47,7 @@ def handle_cloud_event(
     *,
     flow_repo: FlowRunRepository,
     prompt_repo: PromptRepository,
+    schema_repo: SchemaRepository,
     event_logger: EventLogger,
     flow_runs_collection: str,
 ) -> str:
@@ -209,6 +210,58 @@ def handle_cloud_event(
         stepId=step_id,
         ok=True,
     )
+
+    structured_output = (
+        inputs.llm_profile.get("structuredOutput")
+        if isinstance(inputs.llm_profile, Mapping)
+        else None
+    )
+    schema_id = None
+    if isinstance(structured_output, Mapping):
+        schema_id = structured_output.get("schemaId")
+
+    if not isinstance(schema_id, str) or not schema_id.strip():
+        event_logger.log(
+            event="structured_output_schema_invalid",
+            severity="ERROR",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            llm={"schemaId": schema_id or "unknown"},
+            reason={"message": "schemaId missing in llmProfile"},
+            error={"code": ErrorCode.LLM_PROFILE_INVALID.value},
+        )
+        event_logger.log(
+            event="cloud_event_finished",
+            severity="ERROR",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            status="failed",
+        )
+        return "schema_invalid"
+
+    schema = schema_repo.get(schema_id)
+    if schema is None:
+        event_logger.log(
+            event="structured_output_schema_invalid",
+            severity="ERROR",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            llm={"schemaId": schema_id},
+            reason={"message": "schema missing or violates invariants"},
+            error={"code": ErrorCode.LLM_PROFILE_INVALID.value},
+        )
+        event_logger.log(
+            event="cloud_event_finished",
+            severity="ERROR",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            status="failed",
+        )
+        return "schema_invalid"
     event_logger.log(
         event="cloud_event_finished",
         severity="INFO",
