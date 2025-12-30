@@ -1064,12 +1064,133 @@
         "hash": "8226d65c8d3ffd3477f87af30d7aec0a60803ba6",
         "message": "🧪 T-039 dry-run artifact stub"
       }
+    },
+    {
+      "id": "T-040",
+      "title": "E07 Spike: Gemini multimodal + JSON schema path",
+      "description": "Validate Gemini SDK/endpoint constraints for combined image inputs + response JSON schema (SPK-010) and confirm AI Studio vs Vertex choice (SPK-007).\\n\\nDeliverables:\\n- Prototype request using google-genai with: system instruction + user parts + 1-3 PNGs + response_json_schema.\\n- Capture SDK version, model(s) tested, limits (image size/count), and error modes.\\n- Update @docs/questions/arch_spikes.md with results (mark SPK-010/SPK-007 resolved) and update @docs/spec/system_integration.md if constraints change.\\n- Record whether the demo in T-047 can rely on image+schema in one request; note any fallbacks.\\n- No secrets committed; use placeholders in any recorded commands or notes.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "DOCS",
+      "tags": [
+        "epic7",
+        "spike"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-041",
+      "title": "E07 Spike: LLM retry/backoff within time budget",
+      "description": "Define retry/backoff policy for Gemini calls and structured-output repair within finalize budget (SPK-014).\\n\\nDeliverables:\\n- Map google-genai exceptions to retryable vs non-retryable per @docs/spec/error_and_retry_model.md.\\n- Decide retry approach (tenacity vs custom minimal loop) compatible with finalize budget (no unbounded retries).\\n- Document attempt caps for primary call and repair call (maxRepairAttempts=1).\\n- Update @docs/spec/error_and_retry_model.md and/or @docs/spec/implementation_contract.md with the chosen policy.\\n- Record decisions in @docs/questions/arch_spikes.md (mark SPK-014 resolved).",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "DOCS",
+      "tags": [
+        "epic7",
+        "spike"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-042",
+      "title": "E07 Implement LLMProfile + StructuredOutputSpec",
+      "description": "Implement LLM request profile/value objects used by Epic 7 services.\\n\\nScope:\\n- Add LLMProfile and StructuredOutputSpec to @worker_llm_client/reporting/domain.py (or new module), including validation helpers.\\n- Enforce MVP constraints: responseMimeType=application/json, candidateCount==1 (when present), schemaId pattern llm_report_output_v{N} (schemaVersion parse).\\n- Preserve modelName/model alias resolution; expose modelName for logging.\\n- Ensure invalid profiles raise/return LLMProfileInvalid (mapped to LLM_PROFILE_INVALID).\\n- Update LLMReportInputs to use/return validated profile (no raw dicts) if needed by downstream Epic 7 services.\\n\\nOutcome: downstream LLM adapter and validator can rely on a validated, structured profile object.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic7"
+      ],
+      "depends_on": [
+        "T-039"
+      ]
+    },
+    {
+      "id": "T-043",
+      "title": "E07 Implement UserInputAssembler + context resolution",
+      "description": "Implement UserInput assembly and context loading per @docs/spec/prompt_storage_and_context.md.\\n\\nScope:\\n- Add UserInputAssembler in @worker_llm_client/reporting/services.py.\\n- Resolve and load context artifacts via ArtifactStore (OHLCV JSON, charts manifest JSON, previous reports).\\n- Enforce size limits: JSON <= 64KB, chart images <= 256KB; violations -> INVALID_STEP_INPUTS.\\n- Produce UserInput text with scope.symbol + step.timeframe and include JSON blocks + chart list.\\n- Return user content parts suitable for Gemini (text parts + optional image bytes) for use in T-045 and demo T-047.\\n- Do not log raw artifact payloads; only sizes/URIs/hashes.\\n\\nOutcome: deterministic UserInput builder that the Gemini adapter can consume.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic7"
+      ],
+      "depends_on": [
+        "T-036",
+        "T-042"
+      ]
+    },
+    {
+      "id": "T-044",
+      "title": "E07 Implement StructuredOutputValidator + StructuredOutputInvalid",
+      "description": "Implement structured output extraction + JSON Schema validation.\\n\\nScope:\\n- Add StructuredOutputValidator and StructuredOutputInvalid in @worker_llm_client/reporting/services.py and @worker_llm_client/reporting/domain.py.\\n- Deterministic extraction: candidates[0].content.parts[*].text concatenation; fallback to response.text.\\n- JSON parse + validate against llm_schemas/{schemaId}.jsonSchema (use jsonschema lib).\\n- Emit StructuredOutputInvalid with reason.kind (missing_text/json_parse/schema_validation/finish_reason), sanitized message, textBytes, textSha256, finishReason (if any).\\n- Ensure validation never logs raw payloads; provide safe diagnostics only.\\n- Support error mapping used in T-047 demo (INVALID_STRUCTURED_OUTPUT).\\n\\nOutcome: deterministic validator that returns output JSON or a safe error object for logging/step error.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic7"
+      ],
+      "depends_on": [
+        "T-042"
+      ]
+    },
+    {
+      "id": "T-045",
+      "title": "E07 Implement LLMClient port + GeminiClientAdapter",
+      "description": "Add provider-neutral LLM client interface and Gemini AI Studio adapter.\\n\\nScope:\\n- Define LLMClient port in @worker_llm_client/app/services.py (or reporting services).\\n- Implement GeminiClientAdapter in @worker_llm_client/infra/gemini.py using google-genai SDK (AI Studio API key).\\n- Support response JSON schema (structured output) and optional image parts; map finishReason + usage metadata.\\n- Add dependency updates in requirements.txt (google-genai, jsonschema).\\n- Map SDK exceptions to retryable/non-retryable errors per @docs/spec/error_and_retry_model.md (no retries yet).\\n- Enforce allowlist via WorkerConfig.is_model_allowed (LLM_PROFILE_INVALID if disallowed).\\n- Keep secrets out of logs; log only llm.auth.mode + modelName + promptId.\\n\\nOutcome: Gemini adapter can execute real requests with structured output and return a provider response DTO for validation.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "CODER",
+      "tags": [
+        "epic7"
+      ],
+      "depends_on": [
+        "T-040",
+        "T-042"
+      ]
+    },
+    {
+      "id": "T-046",
+      "title": "E07 Tests: profile, user input, structured output",
+      "description": "Add unit tests for Epic 7 components.\\n\\nScope:\\n- LLMProfile/StructuredOutputSpec validation (responseMimeType, candidateCount, schemaId pattern).\\n- UserInputAssembler: scope/timeframe injection, JSON context assembly, size limit failures.\\n- StructuredOutputValidator: fixtures in @docs/fixtures/structured_output_invalid/* and happy-path schema validation.\\n- Ensure logs/diagnostics never include raw payloads.\\n\\nOutcome: local test coverage for validator + input assembly invariants.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "TESTER",
+      "tags": [
+        "epic7"
+      ],
+      "depends_on": [
+        "T-042",
+        "T-043",
+        "T-044"
+      ]
+    },
+    {
+      "id": "T-047",
+      "title": "E07 Epic 7 DoD verification (dev)",
+      "description": "Epic 7 cloud DoD verification (dev).\\n\\nDemo prerequisites:\\n- Function deployed with Epic 7 code (LLMClient + validator + UserInputAssembler) and ACTIVE.\\n- GEMINI_API_KEY injected via Secret Manager; model allowlist (if set) permits the target model.\\n- Firestore seed docs exist: llm_prompts/{promptId}, llm_schemas/{schemaId}, flow_runs/{runId} with READY LLM_REPORT step referencing ohlcv/charts outputs.\\n- GCS input artifacts exist (OHLCV JSON + charts manifest JSON; optional chart images if used).\\n- Runtime SA has Firestore + GCS + Secret Manager access.\\n\\nDemo preparation steps:\\n1) Environment setup: confirm function revision, env vars (ARTIFACTS_BUCKET, GEMINI_TIMEOUT_SECONDS, LOG_LEVEL), and secret wiring.\\n2) Artifact preparation: verify input GCS URIs exist and are within size limits.\\n3) Configuration: ensure llmProfile has responseMimeType=application/json, candidateCount=1, structuredOutput.schemaId valid.\\n4) Deployment: update the function if any Epic 7 code or env vars changed.\\n\\nPositive scenario:\\n- Description: valid prompt/schema produces valid structured output and report artifact.\\n- Steps:\\n  a) Patch flow_runs/{runId}.updatedAt to trigger Firestore update.\\n  b) Observe logs: prompt_fetch_* → context_resolve_* → llm_request_* → structured_output_* → gcs_write_* → step_completed → cloud_event_finished status=ok.\\n  c) Verify GCS report object at deterministic URI and Firestore steps.<stepId>.outputs.gcs_uri matches it.\\n- Expected results: LLM call succeeds, structured output validates, report artifact exists, no raw output in logs.\\n\\nNegative scenarios:\\n1) Preflight schema invalid (LLM_PROFILE_INVALID):\\n  - Use a flow_run referencing an invalid schema doc (missing required summary.markdown).\\n  - Expect structured_output_schema_invalid and cloud_event_finished status=failed; no llm_request_started.\\n2) Structured output invalid (INVALID_STRUCTURED_OUTPUT):\\n  - Use a prompt/profile that forces truncated/invalid JSON (e.g., very low maxOutputTokens).\\n  - Expect structured_output_invalid + step FAILED with INVALID_STRUCTURED_OUTPUT; no raw output in logs; artifact absent unless failure artifact policy is explicitly enabled.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic7",
+        "verify"
+      ],
+      "depends_on": [
+        "T-040",
+        "T-041",
+        "T-042",
+        "T-043",
+        "T-044",
+        "T-045",
+        "T-046"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "c10e032bafaf33ceef8e5a672606b80f1a9ddfccc74c8fb89359131ae65faabe"
+    "checksum": "8dc35f2d4d28d110c328064d7938adeff5cfaacccdd6de212bbc62c42b232979"
   }
 }
