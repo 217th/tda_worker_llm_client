@@ -987,7 +987,7 @@
       "id": "T-037",
       "title": "E06 Tests: ArtifactPathPolicy + ArtifactStore",
       "description": "Unit tests for GcsUri + ArtifactPathPolicy (gs:// validation, prefix normalization, deterministic path, timeframe/stepId invariants) and ArtifactStore create-only semantics (AlreadyExists -> reused). Include test for write result flags (created vs reused).",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -997,6 +997,12 @@
       "depends_on": [
         "T-035",
         "T-036"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: add tests for GcsUri, ArtifactPathPolicy, ArtifactStore semantics."
+        }
       ]
     },
     {
@@ -1036,6 +1042,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "f02ba9178ead15399a0461b655d5da91c57acb33950db35a292d5da6cc4fbc69"
+    "checksum": "f60b920c96ec46e24d3291badc1905b9d909aefe36ad7d2fdd17c41574ccfef4"
   }
 }
