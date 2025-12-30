@@ -1123,7 +1123,7 @@
       "id": "T-042",
       "title": "E07 Implement LLMProfile + StructuredOutputSpec",
       "description": "Implement LLM request profile/value objects used by Epic 7 services.\\n\\nScope:\\n- Add LLMProfile and StructuredOutputSpec to @worker_llm_client/reporting/domain.py (or new module), including validation helpers.\\n- Enforce MVP constraints: responseMimeType=application/json, candidateCount==1 (when present), schemaId pattern llm_report_output_v{N} (schemaVersion parse).\\n- Preserve modelName/model alias resolution; expose modelName for logging.\\n- Ensure invalid profiles raise/return LLMProfileInvalid (mapped to LLM_PROFILE_INVALID).\\n- Update LLMReportInputs to use/return validated profile (no raw dicts) if needed by downstream Epic 7 services.\\n\\nOutcome: downstream LLM adapter and validator can rely on a validated, structured profile object.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -1131,7 +1131,21 @@
       ],
       "depends_on": [
         "T-039"
-      ]
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: implement LLMProfile + StructuredOutputSpec per contracts/specs."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: added LLMProfile + StructuredOutputSpec value objects with MVP validation and exports."
+        }
+      ],
+      "commit": {
+        "hash": "a7a1199ba5a1fddea73d099c9d148a3017706553",
+        "message": "✨ T-042 add LLMProfile types"
+      }
     },
     {
       "id": "T-043",
@@ -1248,6 +1262,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "cc96940cdde3991713cd70054a7c5b7d3e6a8f562433cb4f9d27253708ada6c5"
+    "checksum": "aee5bf25ec78e0978a76758581465dbdaa200307a6465cc9ec39141a37aff6cb"
   }
 }
