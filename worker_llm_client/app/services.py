@@ -3,6 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol
 
+try:
+    from google.cloud import firestore as _firestore  # type: ignore
+except Exception:  # pragma: no cover - optional in non-firestore environments
+    _firestore = None
+
 from worker_llm_client.workflow.domain import FlowRun, FlowRunInvalid, StepError
 
 
@@ -140,13 +145,18 @@ def build_step_update(step_id: str, updates: Mapping[str, Any]) -> dict[str, Any
 def build_claim_patch(step_id: str, started_at_rfc3339: str) -> dict[str, Any]:
     if not isinstance(started_at_rfc3339, str) or not started_at_rfc3339.strip():
         raise ValueError("started_at_rfc3339 must be a non-empty string")
-    return build_step_update(
-        step_id,
-        {
-            "status": "RUNNING",
-            "outputs.execution.timing.startedAt": started_at_rfc3339,
-        },
-    )
+    updates: dict[str, Any] = {
+        "status": "RUNNING",
+        "outputs.execution.timing.startedAt": started_at_rfc3339,
+    }
+    delete_field = getattr(_firestore, "DELETE_FIELD", None)
+    if delete_field is not None:
+        updates["error"] = delete_field
+        updates["finishedAt"] = delete_field
+    else:
+        updates["error"] = None
+        updates["finishedAt"] = None
+    return build_step_update(step_id, updates)
 
 
 def build_finalize_patch(
@@ -183,6 +193,12 @@ def build_finalize_patch(
             updates["error"] = dict(error)
         else:
             raise ValueError("error must be a StepError or mapping")
+    elif status == "SUCCEEDED":
+        delete_field = getattr(_firestore, "DELETE_FIELD", None)
+        if delete_field is not None:
+            updates["error"] = delete_field
+        else:
+            updates["error"] = None
 
     return build_step_update(step_id, updates)
 

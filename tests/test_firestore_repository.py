@@ -11,6 +11,11 @@ try:
 except Exception:  # pragma: no cover - fallback for environments without google-api-core
     gax_exceptions = None
 
+try:
+    from google.cloud import firestore as gcfirestore
+except Exception:  # pragma: no cover - optional in minimal test envs
+    gcfirestore = None
+
 
 if gax_exceptions is not None:  # pragma: no cover - use real exceptions when available
     FailedPreconditionError = gax_exceptions.FailedPrecondition
@@ -86,6 +91,19 @@ class FirestoreRepositoryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_claim_patch("step-1", "")
 
+    def test_build_claim_patch_clears_error_and_finished_at(self) -> None:
+        patch = build_claim_patch("step-1", "2025-01-01T00:00:00Z")
+        error_key = "steps.step-1.error"
+        finished_key = "steps.step-1.finishedAt"
+        self.assertIn(error_key, patch)
+        self.assertIn(finished_key, patch)
+        if gcfirestore is not None:
+            self.assertIs(patch[error_key], gcfirestore.DELETE_FIELD)
+            self.assertIs(patch[finished_key], gcfirestore.DELETE_FIELD)
+        else:
+            self.assertIsNone(patch[error_key])
+            self.assertIsNone(patch[finished_key])
+
     def test_build_finalize_patch_requires_status(self) -> None:
         with self.assertRaises(ValueError):
             build_finalize_patch(
@@ -93,6 +111,19 @@ class FirestoreRepositoryTests(unittest.TestCase):
                 status="BAD",
                 finished_at_rfc3339="2025-01-01T00:00:00Z",
             )
+
+    def test_build_finalize_patch_clears_error_on_success(self) -> None:
+        patch = build_finalize_patch(
+            step_id="step-1",
+            status="SUCCEEDED",
+            finished_at_rfc3339="2025-01-01T00:00:00Z",
+        )
+        error_key = "steps.step-1.error"
+        self.assertIn(error_key, patch)
+        if gcfirestore is not None:
+            self.assertIs(patch[error_key], gcfirestore.DELETE_FIELD)
+        else:
+            self.assertIsNone(patch[error_key])
 
     def test_claim_step_success(self) -> None:
         snapshot = FakeSnapshot(self._base_flow_run())
