@@ -51,6 +51,7 @@ class FakeFlowRunRepo:
         outputs_gcs_uri: str | None = None,
         execution: dict | None = None,
         error: dict | None = None,
+        allow_ready: bool = False,
     ) -> FinalizeResult:
         self.finalized.append(
             {
