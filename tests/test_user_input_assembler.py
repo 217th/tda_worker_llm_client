@@ -123,6 +123,29 @@ class UserInputAssemblerTests(unittest.TestCase):
         self.assertIn("prev_report.json", payload.text)
         self.assertEqual(len(payload.chart_images), 1)
 
+    def test_accepts_png_gcs_uri(self) -> None:
+        flow_run = self._build_flow_run()
+        raw_step = flow_run.get_step("llm")
+        self.assertIsNotNone(raw_step)
+        step = LLMReportStep.from_flow_step(raw_step)
+        inputs = step.parse_inputs(flow_run=flow_run)
+
+        manifest = json.dumps({"items": [{"png_gcs_uri": "gs://bucket/chart1.png"}]})
+        payloads = {
+            "gs://bucket/ohlcv.json": json.dumps({"rows": [1]}).encode("utf-8"),
+            "gs://bucket/charts_manifest.json": manifest.encode("utf-8"),
+            "gs://bucket/prev_report.json": json.dumps(
+                {"summary": {"markdown": "ok"}, "details": {}}
+            ).encode("utf-8"),
+            "gs://bucket/chart1.png": b"png-data",
+        }
+        store = FakeArtifactStore(payloads)
+        assembler = UserInputAssembler(artifact_store=store)
+        resolved = assembler.resolve(flow_run=flow_run, step=step, inputs=inputs)
+
+        self.assertEqual(len(resolved.chart_images), 1)
+        self.assertEqual(resolved.chart_images[0].uri, "gs://bucket/chart1.png")
+
     def test_chart_image_size_limit(self) -> None:
         flow_run = self._build_flow_run()
         raw_step = flow_run.get_step("llm")

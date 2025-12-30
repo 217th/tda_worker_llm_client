@@ -252,13 +252,13 @@ def _extract_manifest_items(manifest: Mapping[str, Any]) -> Sequence[Any]:
 
 
 def _extract_chart_uri(item: Mapping[str, Any]) -> str | None:
-    for key in ("gcsUri", "gcs_uri", "pngGcsUri", "imageGcsUri", "uri"):
+    for key in ("gcsUri", "gcs_uri", "pngGcsUri", "png_gcs_uri", "imageGcsUri", "uri"):
         value = item.get(key)
         if isinstance(value, str) and value.strip():
             return value.strip()
     artifact = item.get("artifact")
     if isinstance(artifact, Mapping):
-        for key in ("gcsUri", "gcs_uri", "uri"):
+        for key in ("gcsUri", "gcs_uri", "pngGcsUri", "png_gcs_uri", "uri"):
             value = artifact.get(key)
             if isinstance(value, str) and value.strip():
                 return value.strip()
