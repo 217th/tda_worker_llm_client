@@ -2,7 +2,12 @@ import unittest
 from dataclasses import dataclass, field
 
 from worker_llm_client.app.handler import handle_cloud_event
-from worker_llm_client.app.services import FlowRunRecord, LLMPrompt, LLMSchema
+from worker_llm_client.app.llm_client import ProviderResponse
+from worker_llm_client.app.services import ClaimResult, FinalizeResult, FlowRunRecord, LLMPrompt, LLMSchema
+from worker_llm_client.artifacts.domain import ArtifactPathPolicy, GcsUri
+from worker_llm_client.artifacts.services import WriteResult
+from worker_llm_client.reporting.services import ResolvedUserInput, UserInputPayload
+from worker_llm_client.reporting.structured_output import StructuredOutputValidator
 from worker_llm_client.workflow.domain import FlowRun
 
 
@@ -19,11 +24,46 @@ class FakeEventLogger:
 class FakeFlowRunRepo:
     def __init__(self, flow_run: FlowRun | None) -> None:
         self._flow_run = flow_run
+        self.claims: list[dict] = []
+        self.finalized: list[dict] = []
 
     def get(self, run_id: str) -> FlowRunRecord | None:
         if self._flow_run is None:
             return None
         return FlowRunRecord(flow_run=self._flow_run, update_time="t1")
+
+    def patch(self, run_id: str, patch: dict, *, precondition_update_time: str) -> None:
+        return None
+
+    def claim_step(self, run_id: str, step_id: str, started_at_rfc3339: str) -> ClaimResult:
+        self.claims.append(
+            {"run_id": run_id, "step_id": step_id, "started_at": started_at_rfc3339}
+        )
+        return ClaimResult(claimed=True, status="READY")
+
+    def finalize_step(
+        self,
+        run_id: str,
+        step_id: str,
+        status: str,
+        finished_at_rfc3339: str,
+        *,
+        outputs_gcs_uri: str | None = None,
+        execution: dict | None = None,
+        error: dict | None = None,
+    ) -> FinalizeResult:
+        self.finalized.append(
+            {
+                "run_id": run_id,
+                "step_id": step_id,
+                "status": status,
+                "finished_at": finished_at_rfc3339,
+                "outputs_gcs_uri": outputs_gcs_uri,
+                "execution": execution,
+                "error": error,
+            }
+        )
+        return FinalizeResult(updated=True, status="RUNNING")
 
 
 class FakePromptRepo:
@@ -42,6 +82,46 @@ class FakeSchemaRepo:
         return self._schema
 
 
+class FakeArtifactStore:
+    def read_bytes(self, uri: GcsUri) -> bytes:
+        return b"{}"
+
+    def exists(self, uri: GcsUri) -> bool:
+        return True
+
+    def write_bytes_create_only(self, uri: GcsUri, data: bytes, *, content_type: str) -> WriteResult:
+        return WriteResult(uri=uri, created=True, reused=False)
+
+
+class FakeLLMClient:
+    def generate(self, *, system: str, user_parts, profile, llm_schema=None) -> ProviderResponse:
+        return ProviderResponse(
+            text='{"summary":{"markdown":"ok"},"details":{}}',
+            finish_reason="STOP",
+            usage={"promptTokens": 1, "candidatesTokens": 1},
+            raw=None,
+        )
+
+
+class FakeUserInputAssembler:
+    def resolve(self, *, flow_run: FlowRun, step, inputs) -> ResolvedUserInput:
+        ohlcv = type("JsonArtifact", (), {"uri": "gs://bucket/ohlcv.json", "bytes_len": 2})()
+        charts_manifest = type(
+            "JsonArtifact", (), {"uri": "gs://bucket/charts.json", "bytes_len": 2}
+        )()
+        return ResolvedUserInput(
+            symbol="LINKUSDT",
+            timeframe="1M",
+            ohlcv=ohlcv,
+            charts_manifest=charts_manifest,
+            chart_images=(),
+            previous_reports=(),
+        )
+
+    def assemble(self, *, base_user_prompt: str, resolved: ResolvedUserInput) -> UserInputPayload:
+        return UserInputPayload(text="user prompt", chart_images=())
+
+
 def _build_flow_run(schema_id: str | None = "llm_report_output_v1") -> FlowRun:
     llm_profile = {
         "modelName": "gemini-2.0-flash",
@@ -52,6 +132,7 @@ def _build_flow_run(schema_id: str | None = "llm_report_output_v1") -> FlowRun:
     raw = {
         "runId": "run-1",
         "status": "RUNNING",
+        "scope": {"symbol": "LINKUSDT"},
         "steps": {
             "ohlcv_1m_v1": {
                 "stepType": "OHLCV_EXPORT",
@@ -69,6 +150,7 @@ def _build_flow_run(schema_id: str | None = "llm_report_output_v1") -> FlowRun:
                 "stepType": "LLM_REPORT",
                 "status": "READY",
                 "dependsOn": ["ohlcv_1m_v1", "charts_1m_v1"],
+                "timeframe": "1M",
                 "inputs": {
                     "llm": {"promptId": "prompt_v1", "llmProfile": llm_profile},
                     "ohlcvStepId": "ohlcv_1m_v1",
@@ -121,6 +203,12 @@ class HandlerLoggingTests(unittest.TestCase):
             schema_repo=FakeSchemaRepo(schema),
             event_logger=logger,
             flow_runs_collection="flow_runs",
+            artifact_store=FakeArtifactStore(),
+            path_policy=ArtifactPathPolicy(bucket="bucket"),
+            llm_client=FakeLLMClient(),
+            user_input_assembler=FakeUserInputAssembler(),
+            structured_output_validator=StructuredOutputValidator(),
+            model_allowed=lambda _: True,
         )
         return result, logger.events
 
