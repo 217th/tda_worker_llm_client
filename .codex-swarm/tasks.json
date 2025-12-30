@@ -1356,12 +1356,34 @@
           "body": "Needed to run T-047 positive + 4.2/4.3 with real LLM calls; current handler only does dry-run artifact write."
         }
       ]
+    },
+    {
+      "id": "T-051",
+      "title": "E07 Deviation: runtime SA lacks GCS read access",
+      "description": "During T-047 positive scenario run, Cloud Function failed reading OHLCV JSON from GCS with 403 storage.objects.get. Grant runtime SA storage.objects.get (and create as needed) on artifacts bucket, then re-run scenarios. Ensure error is handled gracefully if read fails.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic7",
+        "deviation",
+        "gcs"
+      ],
+      "depends_on": [
+        "T-047"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Observed 2025-12-30T17:48:02Z in logs: Forbidden 403 for gs://tda-artifacts-test/20251224-061000_LINKUSDT_demo8/ohlcv_export:1M/1M.json."
+        }
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "64ee4b2d80c3c13f2689bcd87d3a52be423d74f35bb89caef5109bc5243b6957"
+    "checksum": "45fdb265202ce625ad4b6d8f4503af560ebbbae63e97c1b97078fd363cbe0305"
   }
 }
