@@ -146,9 +146,9 @@ class HandlerLoggingTests(unittest.TestCase):
             prompt=_build_prompt(),
             schema=_build_schema(),
         )
-        self.assertEqual(result, "schema_invalid")
-        invalid = [e for e in events if e["event"] == "structured_output_schema_invalid"][0]
-        self.assertEqual(invalid["error"]["code"], "LLM_PROFILE_INVALID")
+        self.assertEqual(result, "failed")
+        finished = [e for e in events if e["event"] == "cloud_event_finished"][0]
+        self.assertEqual(finished["error"]["code"], "LLM_PROFILE_INVALID")
 
     def test_ok_path(self) -> None:
         result, events = self._run(

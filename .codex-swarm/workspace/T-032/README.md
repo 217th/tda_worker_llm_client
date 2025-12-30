@@ -19,7 +19,7 @@
 
 ## Verify Steps
 
-- Not run (not requested).
+- `python3 -m unittest discover -s tests -p "test_*.py"` (passes; warning about google.api_core Python 3.10 EOL).
 
 ## Rollback Plan
 
