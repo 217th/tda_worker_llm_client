@@ -193,7 +193,13 @@ def is_precondition_or_aborted(exc: Exception) -> bool:
 
         return isinstance(exc, (gax.FailedPrecondition, gax.Conflict, gax.Aborted))
     except Exception:
-        return exc.__class__.__name__ in ("FailedPrecondition", "Conflict", "Aborted")
+        return exc.__class__.__name__ in (
+            "FailedPrecondition",
+            "FailedPreconditionError",
+            "Conflict",
+            "ConflictError",
+            "Aborted",
+        )
 
 
 def _require_step_id_safe(step_id: str) -> None:
