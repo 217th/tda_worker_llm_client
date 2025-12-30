@@ -1237,7 +1237,7 @@
       "id": "T-046",
       "title": "E07 Tests: profile, user input, structured output",
       "description": "Add unit tests for Epic 7 components.\\n\\nScope:\\n- LLMProfile/StructuredOutputSpec validation (responseMimeType, candidateCount, schemaId pattern).\\n- UserInputAssembler: scope/timeframe injection, JSON context assembly, size limit failures.\\n- StructuredOutputValidator: fixtures in @docs/fixtures/structured_output_invalid/* and happy-path schema validation.\\n- Ensure logs/diagnostics never include raw payloads.\\n\\nOutcome: local test coverage for validator + input assembly invariants.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -1247,7 +1247,21 @@
         "T-042",
         "T-043",
         "T-044"
-      ]
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: add unit tests for LLMProfile/UserInputAssembler/StructuredOutputValidator."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: pytest -q (69 passed). Added tests for profile/user input/structured output and fixed precondition fallback."
+        }
+      ],
+      "commit": {
+        "hash": "e7b8f254d339e6924373469cb4c93c0f14b7172d",
+        "message": "✨ T-046 fix precondition fallback"
+      }
     },
     {
       "id": "T-047",
@@ -1304,6 +1318,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "bd3f43e347b2b5efd654c233aad79f69d6ff5fb2552340427e050ea9fcec13b0"
+    "checksum": "344055418a8429811fc3c20ae9e90a66c00b2b89a60c6a49312f5ca0942a2c74"
   }
 }
