@@ -987,7 +987,7 @@
       "id": "T-037",
       "title": "E06 Tests: ArtifactPathPolicy + ArtifactStore",
       "description": "Unit tests for GcsUri + ArtifactPathPolicy (gs:// validation, prefix normalization, deterministic path, timeframe/stepId invariants) and ArtifactStore create-only semantics (AlreadyExists -> reused). Include test for write result flags (created vs reused).",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "TESTER",
       "tags": [
@@ -1002,8 +1002,16 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Start: add tests for GcsUri, ArtifactPathPolicy, ArtifactStore semantics."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: unittest discover ran; 53 tests OK (warning about py3.10 EOL)."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "d29d3c2eaa20e8e15eee65b4dad7d2b31b27dd35",
+        "message": "🧪 T-037 record test run"
+      }
     },
     {
       "id": "T-038",
@@ -1042,6 +1050,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "f60b920c96ec46e24d3291badc1905b9d909aefe36ad7d2fdd17c41574ccfef4"
+    "checksum": "b35c7b1411a06b1c73c64fc81167c8bb2d7d7dc414ee8014c95a6cbd11e360cc"
   }
 }
