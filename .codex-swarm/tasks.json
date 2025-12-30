@@ -806,7 +806,7 @@
       "id": "T-031",
       "title": "E05 Implement SchemaRepository + FirestoreSchemaRepository",
       "description": "Implement SchemaRepository port + FirestoreSchemaRepository for llm_schemas/{schemaId}, including minimal schema invariants validation and schemaSha256 policy. Extend the same handler wiring to fetch schema and emit structured_output_schema_invalid / LLM_PROFILE_INVALID logs on invalid schema so the Epic 5 prod demo in T-033 is possible (no LLM call yet).",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -821,8 +821,16 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Start: implement schema repository + invariants validation and logging."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: not run (not requested); schema repo + handler wiring only."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "49234a35ab300615e64f99b26150145a151af511",
+        "message": "✨ T-031 schema repo + schema validation logs"
+      }
     },
     {
       "id": "T-032",
@@ -863,6 +871,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "1c37cbf3c88f38860d775e470a92f3b285bdb8cf3a749edcbe909d71e0173512"
+    "checksum": "7e2c922b84304553a6a55614a47d3b423cd834e739b6159f5feb4761c21b4731"
   }
 }
