@@ -3,6 +3,8 @@ import os
 
 import functions_framework
 
+from worker_llm_client.app.handler import handle_cloud_event
+from worker_llm_client.infra.firestore import FirestoreFlowRunRepository, FirestorePromptRepository
 from worker_llm_client.ops.config import ConfigurationError, WorkerConfig
 from worker_llm_client.ops.logging import CloudLoggingEventLogger, configure_logging
 
@@ -16,6 +18,23 @@ except ConfigurationError as exc:
 
 configure_logging(level=CONFIG.log_level)
 
+try:
+    from google.cloud import firestore  # type: ignore
+except Exception as exc:  # pragma: no cover - runtime guard
+    logger.error("Firestore client unavailable: %s", exc)
+    raise
+
+FIRESTORE_CLIENT = firestore.Client(
+    project=CONFIG.gcp_project,
+    database=CONFIG.firestore_database,
+)
+FLOW_RUN_REPO = FirestoreFlowRunRepository(
+    FIRESTORE_CLIENT, flow_runs_collection=CONFIG.flow_runs_collection
+)
+PROMPT_REPO = FirestorePromptRepository(
+    FIRESTORE_CLIENT, prompts_collection=CONFIG.llm_prompts_collection
+)
+
 ENV_LABEL = os.environ.get("ENV") or os.environ.get("ENVIRONMENT") or "dev"
 EVENT_LOGGER = CloudLoggingEventLogger(
     service="worker_llm_client",
@@ -27,26 +46,11 @@ EVENT_LOGGER = CloudLoggingEventLogger(
 
 @functions_framework.cloud_event
 def worker_llm_client(cloud_event):
-    """Minimal stub entrypoint for deploy pipeline testing."""
-    event_id = None
-    event_type = None
-    subject = None
-    if hasattr(cloud_event, "get"):
-        event_id = cloud_event.get("id")
-        event_type = cloud_event.get("type")
-        subject = cloud_event.get("subject")
-    else:
-        event_id = getattr(cloud_event, "id", None)
-        event_type = getattr(cloud_event, "type", None)
-        subject = getattr(cloud_event, "subject", None)
-
-    EVENT_LOGGER.log(
-        event="cloud_event_received",
-        severity="INFO",
-        eventId=event_id or "unknown",
-        runId="unknown",
-        stepId="unknown",
-        eventType=event_type or "unknown",
-        subject=subject or "unknown",
+    """CloudEvent handler for prompt/schema preflight (MVP)."""
+    return handle_cloud_event(
+        cloud_event,
+        flow_repo=FLOW_RUN_REPO,
+        prompt_repo=PROMPT_REPO,
+        event_logger=EVENT_LOGGER,
+        flow_runs_collection=CONFIG.flow_runs_collection,
     )
-    return "ok"

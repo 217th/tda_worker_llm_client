@@ -56,6 +56,39 @@ class FlowRunRepository(Protocol):
         ...
 
 
+@dataclass(frozen=True, slots=True)
+class LLMPrompt:
+    prompt_id: str
+    schema_version: int
+    system_instruction: str
+    user_prompt: str
+
+    @classmethod
+    def from_raw(cls, raw: Mapping[str, Any], *, prompt_id: str) -> "LLMPrompt":
+        if not isinstance(raw, Mapping):
+            raise ValueError("prompt document must be an object")
+        schema_version = raw.get("schemaVersion")
+        if schema_version != 1:
+            raise ValueError("prompt schemaVersion must be 1")
+        system_instruction = raw.get("systemInstruction")
+        if not isinstance(system_instruction, str) or not system_instruction.strip():
+            raise ValueError("prompt systemInstruction must be a non-empty string")
+        user_prompt = raw.get("userPrompt")
+        if not isinstance(user_prompt, str) or not user_prompt.strip():
+            raise ValueError("prompt userPrompt must be a non-empty string")
+        return cls(
+            prompt_id=prompt_id,
+            schema_version=schema_version,
+            system_instruction=system_instruction,
+            user_prompt=user_prompt,
+        )
+
+
+class PromptRepository(Protocol):
+    def get(self, prompt_id: str) -> LLMPrompt | None:
+        ...
+
+
 def build_step_update(step_id: str, updates: Mapping[str, Any]) -> dict[str, Any]:
     _require_step_id_safe(step_id)
     return {f"steps.{step_id}.{key}": value for key, value in updates.items()}

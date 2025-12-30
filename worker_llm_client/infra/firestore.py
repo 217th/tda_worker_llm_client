@@ -4,11 +4,15 @@ from dataclasses import dataclass
 import time
 from typing import Any, Mapping
 
+import re
+
 from worker_llm_client.app.services import (
     ClaimResult,
     FinalizeResult,
     FlowRunRecord,
     FlowRunRepository,
+    LLMPrompt,
+    PromptRepository,
     build_claim_patch,
     build_finalize_patch,
     is_precondition_or_aborted,
@@ -25,6 +29,13 @@ def _get_step_status(flow_run: Mapping[str, Any], step_id: str) -> str | None:
         return None
     status = step.get("status")
     return status if isinstance(status, str) else None
+
+
+_PROMPT_ID_RE = re.compile(r"^[a-z0-9_]{1,128}$")
+
+
+def _is_prompt_id_safe(prompt_id: str) -> bool:
+    return bool(_PROMPT_ID_RE.fullmatch(prompt_id))
 
 
 @dataclass(slots=True)
@@ -145,3 +156,26 @@ class FirestoreFlowRunRepository(FlowRunRepository):
                 raise
 
         return FinalizeResult(updated=False, status=last_status, reason="precondition_failed")
+
+
+@dataclass(slots=True)
+class FirestorePromptRepository(PromptRepository):
+    client: Any
+    prompts_collection: str = "llm_prompts"
+
+    def get(self, prompt_id: str) -> LLMPrompt | None:
+        if not isinstance(prompt_id, str) or not prompt_id.strip():
+            raise ValueError("prompt_id must be a non-empty string")
+        if not _is_prompt_id_safe(prompt_id):
+            raise ValueError("prompt_id must be storage-safe (^[a-z0-9_]{1,128}$)")
+
+        doc_ref = self.client.collection(self.prompts_collection).document(prompt_id)
+        snapshot = doc_ref.get()
+        if not getattr(snapshot, "exists", False):
+            return None
+        raw = snapshot.to_dict() if snapshot is not None else None
+        raw = raw if isinstance(raw, Mapping) else {}
+        try:
+            return LLMPrompt.from_raw(raw, prompt_id=prompt_id)
+        except ValueError:
+            return None
