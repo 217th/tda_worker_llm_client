@@ -169,7 +169,7 @@
 
 ### Epic 7 — LLM execution + structured output validation/repair (MVP)
 
-- Epic Status: `READY`
+- Epic Status: `DONE`
 - Classes: `LLMClient`, `GeminiClientAdapter`, `LLMProfile`, `StructuredOutputSpec`, `UserInputAssembler`, `StructuredOutputValidator`, `StructuredOutputInvalid`
 - Spikes (from `questions/arch_spikes.md`): `SPK-007`, `SPK-009`, `SPK-010`, `SPK-014`, `SPK-020`
 - What changes:
@@ -189,10 +189,11 @@
 - Where to test/demo:
   - Local: да (валидация/сборка/политики с фейковым LLMClient).
   - Cloud: да, `dev` (реальный Gemini endpoint).
+    - демо-прогон: `.codex-swarm/workspace/T-047/README.md`
 
 ### Epic 8 — Invocation orchestration + time budgets (MVP)
 
-- Epic Status: `PENDING`
+- Epic Status: `READY`
 - Classes: `CloudEventParser`, `FlowRunEventHandler`, `TimeBudgetPolicy`
 - Spikes (from `questions/arch_spikes.md`): `SPK-008`, `SPK-014`, `SPK-015`
 - What changes:
