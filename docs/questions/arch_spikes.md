@@ -14,6 +14,8 @@
   - `SPK-005` (see `docs/spec/implementation_contract.md` “Self-trigger loops”, 2025-12-29)
   - `SPK-006` (see `docs/contracts/llm_schema.md` “SHA-256 policy (MVP)”, 2025-12-29)
   - `SPK-016` (see `docs/spec/system_integration.md` “Orchestrator must pin explicit versions”, 2025-12-29)
+  - `SPK-002` (see `docs/spec/implementation_contract.md` “Artifact write semantics (decision)” + `docs/spec/error_and_retry_model.md#Idempotency model`, 2025-12-30)
+  - `SPK-012` (see `docs/spec/system_integration.md` “ARTIFACTS_PREFIX normalization (MVP)”, 2025-12-30)
 - Scope analyzed (no allowlist):
   - `docs/README.md`
   - `docs/spec/**`

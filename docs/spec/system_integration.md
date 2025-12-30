@@ -149,6 +149,10 @@ Artifact naming scheme (decision):
 - use deterministic object names derived from stable identifiers (`runId`, `timeframe`, `stepId`)
 - do not include `attempt` or non-deterministic timestamps in object names
 - do not store `signed_url` in Firestore; store only `gcs_uri`
+- `ARTIFACTS_PREFIX` normalization (MVP):
+  - treat empty/whitespace-only as “no prefix”
+  - trim leading/trailing `/`
+  - join segments with a single `/` (no `//`)
 
 Canonical shapes:
 - JSON artifacts (OHLCV / charts manifest / LLM report):
@@ -175,6 +179,9 @@ If introduced, `flow_runs/{runId}` steps may store both `reportId/recommendation
 
 MVP decision:
 - no separate indexing collections; use `flow_run` + GCS only.
+
+Idempotent write rule (MVP):
+- use create-only writes (`ifGenerationMatch=0`); treat AlreadyExists as success/reuse on the deterministic URI.
 
 ## Delivery/ordering/idempotency guarantees
 

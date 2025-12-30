@@ -415,7 +415,8 @@ No questions
 - Conceptual:
   - Meaning in the domain: Strongly typed representation of GCS object identifiers used throughout artifact flows.
   - Invariants/rules:
-    - Must be `gs://bucket/object`.
+    - Must be `gs://bucket/object` with non-empty bucket + object.
+    - No query/fragment; object path must not be empty.
   - Main states/attributes (meaning):
     - Bucket and object path.
 - Specification-level:
@@ -434,6 +435,8 @@ No questions
   - Meaning in the domain: Deterministic artifact naming policy to guarantee idempotency and enable split-brain recovery.
   - Invariants/rules:
     - JSON artifact: `<prefix>/<runId>/<timeframe>/<stepId>.json`.
+    - `ARTIFACTS_PREFIX` normalization: trim leading/trailing `/`; empty → no prefix; join with single `/`.
+    - `timeframe` must match `steps[stepId].timeframe` and the timeframe embedded in `stepId` (if present).
   - Main states/attributes (meaning):
     - Bucket/prefix configuration.
 - Specification-level:
@@ -451,6 +454,7 @@ No questions
   - Meaning in the domain: Port for artifact I/O with idempotency semantics.
   - Invariants/rules:
     - Support create-only writes (treat “already exists” as success for deterministic objects).
+    - Write result should report `created` vs `reused`.
   - Main states/attributes (meaning):
     - None (interface).
 - Specification-level:

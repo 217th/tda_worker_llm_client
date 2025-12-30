@@ -372,9 +372,19 @@ Prompt assembly note:
 - Canonical JSON artifact path (OHLCV / charts manifest / LLM report):
   - `<ARTIFACTS_PREFIX>/<runId>/<timeframe>/<stepId>.json`
 - Do not include `attempt` or non-deterministic timestamps in JSON object names.
+- `ARTIFACTS_PREFIX` normalization (MVP):
+  - treat empty/whitespace-only as “no prefix”
+  - trim leading/trailing `/`
+  - join segments with a single `/` (no `//`)
 
 Invariant:
 - `steps[stepId].timeframe` must match both the `<timeframe>` path segment and the `<timeframe>` embedded in `stepId` (if present).
+
+### Artifact write semantics (decision)
+
+- Use **create-only** GCS writes with `ifGenerationMatch=0` on the deterministic object path.
+- If the object already exists, treat as **success + reuse** (no new object); finalize Firestore with the same `outputs.gcs_uri`.
+- Split-brain recovery: if the deterministic object exists but Firestore is missing `outputs.gcs_uri`, the next invocation should set `outputs.gcs_uri` without re-writing the object or calling Gemini.
 
 ## CloudEvent parsing (runId extraction)
 
