@@ -131,7 +131,7 @@ Steps:
 Expected result:
 - Context resolution fails due to size; step FAILED with INVALID_STEP_INPUTS; no LLM call.
 
-## Execution log (fill during run; include request/response details)
+## Execution log (original run; 00010-xog)
 
 ### Environment
 - Function revision:
@@ -198,7 +198,7 @@ Expected result:
   - textBytes=19, textSha256=1d64bb1b8aebcdb4e2d5c0b3f820f27b8fa4bbfc1aa6f7e560e92cf933a62f3d
 - Raw output: **DO NOT RECORD** (store only hash/bytes if needed)
 
-### Logs evidence
+### Logs evidence (original run)
 - Log query/filters used:
   - `gcloud logging read 'resource.type="cloud_run_revision" resource.labels.service_name="worker-llm-client" jsonPayload.runId="20251230-120000_LINKUSDT_demo8"' --limit 200 --format json`
   - `gcloud logging read 'resource.type="cloud_run_revision" resource.labels.service_name="worker-llm-client" jsonPayload.event="structured_output_invalid" jsonPayload.runId="20251230-120000_LINKUSDT_demo8"' --limit 20 --format json`
@@ -213,14 +213,70 @@ Expected result:
 - Positive scenario result:
   - LLM call succeeded; structured output validated; report artifact write logged.
   - Firestore step status SUCCEEDED; outputs.gcs_uri set.
-  - Deviation: prior error field remained after success (T-052).
+  - Deviation: error field remained after success (T-052).
 - Negative 4.1 result:
-  - Previously observed structured_output_schema_invalid and cloud_event_finished status=failed.
-  - Not re-run after revision 00010-xog (still valid preflight path).
+  - structured_output_schema_invalid logged; step remained READY (deviation; T-049).
 - Negative 4.2 result:
   - LLM call executed; structured output invalid (json_parse); step FAILED with INVALID_STRUCTURED_OUTPUT.
 - Negative 4.3 result:
   - Context resolve failed due to oversized OHLCV; step FAILED with INVALID_STEP_INPUTS; no LLM call.
+
+## Execution log (rerun: 2025-12-30; 00012-taz)
+
+### Environment
+- Function revision: worker-llm-client-00012-taz (updateTime=2025-12-30T18:47:13Z)
+- env: ARTIFACTS_BUCKET=tda-artifacts-test, ARTIFACTS_DRY_RUN=false, FIRESTORE_DATABASE=tda-db-europe-west4, LOG_LEVEL=INFO
+- secret env: GEMINI_API_KEY=projects/457107786858/secrets/gemini-api-key:latest
+- runId / stepId: 20251230-120000_LINKUSDT_demo8 / llm_report_1m_summary_v1
+- promptId / schemaId: llm_report_prompt_v1 / llm_report_output_v1
+- model: gemini-2.5-flash-lite
+- report URI: gs://tda-artifacts-test/20251230-120000_LINKUSDT_demo8/1M/llm_report_1m_summary_v1.json
+
+### Commands / requests executed (redact secrets)
+- Deploy revision:
+  - Request: `scripts/deploy_dev.sh` (ENV_VARS_INLINE includes FIRESTORE_DATABASE=tda-db-europe-west4)
+  - Response (summary): revision worker-llm-client-00012-taz, updateTime=2025-12-30T18:47:13Z.
+- Positive scenario trigger (set model/schema/URIs + updatedAt):
+  - Request: PATCH flow_runs/20251230-120000_LINKUSDT_demo8 (modelName=gemini-2.5-flash-lite, maxOutputTokens=1024, schemaId=llm_report_output_v1, status=READY, ohlcv/charts URIs, updatedAt=2025-12-30T18:47:57Z).
+  - Response (summary): updateTime=2025-12-30T18:47:57Z.
+- Negative 4.1 (schema invalid):
+  - Request: create llm_schemas/llm_report_output_v99 with missing summary fields; set schemaId=llm_report_output_v99; status=READY; updatedAt=2025-12-30T18:50:00Z.
+  - Response (summary): updateTime=2025-12-30T18:50:00Z.
+- Negative 4.2 (structured output invalid):
+  - Request: set schemaId=llm_report_output_v1; maxOutputTokens=5; status=READY; updatedAt=2025-12-30T18:51:37Z.
+  - Response (summary): updateTime=2025-12-30T18:51:37Z.
+- Negative 4.3 (oversized input):
+  - Request: upload /tmp/ohlcv_big.json (80170 bytes) to gs://tda-artifacts-test/20251230-120000_LINKUSDT_demo8/ohlcv_export:1M/1M_big.json; set ohlcv_export_1m.outputs.gcs_uri to 1M_big.json; status=READY; updatedAt=2025-12-30T18:53:32Z.
+  - Response (summary): updateTime=2025-12-30T18:53:32Z.
+- Cleanup/restore:
+  - Request: restore schemaId=llm_report_output_v1, maxOutputTokens=1024, status=READY, updatedAt=2025-12-30T18:55:24Z.
+  - Request: DELETE llm_schemas/llm_report_output_v99.
+
+### LLM request/response (sanitized)
+- Positive run:
+  - finishReason: STOP
+  - usage: prompt_token_count=7331, candidates_token_count=338, total_token_count=7669
+- Negative 4.2:
+  - finishReason: MAX_TOKENS
+  - structured_output_invalid: kind=json_parse
+
+### Logs evidence (rerun)
+- Log query/filters used:
+  - `gcloud logging read 'resource.type="cloud_run_revision" resource.labels.service_name="worker-llm-client" jsonPayload.runId="20251230-120000_LINKUSDT_demo8"' --freshness=30m --limit 200 --format json`
+  - `gcloud logging read 'resource.type="cloud_run_revision" resource.labels.service_name="worker-llm-client" jsonPayload.event="structured_output_schema_invalid" jsonPayload.runId="20251230-120000_LINKUSDT_demo8"' --freshness=30m --limit 20 --format json`
+  - `gcloud logging read 'resource.type="cloud_run_revision" resource.labels.service_name="worker-llm-client" jsonPayload.event="structured_output_invalid" jsonPayload.runId="20251230-120000_LINKUSDT_demo8"' --freshness=30m --limit 20 --format json`
+  - `gcloud logging read 'resource.type="cloud_run_revision" resource.labels.service_name="worker-llm-client" jsonPayload.event="context_resolve_finished" jsonPayload.runId="20251230-120000_LINKUSDT_demo8"' --freshness=30m --limit 20 --format json`
+- Key log entries (timestamps + event names):
+  - 2025-12-30T18:47:58Z..18:48:03Z: prompt_fetch_started → context_resolve_finished ok=true → llm_request_finished (STOP) → gcs_write_finished ok=true → cloud_event_finished status=ok.
+  - 2025-12-30T18:50:01Z: structured_output_schema_invalid error.code=LLM_PROFILE_INVALID.
+  - 2025-12-30T18:51:40Z: structured_output_invalid kind=json_parse, finishReason=MAX_TOKENS.
+  - 2025-12-30T18:53:33Z: context_resolve_finished ok=false reason="ohlcv exceeds maxContextBytesPerJsonArtifact".
+
+### Results
+- Positive: SUCCEEDED; outputs.gcs_uri set; error field cleared.
+- Negative 4.1: FAILED with error.code=LLM_PROFILE_INVALID (READY→FAILED now handled).
+- Negative 4.2: FAILED with error.code=INVALID_STRUCTURED_OUTPUT.
+- Negative 4.3: FAILED with error.code=INVALID_STEP_INPUTS.
 
 ## Changes Summary (auto)
 
