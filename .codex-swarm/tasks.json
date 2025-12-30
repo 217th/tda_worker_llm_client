@@ -866,7 +866,7 @@
       "id": "T-033",
       "title": "E05 Epic 5 DoD verification + stabilization",
       "description": "Epic 5 DoD verification (prod demo + local tests). Prereqs: prod deploy of worker; Firestore has seed docs; runtime SA has Firestore/Secret Manager access; logs enabled. Seed data counts: at least 1 prompt doc (llm_prompts/{promptId}), at least 1 schema doc (llm_schemas/{schemaId}), and at least 1 flow_runs/{runId} with a READY LLM_REPORT referencing those IDs. Negative scenarios: yes—use one invalid/missing promptId (expect PROMPT_NOT_FOUND) and one invalid schema (missing required summary fields → LLM_PROFILE_INVALID). Prep steps: (1) confirm prod function active, (2) insert/verify prompt+schema docs (1 valid + 1 invalid), (3) create/update flow_runs/{runId} with READY step and valid inputs, (4) create/update a second run or step variant for negative cases. Demo steps: (1) update flow_runs/{runId} to trigger Firestore event, (2) watch Cloud Logging for cloud_event_received → cloud_event_parsed → prompt_fetch_* / structured_output_schema_invalid or prompt_not_found, (3) confirm no prompt/raw output in logs. Expected result: logs show prompt/schema fetch behavior consistent with spec; missing/invalid docs yield PROMPT_NOT_FOUND or LLM_PROFILE_INVALID with sanitized error; no secrets/payloads in logs. Record output in @.codex-swarm/workspace/T-033/README.md.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "INTEGRATOR",
       "tags": [
@@ -883,14 +883,22 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Start: prep Epic5 demo checklist and expected outcomes."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: demo runs executed in cloud; logs captured for positive and negative cases."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "2767320bbcae9848235c1384db83ce54ab26e134",
+        "message": "🛠️ T-033 deploy fix + demo report"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "fc63b19405280135ed1f760c385597219d85fd23933ecb1cf0e5004aae6b1cbd"
+    "checksum": "800aaa10fba1e39c721b676be310a65dc5a7fb4c25294999d38dbbe9b3f6df4d"
   }
 }
