@@ -1180,7 +1180,7 @@
       "id": "T-044",
       "title": "E07 Implement StructuredOutputValidator + StructuredOutputInvalid",
       "description": "Implement structured output extraction + JSON Schema validation.\\n\\nScope:\\n- Add StructuredOutputValidator and StructuredOutputInvalid in @worker_llm_client/reporting/services.py and @worker_llm_client/reporting/domain.py.\\n- Deterministic extraction: candidates[0].content.parts[*].text concatenation; fallback to response.text.\\n- JSON parse + validate against llm_schemas/{schemaId}.jsonSchema (use jsonschema lib).\\n- Emit StructuredOutputInvalid with reason.kind (missing_text/json_parse/schema_validation/finish_reason), sanitized message, textBytes, textSha256, finishReason (if any).\\n- Ensure validation never logs raw payloads; provide safe diagnostics only.\\n- Support error mapping used in T-047 demo (INVALID_STRUCTURED_OUTPUT).\\n\\nOutcome: deterministic validator that returns output JSON or a safe error object for logging/step error.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -1188,7 +1188,21 @@
       ],
       "depends_on": [
         "T-042"
-      ]
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: implement StructuredOutputValidator + StructuredOutputInvalid per spec."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: added StructuredOutputValidator + StructuredOutputInvalid with sanitized diagnostics; uses jsonschema with minimal fallback."
+        }
+      ],
+      "commit": {
+        "hash": "db6c3af81e09038676da770d09b2d061654ec2b0",
+        "message": "✨ T-044 add structured output validator"
+      }
     },
     {
       "id": "T-045",
@@ -1276,6 +1290,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "dacc39bcae18a1712c98a517dc8f1e540eb435c649e7a2da0bb855c3a8514663"
+    "checksum": "2f54f2aa2ea85fee877986e08cfd542bbb08a455e4620ca7616a62ead2b8e796"
   }
 }
