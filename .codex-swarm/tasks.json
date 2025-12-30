@@ -1404,7 +1404,7 @@
       "id": "T-053",
       "title": "E07 Deviation: chart manifest uses png_gcs_uri key",
       "description": "UserInputAssembler does not recognize chart manifest image key png_gcs_uri; context resolution failed with 'charts manifest contains no valid image URIs'. Add support for snake_case key or normalize manifest export. Ensure charts manifest parsing accepts png_gcs_uri (and possibly other aliases) and add tests.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "INTEGRATOR",
       "tags": [
@@ -1418,14 +1418,22 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Observed 2025-12-30T17:53:20Z: INVALID_STEP_INPUTS 'charts manifest contains no valid image URIs' using manifest.json with png_gcs_uri."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: pytest tests/test_user_input_assembler.py -q (4 passed). Added png_gcs_uri alias support + test."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "1449040baec13be6b50eb2845ea2784047b755ec",
+        "message": "✨ T-053 accept png_gcs_uri in chart manifest"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "96f6da6a9e22b006783212d4fd4b506c34b3da3d44c18172a48e2d1c1724063d"
+    "checksum": "ba55d377eb94454480486d91f233babc08c14b50e248483b030b52556a8f038b"
   }
 }
