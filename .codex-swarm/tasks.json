@@ -957,7 +957,7 @@
       "id": "T-036",
       "title": "E06 Implement ArtifactStore + GcsArtifactStore",
       "description": "Add ArtifactStore port and GcsArtifactStore adapter (artifacts/services.py + infra/gcs.py or similar) with create-only writes (ifGenerationMatch=0). Treat AlreadyExists as success/reuse to support split-brain recovery. Include read/exists helpers, contentType, and write result (created vs reused); map transient GCS errors to retryable codes.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "CODER",
       "tags": [
@@ -967,6 +967,12 @@
       ],
       "depends_on": [
         "T-035"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: implement ArtifactStore + GcsArtifactStore with create-only semantics."
+        }
       ]
     },
     {
@@ -1022,6 +1028,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "56c6c7498aa8032555f77968587b18bad5a7d4a2093a6f7ab7e3269c3e08ad10"
+    "checksum": "00bc39141f5536c9e1993e404597b43966e602819a5aa497bb0480cbba6986ac"
   }
 }

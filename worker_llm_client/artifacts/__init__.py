@@ -4,10 +4,20 @@ from worker_llm_client.artifacts.domain import (
     InvalidGcsUri,
     InvalidIdentifier,
 )
+from worker_llm_client.artifacts.services import (
+    ArtifactReadFailed,
+    ArtifactStore,
+    ArtifactWriteFailed,
+    WriteResult,
+)
 
 __all__ = [
     "ArtifactPathPolicy",
     "GcsUri",
     "InvalidGcsUri",
     "InvalidIdentifier",
+    "ArtifactStore",
+    "ArtifactReadFailed",
+    "ArtifactWriteFailed",
+    "WriteResult",
 ]

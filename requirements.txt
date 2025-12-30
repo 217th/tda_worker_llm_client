@@ -1,2 +1,3 @@
 # Cloud Functions gen2 runtime provides functions-framework.
 google-cloud-firestore
+google-cloud-storage
