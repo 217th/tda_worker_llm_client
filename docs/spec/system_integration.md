@@ -134,8 +134,10 @@ MVP endpoint choice:
   - Structured output is supported via `response_mime_type="application/json"` + `response_json_schema`.
   - Image inputs are supported via multipart content (inline image bytes or File API).
   - Vertex AI uses the same SDK with `vertexai=True` plus explicit project/location.
-- Constraint note: structured output and image inputs are documented separately; validate the combined
-  multimodal + response schema path in Epic 7 (SPK-010).
+- Constraint note (validated in T-040, 2025-12-30): the combined multimodal + response schema path
+  works with the Google GenAI Python SDK using `GenerateContentConfig(response_mime_type="application/json",
+  response_json_schema=...)` and inline image bytes via `types.Part.from_bytes`. The model still requires
+  downstream validation for semantic constraints (e.g., specific field values).
 - Model allowlist (MVP): when `GEMINI_ALLOWED_MODELS` is set, the worker must reject any step whose
   `llmProfile.modelName` (or `model`) is not in the allowlist with `LLM_PROFILE_INVALID`.
 

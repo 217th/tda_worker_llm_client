@@ -16,6 +16,8 @@
   - `SPK-016` (see `docs/spec/system_integration.md` “Orchestrator must pin explicit versions”, 2025-12-29)
   - `SPK-002` (see `docs/spec/implementation_contract.md` “Artifact write semantics (decision)” + `docs/spec/error_and_retry_model.md#Idempotency model`, 2025-12-30)
   - `SPK-012` (see `docs/spec/system_integration.md` “ARTIFACTS_PREFIX normalization (MVP)”, 2025-12-30)
+  - `SPK-010` (see `docs/spec/system_integration.md` “Google Gemini (LLM)” + `.codex-swarm/workspace/T-040/README.md`, 2025-12-30)
+  - `SPK-007` (see `docs/spec/system_integration.md` “MVP endpoint choice”, 2025-12-30)
 - Scope analyzed (no allowlist):
   - `docs/README.md`
   - `docs/spec/**`
