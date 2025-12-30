@@ -761,6 +761,10 @@
         {
           "author": "DOCS",
           "body": "Starting prompt/schema registry invariant docs + Firestore seed checklist."
+        },
+        {
+          "author": "DOCS",
+          "body": "Seeded Firestore (dev) IDs: llm_prompts/llm_report_prompt_v1; llm_schemas/llm_report_output_v1 (valid) + llm_report_output_v2 (invalid); flow_runs/20251230-120000_LINKUSDT_demo8 (valid) / 20251230-120500_LINKUSDT_demo8_missing_prompt / 20251230-121000_LINKUSDT_demo8_invalid_schema."
         }
       ]
     },
@@ -835,6 +839,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "6ab69574ec9cea59905f74209c66a1cc6dd2e36eda82a0acf0a3e8a4ceff9e26"
+    "checksum": "04a094a95cbe7d0c1b4647b657d1ece06d148e7d2b4e6804428523008e69d24f"
   }
 }
