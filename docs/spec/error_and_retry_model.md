@@ -124,6 +124,26 @@ If Gemini returns rate limiting:
 - apply backoff
 - optionally cap concurrent executions per function instance (in-process semaphore) (implementation detail)
 
+### Gemini SDK error mapping (google-genai)
+
+SDK error classes (google-genai 1.56.0):
+- `google.genai.errors.APIError` with subclasses:
+  - `ClientError` for HTTP 4xx
+  - `ServerError` for HTTP 5xx
+- `APIError` exposes `code`, `status`, and `message` from the response JSON.
+
+Recommended mapping:
+- `ServerError` (5xx) → `GEMINI_REQUEST_FAILED` (retryable, time-budget gated).
+- `ClientError` with `code=429` or `status=RESOURCE_EXHAUSTED` → `RATE_LIMITED` (retryable).
+- Other `ClientError` → non-retryable configuration/input error:
+  - prefer `LLM_PROFILE_INVALID` for model/config/schema issues
+  - prefer `INVALID_STEP_INPUTS` for missing/invalid inputs or artifacts
+
+Gemini retry envelope (MVP):
+- `maxGeminiAttempts=1` (no primary retry loop).
+- Structured-output repair: `maxRepairAttempts=1` only when remaining time is safely above `finalizeBudgetSeconds`
+  plus a small safety margin (implementation-defined).
+
 ## Partial failures (split-brain cases)
 
 Recommended handling patterns, aligned with deterministic artifacts + at-least-once finalization:
