@@ -1628,12 +1628,26 @@
         "hash": "8ef2644e9d3df22b202c741db988e08afe259463",
         "message": "✨ T-059 support external previous reports"
       }
+    },
+    {
+      "id": "T-060",
+      "title": "Persist full usageMetadata payload",
+      "description": "Update LLM report outputs to store the complete usageMetadata object returned by the model (not just minimum token counts). Preserve all fields as-is (including nulls/details), and update contracts/docs/examples/tests accordingly.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "usage_metadata",
+        "llm",
+        "docs"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "46365825d8844b3ab127dd2cb2caf99386f6d907812b96496babb0132dabfd84"
+    "checksum": "b089eba8e7622c86f87406f33c5fd65abdd09202442ae330e400cde5e9429102"
   }
 }
