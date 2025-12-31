@@ -55,7 +55,12 @@ Inputs (minimum):
   - `inputs.llm.llmProfile.candidateCount`: if provided, must be `1` (deterministic behavior)
 - `inputs.ohlcvStepId`: stepId of an `OHLCV_EXPORT` step; worker resolves `steps[ohlcvStepId].outputs.gcs_uri`.
 - `inputs.chartsManifestStepId`: stepId of a `CHART_EXPORT` step; worker resolves `steps[chartsManifestStepId].outputs.gcs_uri` (charts manifest JSON).
-- optional `inputs.previousReportStepIds`: stepIds of previous `LLM_REPORT` steps whose report artifacts may be included as context. If any referenced step is missing, not `LLM_REPORT`, or missing `outputs.gcs_uri`, the worker must fail the step as `INVALID_STEP_INPUTS`.
+- optional `inputs.previousReportStepIds`: stepIds of previous `LLM_REPORT` steps whose report artifacts may be included as context (same workflow). If any referenced step is missing, not `LLM_REPORT`, or missing `outputs.gcs_uri`, the worker must fail the step as `INVALID_STEP_INPUTS`.
+- optional `inputs.previousReports`: explicit previous report references (external or same workflow). Each item is an object with:
+  - `stepId` (optional): same-workflow `LLM_REPORT` step ID.
+  - `gcs_uri` (optional): direct GCS URI of a report artifact (can be from another workflow).
+  - If both `stepId` and `gcs_uri` are provided, **`gcs_uri` wins** (stepId ignored).
+  - If neither is provided → `INVALID_STEP_INPUTS`.
 
 Outputs (minimum on success):
 - `outputs.gcs_uri`: GCS URI for the final report artifact written by the worker.
@@ -83,5 +88,6 @@ Step-level required fields for an executable `LLM_REPORT`:
 - `inputs.llm.llmProfile` (object; must pass `LLM_PROFILE_INVALID` checks)
 - `inputs.ohlcvStepId` and `inputs.chartsManifestStepId` (string; referenced steps must exist with `outputs.gcs_uri`)
 - optional `inputs.previousReportStepIds` (if present, each referenced step must be `LLM_REPORT` with `outputs.gcs_uri`)
+- optional `inputs.previousReports` (if present, each item must provide `gcs_uri` or a valid `stepId`; invalid items → `INVALID_STEP_INPUTS`)
 
 If a candidate READY step is missing required inputs, the worker fails that step with `INVALID_STEP_INPUTS` (step-level error).

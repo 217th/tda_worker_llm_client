@@ -55,3 +55,9 @@
 ## Rollback Plan
 
 - Revert the commit and remove new input field from docs.
+
+## Execution log
+
+- Tests:
+  - `python -m pytest tests/test_workflow_domain.py -q`
+  - `python -m pytest tests/test_user_input_assembler.py -q`

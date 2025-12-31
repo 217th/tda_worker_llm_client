@@ -25,6 +25,12 @@ class LLMProfileInvalid(ValueError):
     """Raised when an LLM profile is invalid for LLM_REPORT."""
 
 
+@dataclass(frozen=True, slots=True)
+class PreviousReportRef:
+    step_id: str | None
+    gcs_uri: str
+
+
 class ErrorCode(str, Enum):
     FLOW_RUN_NOT_FOUND = "FLOW_RUN_NOT_FOUND"
     FLOW_RUN_INVALID = "FLOW_RUN_INVALID"
@@ -217,9 +223,9 @@ class LLMReportInputs:
     llm_profile: Mapping[str, Any]
     ohlcv_step_id: str
     charts_manifest_step_id: str
-    previous_report_step_ids: tuple[str, ...]
     ohlcv_gcs_uri: str
     charts_manifest_gcs_uri: str
+    previous_report_refs: tuple[PreviousReportRef, ...]
     previous_report_gcs_uris: tuple[str, ...]
 
     @classmethod
@@ -246,22 +252,29 @@ class LLMReportInputs:
             inputs.get("chartsManifestStepId"), label="inputs.chartsManifestStepId"
         )
         previous_report_step_ids = _parse_optional_step_ids(inputs.get("previousReportStepIds"))
+        previous_report_refs: list[PreviousReportRef] = [
+            PreviousReportRef(
+                step_id=step_id,
+                gcs_uri=_resolve_output_uri(flow_run, step_id, require_llm_report=True),
+            )
+            for step_id in previous_report_step_ids
+        ]
+        previous_report_refs.extend(
+            _parse_previous_report_refs(inputs.get("previousReports"), flow_run=flow_run)
+        )
 
         ohlcv_gcs_uri = _resolve_output_uri(flow_run, ohlcv_step_id)
         charts_manifest_gcs_uri = _resolve_output_uri(flow_run, charts_manifest_step_id)
-        previous_report_gcs_uris = tuple(
-            _resolve_output_uri(flow_run, step_id, require_llm_report=True)
-            for step_id in previous_report_step_ids
-        )
+        previous_report_gcs_uris = tuple(ref.gcs_uri for ref in previous_report_refs)
 
         return cls(
             prompt_id=prompt_id,
             llm_profile=llm_profile,
             ohlcv_step_id=ohlcv_step_id,
             charts_manifest_step_id=charts_manifest_step_id,
-            previous_report_step_ids=previous_report_step_ids,
             ohlcv_gcs_uri=ohlcv_gcs_uri,
             charts_manifest_gcs_uri=charts_manifest_gcs_uri,
+            previous_report_refs=tuple(previous_report_refs),
             previous_report_gcs_uris=previous_report_gcs_uris,
         )
 
@@ -297,6 +310,34 @@ def _parse_optional_step_ids(value: Any) -> tuple[str, ...]:
             raise InvalidStepInputs("inputs.previousReportStepIds must contain non-empty strings")
         values.append(item.strip())
     return tuple(values)
+
+
+def _parse_previous_report_refs(
+    value: Any, *, flow_run: FlowRun
+) -> tuple[PreviousReportRef, ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
+        raise InvalidStepInputs("inputs.previousReports must be an array")
+    refs: list[PreviousReportRef] = []
+    for item in value:
+        if not isinstance(item, Mapping):
+            raise InvalidStepInputs("inputs.previousReports must contain objects")
+        raw_step_id = item.get("stepId")
+        step_id = raw_step_id.strip() if isinstance(raw_step_id, str) and raw_step_id.strip() else None
+        raw_uri = item.get("gcs_uri")
+        if raw_uri is None:
+            raw_uri = item.get("gcsUri")
+        gcs_uri = raw_uri.strip() if isinstance(raw_uri, str) and raw_uri.strip() else None
+        if gcs_uri:
+            refs.append(PreviousReportRef(step_id=step_id, gcs_uri=gcs_uri))
+            continue
+        if step_id:
+            resolved = _resolve_output_uri(flow_run, step_id, require_llm_report=True)
+            refs.append(PreviousReportRef(step_id=step_id, gcs_uri=resolved))
+            continue
+        raise InvalidStepInputs("inputs.previousReports[*] must include stepId or gcs_uri")
+    return tuple(refs)
 
 
 def _resolve_output_uri(

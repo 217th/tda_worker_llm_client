@@ -368,6 +368,22 @@
                   "type": "array",
                   "description": "Optional: stepIds of previous LLM_REPORT steps whose report artifacts may be included as context.",
                   "items": { "type": "string", "minLength": 1 }
+                },
+                "previousReports": {
+                  "type": "array",
+                  "description": "Optional: previous report references; each item may specify stepId and/or gcs_uri. If both provided, gcs_uri takes precedence.",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "stepId": { "type": "string", "minLength": 1 },
+                      "gcs_uri": { "type": "string", "pattern": "^gs://.+" }
+                    },
+                    "anyOf": [
+                      { "required": ["stepId"] },
+                      { "required": ["gcs_uri"] }
+                    ]
+                  }
                 }
               }
             },

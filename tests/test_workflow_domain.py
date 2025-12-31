@@ -130,6 +130,41 @@ class LLMReportInputsTests(unittest.TestCase):
         self.assertEqual(parsed.ohlcv_gcs_uri, "gs://x/ohlcv.json")
         self.assertEqual(parsed.charts_manifest_gcs_uri, "gs://x/charts.json")
         self.assertEqual(parsed.previous_report_gcs_uris, ("gs://x/prev.json",))
+        self.assertEqual(parsed.previous_report_refs[0].step_id, "prev")
+
+    def test_previous_reports_gcs_uri_only(self) -> None:
+        flow = self._flow_run_for_inputs()
+        inputs = _llm_step(step_id="llm-a", status="READY")["inputs"]
+        inputs["previousReportStepIds"] = []
+        inputs["previousReports"] = [{"gcs_uri": "gs://x/external.json"}]
+        parsed = LLMReportInputs.from_raw(inputs, flow_run=flow)
+        self.assertEqual(parsed.previous_report_gcs_uris, ("gs://x/external.json",))
+        self.assertIsNone(parsed.previous_report_refs[0].step_id)
+
+    def test_previous_reports_step_id_only(self) -> None:
+        flow = self._flow_run_for_inputs()
+        inputs = _llm_step(step_id="llm-a", status="READY")["inputs"]
+        inputs["previousReportStepIds"] = []
+        inputs["previousReports"] = [{"stepId": "prev"}]
+        parsed = LLMReportInputs.from_raw(inputs, flow_run=flow)
+        self.assertEqual(parsed.previous_report_gcs_uris, ("gs://x/prev.json",))
+        self.assertEqual(parsed.previous_report_refs[0].step_id, "prev")
+
+    def test_previous_reports_prefers_gcs_uri(self) -> None:
+        flow = self._flow_run_for_inputs()
+        inputs = _llm_step(step_id="llm-a", status="READY")["inputs"]
+        inputs["previousReportStepIds"] = []
+        inputs["previousReports"] = [{"stepId": "missing", "gcs_uri": "gs://x/external.json"}]
+        parsed = LLMReportInputs.from_raw(inputs, flow_run=flow)
+        self.assertEqual(parsed.previous_report_gcs_uris, ("gs://x/external.json",))
+
+    def test_previous_reports_missing_fields(self) -> None:
+        flow = self._flow_run_for_inputs()
+        inputs = _llm_step(step_id="llm-a", status="READY")["inputs"]
+        inputs["previousReportStepIds"] = []
+        inputs["previousReports"] = [{}]
+        with self.assertRaises(InvalidStepInputs):
+            LLMReportInputs.from_raw(inputs, flow_run=flow)
 
     def test_missing_prompt_id(self) -> None:
         flow = self._flow_run_for_inputs()

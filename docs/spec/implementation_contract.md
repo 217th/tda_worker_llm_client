@@ -43,6 +43,9 @@ For this component, we care about:
   - `ohlcvStepId`: step ID of an `OHLCV_EXPORT` step; worker resolves `steps[ohlcvStepId].outputs.gcs_uri`
   - `chartsManifestStepId`: step ID of a `CHART_EXPORT` step; worker resolves `steps[chartsManifestStepId].outputs.gcs_uri` (charts manifest JSON)
   - optional `previousReportStepIds`: step IDs of earlier `LLM_REPORT` steps whose artifacts may be included as context
+  - optional `previousReports`: explicit report references (external or same workflow):
+    - each item is an object with optional `stepId` and/or `gcs_uri`
+    - if both `stepId` and `gcs_uri` are provided, **`gcs_uri` wins** (stepId ignored)
 - `outputs`:
   - `gcs_uri` (output artifact)
   - optional execution metadata (see below)
@@ -86,6 +89,7 @@ This subset is the minimum required to select and execute one `LLM_REPORT` step 
 - `inputs.ohlcvStepId`: string; referenced step must exist and contain `outputs.gcs_uri`
 - `inputs.chartsManifestStepId`: string; referenced step must exist and contain `outputs.gcs_uri`
 - `inputs.previousReportStepIds` (optional): each referenced step must be `LLM_REPORT` and contain `outputs.gcs_uri`
+- `inputs.previousReports` (optional): each item must include `gcs_uri` or a valid `stepId` (invalid items → `INVALID_STEP_INPUTS`)
 
 **FlowRun identity fields (optional but recommended):**
 - `runId` inside the document should match the document ID (if present); mismatch → `FLOW_RUN_INVALID`
@@ -356,6 +360,7 @@ Notes:
 For JSON context artifacts (OHLCV, charts manifest, previous reports):
 - worker downloads objects from GCS and injects the content as text into the prompt (or as a dedicated text-part, depending on the SDK).
 - apply a hard size limit per JSON artifact: `maxContextBytesPerJsonArtifact = 64KB`; if exceeded, fail the step with `INVALID_STEP_INPUTS` (contract violation / too-large context).
+- previous reports may come from same-workflow steps (`previousReportStepIds`) or explicit `previousReports[].gcs_uri` references.
 
 For image artifacts (charts):
 - preferred: pass as inline bytes (file/data parts) in the LLM request (e.g., PNG bytes) when supported by the chosen SDK/endpoint.
@@ -568,7 +573,7 @@ For `LLM_REPORT` execution, if any required upstream references are missing or u
 
 ### Previous report references (LLM_REPORT inputs)
 
-If `inputs.previousReportStepIds[*]` contains any invalid reference, finalize as `FAILED` with `error.code=INVALID_STEP_INPUTS`:
+If `inputs.previousReportStepIds[*]` or `inputs.previousReports[*]` contains any invalid reference, finalize as `FAILED` with `error.code=INVALID_STEP_INPUTS`:
 - referenced step does not exist
 - referenced step exists but `stepType != LLM_REPORT`
 - referenced step exists but `outputs.gcs_uri` is missing/empty

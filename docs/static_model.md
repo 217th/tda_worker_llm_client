@@ -823,6 +823,12 @@ package "Workflow Execution" {
     +ohlcvStepId: str
     +chartsManifestStepId: str
     +previousReportStepIds: List<str>
+    +previousReports: List<PreviousReportRef>
+  }
+
+  class PreviousReportRef {
+    +stepId: str?
+    +gcs_uri: str
   }
 
   class StepError {

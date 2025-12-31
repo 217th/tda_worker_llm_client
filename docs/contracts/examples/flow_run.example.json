@@ -75,7 +75,12 @@
         },
         "ohlcvStepId": "ohlcv_1M_bigquery_all_v1",
         "chartsManifestStepId": "charts_1M_default_set_v1",
-        "previousReportStepIds": []
+        "previousReportStepIds": [],
+        "previousReports": [
+          {
+            "gcs_uri": "gs://external-reports/monthly/2024-12/report.json"
+          }
+        ]
       },
       "outputs": {}
     }

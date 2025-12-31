@@ -719,14 +719,18 @@ def _handle_cloud_event_impl(
         ],
     }
     if resolved.previous_reports:
-        artifacts_summary["previous_reports"] = [
-            {
-                "stepId": report.step_id,
+        previous_reports_summary = []
+        for report in resolved.previous_reports:
+            entry = {
                 "uri": report.artifact.uri,
                 "bytes": report.artifact.bytes_len,
             }
-            for report in resolved.previous_reports
-        ]
+            if report.step_id:
+                entry["stepId"] = report.step_id
+            else:
+                entry["source"] = "external"
+            previous_reports_summary.append(entry)
+        artifacts_summary["previous_reports"] = previous_reports_summary
 
     event_logger.log(
         event="context_resolve_finished",

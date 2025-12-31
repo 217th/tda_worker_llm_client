@@ -56,6 +56,11 @@ Rationale:
 - prevents runaway token costs and request rejection due to size
 - keeps behavior deterministic and observable
 
+Previous reports:
+- Same-workflow reports can be referenced via `inputs.previousReportStepIds`.
+- External reports can be referenced via `inputs.previousReports[].gcs_uri`.
+- If both `stepId` and `gcs_uri` are provided for a `previousReports` entry, `gcs_uri` takes precedence.
+
 ### Images (charts)
 
 Preferred mechanism:
@@ -99,7 +104,7 @@ Source: <resolved_inputs.ohlcv.gcs_uri>
 ...
 
 ### Previous reports
-<one block per report, if any>
+<one block per report, if any; label as stepId or `external` when only gcs_uri is provided>
 ```
 
 Notes:

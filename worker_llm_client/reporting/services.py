@@ -37,7 +37,7 @@ class ChartImage:
 
 @dataclass(frozen=True, slots=True)
 class PreviousReport:
-    step_id: str
+    step_id: str | None
     artifact: JsonArtifact
 
 
@@ -99,11 +99,13 @@ class UserInputAssembler:
         )
 
         previous_reports = []
-        for step_id, uri in zip(inputs.previous_report_step_ids, inputs.previous_report_gcs_uris):
+        for ref in inputs.previous_report_refs:
+            step_id = ref.step_id
+            label = step_id or "external"
             report = _load_json_artifact(
                 self._artifact_store,
-                uri,
-                label=f"previous_report:{step_id}",
+                ref.gcs_uri,
+                label=f"previous_report:{label}",
                 max_bytes=self._max_json_bytes,
             )
             previous_reports.append(PreviousReport(step_id=step_id, artifact=report))
@@ -151,7 +153,8 @@ class UserInputAssembler:
         lines.append("### Previous reports")
         if resolved.previous_reports:
             for report in resolved.previous_reports:
-                lines.append(f"- {report.step_id} (uri: {report.artifact.uri})")
+                label = report.step_id or "external"
+                lines.append(f"- {label} (uri: {report.artifact.uri})")
                 lines.append("```json")
                 lines.append(report.artifact.payload)
                 lines.append("```")
