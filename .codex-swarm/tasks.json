@@ -1500,7 +1500,7 @@
       "id": "T-055",
       "title": "E08 CloudEventParser service",
       "description": "Introduce CloudEventParser (infra/cloudevents.py) for Firestore CloudEvent parsing.\n\nScope:\n- Parse/validate subject and runId according to @docs/spec/system_integration.md.\n- Handler uses parser; invalid subject/runId -> cloud_event_ignored (reason=invalid_subject) with no Firestore writes.\n- Unit tests for valid/invalid subjects and logging outcomes.\n\nContribution to Epic 8 demo:\n- Ensures deterministic event ingestion and clear no-op behavior before orchestration.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "INTEGRATOR",
       "tags": [
@@ -1509,6 +1509,16 @@
       ],
       "depends_on": [
         "T-047"
+      ],
+      "commit": {
+        "hash": "8dac548922c1b7df2b5cb4f4ecd726ec8847e531",
+        "message": "✨ T-055 add CloudEventParser"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: pytest tests/test_cloudevent_parser.py tests/test_handler_logging.py -q (7 passed, 1 warning). CloudEventParser integrated."
+        }
       ]
     },
     {
@@ -1562,6 +1572,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "1d822494fb1e57641732ea3f56e0e4e236ef2e4a5708eb7e5695f0c49840b7f9"
+    "checksum": "c2cf5092f06e00257c7aa5cc7b433e7cd67126c9ecebb94441aee9066e7fe8e9"
   }
 }
