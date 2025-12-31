@@ -1,2 +1,3 @@
 .env.dev.local
+.env.prod.local
 docs/fixtures/external_refs/
