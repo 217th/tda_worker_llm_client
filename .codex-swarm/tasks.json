@@ -1661,7 +1661,7 @@
       "id": "T-061",
       "title": "Add one-command prod deploy + smoke script",
       "description": "Create a production deploy script (one command) that performs update deploy with minimal prep, then runs a short smoke run (1 positive + 1 negative scenario), cleans up any test artifacts, and outputs a summary report. Follow the gen2 deploy playbook; require explicit smoke approval and use placeholders in docs. Update docs to describe usage.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "high",
       "owner": "INTEGRATOR",
       "tags": [
@@ -1675,14 +1675,22 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Start: implement prod deploy + smoke script."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: prod deploy+smoke script executed; positive PASS, negative finalized; script fixes logged in @.codex-swarm/workspace/T-061/README.md."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "bc30db01b63e0d0d64085d69239d108690b78891",
+        "message": "🔧 T-061 fix smoke script + log run"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "7e32dd362bb8fcc3d59995d6e7af269abd5a0cede7be80a6e35301c5ad7c13df"
+    "checksum": "056e610b132baab8d25a9db785ede70928dd3a2d46b51e0638a0b6ec37e9aaa0"
   }
 }
