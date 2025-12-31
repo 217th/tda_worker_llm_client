@@ -206,7 +206,7 @@ if schema_id:
         }
     }
 
-json.dump({"fields": fields_out}, open(sys.stdout, "w"))
+json.dump({"fields": fields_out}, sys.stdout)
 PY
 }
 
@@ -221,10 +221,12 @@ firestore_patch() {
 }
 
 extract_step_status_code() {
-  python3 - <<'PY'
-import json, os
-doc = json.load(open(os.environ["DOC_PATH"]))
-step_id = os.environ["STEP_ID"]
+  local doc_path="$1"
+  local step_id="$2"
+  python3 - "$doc_path" "$step_id" <<'PY'
+import json, sys
+doc = json.load(open(sys.argv[1]))
+step_id = sys.argv[2]
 step = doc.get("fields", {}).get("steps", {}).get("mapValue", {}).get("fields", {}).get(step_id, {})
 fields = step.get("mapValue", {}).get("fields", {})
 status = fields.get("status", {}).get("stringValue")
@@ -235,12 +237,40 @@ print(code or "")
 PY
 }
 
+wait_for_step_status() {
+  local run_id="$1"
+  local step_id="$2"
+  local timeout_secs="${3:-60}"
+  local interval_secs="${4:-5}"
+  local deadline=$((SECONDS + timeout_secs))
+  local status=""
+  local code=""
+  while true; do
+    firestore_get "${run_id}"
+    readarray -t result < <(extract_step_status_code "${tmpdir}/${run_id}.json" "${step_id}")
+    status="${result[0]:-}"
+    code="${result[1]:-}"
+    if [[ "${status}" == "SUCCEEDED" || "${status}" == "FAILED" ]]; then
+      echo "${status}"
+      echo "${code}"
+      return 0
+    fi
+    if (( SECONDS >= deadline )); then
+      echo "${status}"
+      echo "${code}"
+      return 0
+    fi
+    sleep "${interval_secs}"
+  done
+}
+
 info "Smoke (positive) using ${SMOKE_POS_RUN_ID}/${SMOKE_POS_STEP_ID}..."
 firestore_get "${SMOKE_POS_RUN_ID}"
 RUN_ID="${SMOKE_POS_RUN_ID}" STEP_ID="${SMOKE_POS_STEP_ID}" DOC_PATH="${tmpdir}/${SMOKE_POS_RUN_ID}.json" \
   build_restore_patch "${SMOKE_POS_RUN_ID}" "${SMOKE_POS_STEP_ID}"
 
 UPDATED_AT="$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)"
+STEP_ID="${SMOKE_POS_STEP_ID}" UPDATED_AT="${UPDATED_AT}" \
 python3 - <<'PY' >"${tmpdir}/pos_patch.json"
 import json, os
 def fs_ts(v): return {"timestampValue": v}
@@ -260,9 +290,7 @@ UPDATE_MASK="updateMask.fieldPaths=updatedAt&updateMask.fieldPaths=steps.${SMOKE
 STEP_ID="${SMOKE_POS_STEP_ID}" UPDATED_AT="${UPDATED_AT}" \
   firestore_patch "${SMOKE_POS_RUN_ID}" "${UPDATE_MASK}" "${tmpdir}/pos_patch.json"
 
-sleep 12
-firestore_get "${SMOKE_POS_RUN_ID}"
-DOC_PATH="${tmpdir}/${SMOKE_POS_RUN_ID}.json" STEP_ID="${SMOKE_POS_STEP_ID}" readarray -t pos_status < <(extract_step_status_code)
+readarray -t pos_status < <(wait_for_step_status "${SMOKE_POS_RUN_ID}" "${SMOKE_POS_STEP_ID}" 90 6)
 POS_STATUS="${pos_status[0]:-}"
 POS_CODE="${pos_status[1]:-}"
 
@@ -348,28 +376,54 @@ def fs_str(v): return {"stringValue": v}
 def fs_null(): return {"nullValue": None}
 step_id=os.environ["STEP_ID"]
 schema_id=os.environ["SCHEMA_ID"]
-fields={
-  "updatedAt": fs_ts(os.environ["UPDATED_AT"]),
-  "steps": {"mapValue": {"fields": {step_id: {"mapValue": {"fields": {
-    "status": fs_str("READY"),
-    "error": fs_null(),
-    "inputs": {"mapValue": {"fields": {
-      "llm": {"mapValue": {"fields": {
-        "llmProfile": {"mapValue": {"fields": {
-          "structuredOutput": {"mapValue": {"fields": {"schemaId": fs_str(schema_id)}}}
-        }}}
-      }}}
-    }}}
-  }}}}}
+fields = {
+    "updatedAt": fs_ts(os.environ["UPDATED_AT"]),
+    "steps": {
+        "mapValue": {
+            "fields": {
+                step_id: {
+                    "mapValue": {
+                        "fields": {
+                            "status": fs_str("READY"),
+                            "error": fs_null(),
+                            "inputs": {
+                                "mapValue": {
+                                    "fields": {
+                                        "llm": {
+                                            "mapValue": {
+                                                "fields": {
+                                                    "llmProfile": {
+                                                        "mapValue": {
+                                                            "fields": {
+                                                                "structuredOutput": {
+                                                                    "mapValue": {
+                                                                        "fields": {
+                                                                            "schemaId": fs_str(schema_id)
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 print(json.dumps({"fields": fields}))
 PY
 UPDATE_MASK="updateMask.fieldPaths=updatedAt&updateMask.fieldPaths=steps.${SMOKE_NEG_STEP_ID}.status&updateMask.fieldPaths=steps.${SMOKE_NEG_STEP_ID}.error&updateMask.fieldPaths=steps.${SMOKE_NEG_STEP_ID}.inputs.llm.llmProfile.structuredOutput.schemaId"
 firestore_patch "${SMOKE_NEG_RUN_ID}" "${UPDATE_MASK}" "${tmpdir}/neg_patch.json"
 
-sleep 10
-firestore_get "${SMOKE_NEG_RUN_ID}"
-DOC_PATH="${tmpdir}/${SMOKE_NEG_RUN_ID}.json" STEP_ID="${SMOKE_NEG_STEP_ID}" readarray -t neg_status < <(extract_step_status_code)
+readarray -t neg_status < <(wait_for_step_status "${SMOKE_NEG_RUN_ID}" "${SMOKE_NEG_STEP_ID}" 90 6)
 NEG_STATUS="${neg_status[0]:-}"
 NEG_CODE="${neg_status[1]:-}"
 

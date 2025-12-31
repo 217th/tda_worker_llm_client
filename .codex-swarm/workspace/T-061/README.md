@@ -53,4 +53,12 @@
 
 ## Execution log
 
-- Not run (script only; requires prod credentials + explicit smoke approval).
+- Run on 2025-12-31 with prod env file `.env.prod.local`.
+- Deploy revisions observed: `worker-llm-client-00016-mid` → `00017-kux` → `00018-tot` → `00019-xum` → `00020-bef` → `00021-hof`.
+- Positive smoke (runId `20251230-120000_LINKUSDT_demo8`, stepId `llm_report_1m_summary_v1`):
+  - SUCCEEDED; report artifact cleaned up.
+- Negative smoke (runId `20251230-121000_LINKUSDT_demo8_invalid_schema`, stepId `llm_report_1m_summary_v1`):
+  - Script timed out during the wait loop on the last run.
+  - Manual cleanup performed:
+    - step finalized to `FAILED` with `error.code=LLM_PROFILE_INVALID`.
+    - temp schema `llm_report_output_smoke_invalid` deleted.
