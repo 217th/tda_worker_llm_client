@@ -1707,12 +1707,28 @@
           "body": "Start: add root README.md describing the LLM_REPORT entity hierarchy (Firestore flow_run + prompt/schema docs + GCS report artifact), with links to schemas/examples."
         }
       ]
+    },
+    {
+      "id": "T-063",
+      "title": "Fix agentctl finish verify call",
+      "description": "Fix NameError in .codex-swarm/agentctl.py cmd_finish (run_verify_commands undefined) so agentctl can close tasks via 'finish' when verify commands are configured.",
+      "status": "TODO",
+      "priority": "low",
+      "owner": "ORCHESTRATOR",
+      "tags": [
+        "tooling",
+        "agentctl"
+      ],
+      "depends_on": [],
+      "verify": [
+        "python3 -m pytest -q"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "c514d01fb2e29a1926d68562112f77d937d62567ba71b0badfa8eaaff151106c"
+    "checksum": "bb42bfcf6e4f0b360d8d5e6d8486f974c60ad09c0618001a0a526489c4e85a5e"
   }
 }

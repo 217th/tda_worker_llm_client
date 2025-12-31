@@ -1669,7 +1669,7 @@ def cmd_finish(args: argparse.Namespace) -> None:
     for task_id in task_ids:
         commands = verify_commands.get(task_id) or []
         if commands and not args.skip_verify and not args.force:
-            run_verify_commands(task_id, commands, cwd=ROOT, quiet=args.quiet)
+            run_verify_with_capture(task_id, cwd=ROOT, quiet=bool(args.quiet))
 
     for task_id in task_ids:
         target = _ensure_task_object(data, task_id)
