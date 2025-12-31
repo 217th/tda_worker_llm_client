@@ -1475,7 +1475,7 @@
       "id": "T-054",
       "title": "E08 TimeBudgetPolicy + invocation deadline config",
       "description": "Implement TimeBudgetPolicy and invocation deadline config.\n\nScope:\n- Add INVOCATION_TIMEOUT_SECONDS to WorkerConfig (default 780) and document in @docs/spec/deploy_and_envs.md.\n- Implement TimeBudgetPolicy with remaining_seconds(now), can_start_llm_call(now), can_start_repair_call(now).\n- Ensure policy snapshot fields are available for logging (remainingSeconds, finalizeBudgetSeconds).\n- Unit tests for policy math + config parsing.\n\nContribution to Epic 8 demo:\n- Enables time-budget guard in T-057 and negative scenario in T-058.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "INTEGRATOR",
       "tags": [
@@ -1484,6 +1484,16 @@
       ],
       "depends_on": [
         "T-047"
+      ],
+      "commit": {
+        "hash": "b30cf070f91566d7e2781efba6394ea32db4698e",
+        "message": "✨ T-054 add time budget policy and config"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: pytest tests/test_config.py tests/test_time_budget_policy.py -q (9 passed). Added TimeBudgetPolicy and INVOCATION_TIMEOUT_SECONDS config."
+        }
       ]
     },
     {
@@ -1552,6 +1562,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "e095f4d3a8a702998d538bd20ec1d33445e1b3ddd54dc8dd31b71ca5a3255f13"
+    "checksum": "1d822494fb1e57641732ea3f56e0e4e236ef2e4a5708eb7e5695f0c49840b7f9"
   }
 }
