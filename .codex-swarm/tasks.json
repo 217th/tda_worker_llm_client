@@ -1690,7 +1690,7 @@
       "id": "T-062",
       "title": "Add root README for LLM_REPORT entity hierarchy",
       "description": "Create README.md in the repo root that documents the entity hierarchy used to describe a LLM_REPORT step (Firestore flow_run, referenced prompt/schema docs, and the final GCS report artifact), with brief descriptions and links to schemas + examples.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "low",
       "owner": "DOCS",
       "tags": [
@@ -1705,14 +1705,22 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Start: add root README.md describing the LLM_REPORT entity hierarchy (Firestore flow_run + prompt/schema docs + GCS report artifact), with links to schemas/examples."
+        },
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: locally ran python3 -m pytest -q (PASS). Docs-only change adds root README.md describing the LLM_REPORT entity hierarchy with schema/example links."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "fa6a64d640bca6273b6700e1f76c996870611b37",
+        "message": "📝 T-062 document LLM_REPORT entity hierarchy"
+      }
     },
     {
       "id": "T-063",
       "title": "Fix agentctl finish verify call",
       "description": "Fix NameError in .codex-swarm/agentctl.py cmd_finish (run_verify_commands undefined) so agentctl can close tasks via 'finish' when verify commands are configured.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "low",
       "owner": "ORCHESTRATOR",
       "tags": [
@@ -1722,6 +1730,16 @@
       "depends_on": [],
       "verify": [
         "python3 -m pytest -q"
+      ],
+      "commit": {
+        "hash": "e335e3d643764156bb40ae6596a23d9cadbe9a03",
+        "message": "🛠️ T-063 fix agentctl finish verify"
+      },
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Verified: locally ran python3 -m pytest -q (PASS). Fix removes NameError in agentctl finish path so tasks can be closed when verify commands are configured."
+        }
       ]
     }
   ],
@@ -1729,6 +1747,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "bb42bfcf6e4f0b360d8d5e6d8486f974c60ad09c0618001a0a526489c4e85a5e"
+    "checksum": "bef74bc0d8e7d14835265fc062f2959a991f594f9d7615ac0ddbc19faaa65e62"
   }
 }
