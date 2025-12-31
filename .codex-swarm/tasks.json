@@ -1525,7 +1525,7 @@
       "id": "T-056",
       "title": "E08 FlowRunEventHandler class",
       "description": "Refactor orchestration into FlowRunEventHandler class in @worker_llm_client/app/handler.py.\n\nScope:\n- Create FlowRunEventHandler.handle(event) that wraps existing orchestration (claim -> prompt/schema -> context -> LLM -> artifact -> finalize).\n- Keep handle_cloud_event as thin wrapper delegating to the class.\n- Update tests to cover class-based handler without changing log taxonomy.\n\nContribution to Epic 8 demo:\n- Provides the E08 application-service structure required by static_model for orchestration and time-budget gating.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "INTEGRATOR",
       "tags": [
@@ -1534,6 +1534,16 @@
       ],
       "depends_on": [
         "T-055"
+      ],
+      "commit": {
+        "hash": "547f59bf477ecc6db34f6622ddf55453ee9fb45f",
+        "message": "✨ T-056 add FlowRunEventHandler class"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: pytest tests/test_handler_logging.py -q (6 passed, 1 warning). FlowRunEventHandler class wraps existing handler."
+        }
       ]
     },
     {
@@ -1572,6 +1582,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "c2cf5092f06e00257c7aa5cc7b433e7cd67126c9ecebb94441aee9066e7fe8e9"
+    "checksum": "5ed8f3e03283f0944a58d6389c8e5a34dd026c18e1a5e151a0c40338e3fcd3c0"
   }
 }
