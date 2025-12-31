@@ -1656,12 +1656,27 @@
         "hash": "8f53bbe38c0067139e22339be5d5ee97c30cfada",
         "message": "✨ T-060 persist full usageMetadata"
       }
+    },
+    {
+      "id": "T-061",
+      "title": "Add one-command prod deploy + smoke script",
+      "description": "Create a production deploy script (one command) that performs update deploy with minimal prep, then runs a short smoke run (1 positive + 1 negative scenario), cleans up any test artifacts, and outputs a summary report. Follow the gen2 deploy playbook; require explicit smoke approval and use placeholders in docs. Update docs to describe usage.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "deploy",
+        "prod",
+        "smoke",
+        "docs"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "86d319c399c9f339a770ee93e3469782624e3c543a0f3ecece4059c58f0b7ce3"
+    "checksum": "7b0fd9759a641b6cafd5c1ab769f54995c5f2badd8070710c678afb395a40652"
   }
 }
