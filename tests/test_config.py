@@ -17,6 +17,7 @@ class WorkerConfigTests(unittest.TestCase):
         self.assertEqual(config.llm_prompts_collection, "llm_prompts")
         self.assertEqual(config.llm_models_collection, "llm_models")
         self.assertEqual(config.log_level, "INFO")
+        self.assertEqual(config.invocation_timeout_seconds, 780)
         self.assertTrue(config.is_model_allowed("gemini-2.0-flash"))
 
     def test_missing_api_key_is_rejected(self) -> None:
@@ -82,6 +83,18 @@ class WorkerConfigTests(unittest.TestCase):
             WorkerConfig.from_env(env)
 
         self.assertIn("ARTIFACTS_DRY_RUN", str(ctx.exception))
+
+    def test_invocation_timeout_invalid(self) -> None:
+        env = {
+            "ARTIFACTS_BUCKET": "test-bucket",
+            "GEMINI_API_KEY": "sk_test_123",
+            "INVOCATION_TIMEOUT_SECONDS": "0",
+        }
+
+        with self.assertRaises(ConfigurationError) as ctx:
+            WorkerConfig.from_env(env)
+
+        self.assertIn("INVOCATION_TIMEOUT_SECONDS", str(ctx.exception))
 
 
 if __name__ == "__main__":

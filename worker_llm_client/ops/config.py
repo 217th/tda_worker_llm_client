@@ -108,6 +108,7 @@ class WorkerConfig:
     gemini_auth: GeminiAuthConfig
     gemini_timeout_seconds: int
     finalize_budget_seconds: int
+    invocation_timeout_seconds: int
     gemini_allowed_models: tuple[str, ...] | None
     log_level: str
 
@@ -138,6 +139,7 @@ class WorkerConfig:
 
         gemini_timeout_seconds = _parse_int(env, "GEMINI_TIMEOUT_SECONDS", 600)
         finalize_budget_seconds = _parse_int(env, "FINALIZE_BUDGET_SECONDS", 120)
+        invocation_timeout_seconds = _parse_int(env, "INVOCATION_TIMEOUT_SECONDS", 780)
 
         allowed_models_raw = _optional_env(env, "GEMINI_ALLOWED_MODELS")
         gemini_allowed_models = (
@@ -162,6 +164,7 @@ class WorkerConfig:
             gemini_auth=gemini_auth,
             gemini_timeout_seconds=gemini_timeout_seconds,
             finalize_budget_seconds=finalize_budget_seconds,
+            invocation_timeout_seconds=invocation_timeout_seconds,
             gemini_allowed_models=gemini_allowed_models,
             log_level=log_level,
         )

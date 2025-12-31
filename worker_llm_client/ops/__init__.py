@@ -2,6 +2,7 @@
 
 from worker_llm_client.ops.config import GeminiApiKey, GeminiAuthConfig, WorkerConfig
 from worker_llm_client.ops.logging import CloudLoggingEventLogger, EventLogger, LogPayloadError
+from worker_llm_client.ops.time_budget import TimeBudgetPolicy
 
 __all__ = [
     "GeminiApiKey",
@@ -10,4 +11,5 @@ __all__ = [
     "EventLogger",
     "CloudLoggingEventLogger",
     "LogPayloadError",
+    "TimeBudgetPolicy",
 ]

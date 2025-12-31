@@ -135,7 +135,7 @@ gcloud firestore databases list \
 - Confirm env vars are defined for:
   - `GCP_PROJECT`, `GCP_REGION`, `FIRESTORE_DATABASE`, `FLOW_RUNS_COLLECTION`
   - `LLM_PROMPTS_COLLECTION`, `LLM_MODELS_COLLECTION`
-  - `ARTIFACTS_BUCKET`, `GEMINI_TIMEOUT_SECONDS`, `FINALIZE_BUDGET_SECONDS`, `LOG_LEVEL`
+  - `ARTIFACTS_BUCKET`, `GEMINI_TIMEOUT_SECONDS`, `FINALIZE_BUDGET_SECONDS`, `INVOCATION_TIMEOUT_SECONDS`, `LOG_LEVEL`
 - Secrets injected via `--set-secrets` (single-key only in MVP).
 
 ## Deploy pipeline (dev)
@@ -180,6 +180,7 @@ Configuration via environment variables (draft):
 - `GEMINI_ALLOWED_MODELS` (optional; comma-separated allowlist of model names)
 - `GEMINI_TIMEOUT_SECONDS` (MVP, default `600`)
 - `FINALIZE_BUDGET_SECONDS` (MVP, default `120`)
+- `INVOCATION_TIMEOUT_SECONDS` (MVP, default `780`)
 - `LOG_LEVEL`
 
 Environment variable style (implementation guidance):
