@@ -1600,12 +1600,26 @@
         "hash": "2942b47fd66545b72277423420ea3b010c03b9d3",
         "message": "🧪 T-058 document Epic 8 demo run"
       }
+    },
+    {
+      "id": "T-059",
+      "title": "Support external previous report references",
+      "description": "Allow LLM_REPORT inputs to reference previous reports by explicit GCS URI (external workflow), while keeping previousReportStepIds for same-workflow refs. If both stepId and gcs_uri are provided for an entry, prefer gcs_uri. Invalid refs (missing stepId/gcs_uri, unknown stepId, non-LLM_REPORT step, or missing outputs.gcs_uri) must fail with INVALID_STEP_INPUTS. Update contracts/docs and add tests covering precedence + invalid cases.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "flow_run",
+        "inputs",
+        "docs"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "1537aa143e7f1a5394225cda31ab7adb60116a39d4fecb4532769ae7c5c282fe"
+    "checksum": "d8a3b75fcf22425f089037ce97884537eb10d9d8299b06a2582a9722724e2c35"
   }
 }
