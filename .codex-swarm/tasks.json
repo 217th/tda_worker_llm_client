@@ -1470,12 +1470,88 @@
         "hash": "1449040baec13be6b50eb2845ea2784047b755ec",
         "message": "✨ T-053 accept png_gcs_uri in chart manifest"
       }
+    },
+    {
+      "id": "T-054",
+      "title": "E08 TimeBudgetPolicy + invocation deadline config",
+      "description": "Implement TimeBudgetPolicy and invocation deadline config.\n\nScope:\n- Add INVOCATION_TIMEOUT_SECONDS to WorkerConfig (default 780) and document in @docs/spec/deploy_and_envs.md.\n- Implement TimeBudgetPolicy with remaining_seconds(now), can_start_llm_call(now), can_start_repair_call(now).\n- Ensure policy snapshot fields are available for logging (remainingSeconds, finalizeBudgetSeconds).\n- Unit tests for policy math + config parsing.\n\nContribution to Epic 8 demo:\n- Enables time-budget guard in T-057 and negative scenario in T-058.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic8",
+        "time_budget"
+      ],
+      "depends_on": [
+        "T-047"
+      ]
+    },
+    {
+      "id": "T-055",
+      "title": "E08 CloudEventParser service",
+      "description": "Introduce CloudEventParser (infra/cloudevents.py) for Firestore CloudEvent parsing.\n\nScope:\n- Parse/validate subject and runId according to @docs/spec/system_integration.md.\n- Handler uses parser; invalid subject/runId -> cloud_event_ignored (reason=invalid_subject) with no Firestore writes.\n- Unit tests for valid/invalid subjects and logging outcomes.\n\nContribution to Epic 8 demo:\n- Ensures deterministic event ingestion and clear no-op behavior before orchestration.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic8",
+        "cloudevents"
+      ],
+      "depends_on": [
+        "T-047"
+      ]
+    },
+    {
+      "id": "T-056",
+      "title": "E08 FlowRunEventHandler class",
+      "description": "Refactor orchestration into FlowRunEventHandler class in @worker_llm_client/app/handler.py.\n\nScope:\n- Create FlowRunEventHandler.handle(event) that wraps existing orchestration (claim -> prompt/schema -> context -> LLM -> artifact -> finalize).\n- Keep handle_cloud_event as thin wrapper delegating to the class.\n- Update tests to cover class-based handler without changing log taxonomy.\n\nContribution to Epic 8 demo:\n- Provides the E08 application-service structure required by static_model for orchestration and time-budget gating.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic8",
+        "handler"
+      ],
+      "depends_on": [
+        "T-055"
+      ]
+    },
+    {
+      "id": "T-057",
+      "title": "E08 Time budget gating in handler",
+      "description": "Integrate TimeBudgetPolicy guard into orchestration.\n\nScope:\n- Before any external call (LLM and repair), check remainingSeconds >= finalizeBudgetSeconds.\n- If insufficient, do NOT start LLM/GCS calls; finalize FAILED with a stable error.code.\n- Decide error code: add TIME_BUDGET_EXCEEDED to ErrorCode (preferred) or reuse an existing code; update @docs/spec/error_and_retry_model.md and @docs/spec/implementation_contract.md accordingly.\n- Emit policy snapshot in logs (remainingSeconds, finalizeBudgetSeconds, repairPlanned).\n- Unit tests for guard path (no llm_request_started, status FAILED, correct error.code).\n\nContribution to Epic 8 demo:\n- Enables negative time-budget scenario in T-058.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic8",
+        "time_budget"
+      ],
+      "depends_on": [
+        "T-054",
+        "T-056"
+      ]
+    },
+    {
+      "id": "T-058",
+      "title": "E08 Cloud demo: orchestration + time budget",
+      "description": "Epic 8 cloud demo verifying orchestration + time budget guard.\n\nDemo prerequisites:\n- Dev GCP access and deployed worker (Cloud Functions gen2).\n- Runtime SA has Secret Manager access for GEMINI_API_KEY and GCS read/write (objectViewer/objectCreator) on artifacts bucket.\n- Firestore DB tda-db-europe-west4 and collections flow_runs/llm_prompts/llm_schemas exist.\n- Seed docs: llm_prompts/{promptId}, llm_schemas/{schemaId} valid; flow_runs/{runId} with READY LLM_REPORT step referencing ohlcv/charts outputs; artifacts exist in GCS and within size limits; charts manifest supports gcs_uri or png_gcs_uri.\n- Model allowlist includes gemini-2.5-flash-lite (or selected model).\n\nDemo preparation steps:\n1) Environment setup: confirm revision includes Epic 8 code; env vars ARTIFACTS_BUCKET, FIRESTORE_DATABASE, GEMINI_TIMEOUT_SECONDS, FINALIZE_BUDGET_SECONDS, INVOCATION_TIMEOUT_SECONDS, LOG_LEVEL; secret env GEMINI_API_KEY.\n2) Artifact preparation: verify OHLCV JSON + charts manifest URIs and sizes (<=64KB JSON, <=256KB image).\n3) Configuration: ensure llmProfile responseMimeType=application/json, candidateCount=1, schemaId valid.\n4) Deployment: deploy with CONFIRM_TRIGGER_UNCHANGED=true; ensure revision ACTIVE.\n\nPositive scenario:\n- Description: normal invocation with sufficient time budget.\n- Steps:\n  a) PATCH flow_runs/{runId}.updatedAt to trigger.\n  b) Observe logs: cloud_event_parsed -> ready_step_selected -> prompt_fetch_* -> context_resolve_* -> llm_request_* -> gcs_write_* -> cloud_event_finished status=ok.\n  c) Verify Firestore: status=SUCCEEDED, outputs.gcs_uri set, error absent.\n- Expected results: LLM call succeeds; artifact written; logs include policy snapshot without raw payloads.\n\nNegative scenario (time budget guard):\n- Description: force remainingSeconds < finalizeBudgetSeconds so LLM is not started.\n- Steps:\n  a) Deploy with INVOCATION_TIMEOUT_SECONDS < FINALIZE_BUDGET_SECONDS (e.g., 60 vs 120).\n  b) Set step READY; PATCH updatedAt to trigger.\n  c) Observe logs: no llm_request_started; cloud_event_finished status=failed with policy snapshot.\n  d) Verify Firestore: status=FAILED, error.code = TIME_BUDGET_EXCEEDED (or code chosen in T-057); no artifact write.\n- Expected results: guard prevents LLM; step finalized cleanly; no external side effects.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "INTEGRATOR",
+      "tags": [
+        "epic8",
+        "demo"
+      ],
+      "depends_on": [
+        "T-057"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "fed228465891e102427db4aac4d32d3c553b48a9eea4ac45f9d01e2848b0b86c"
+    "checksum": "e97dfc778110cccfecdbc115526856b4c68ed9f6a73c9d45eb5c05a457763734"
   }
 }
