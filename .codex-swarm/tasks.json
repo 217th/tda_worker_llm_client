@@ -1605,7 +1605,7 @@
       "id": "T-059",
       "title": "Support external previous report references",
       "description": "Allow LLM_REPORT inputs to reference previous reports by explicit GCS URI (external workflow), while keeping previousReportStepIds for same-workflow refs. If both stepId and gcs_uri are provided for an entry, prefer gcs_uri. Invalid refs (missing stepId/gcs_uri, unknown stepId, non-LLM_REPORT step, or missing outputs.gcs_uri) must fail with INVALID_STEP_INPUTS. Update contracts/docs and add tests covering precedence + invalid cases.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "INTEGRATOR",
       "tags": [
@@ -1618,14 +1618,22 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Start: implement external previous report inputs + docs updates."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: updated inputs for external previous reports; docs + tests updated (see @.codex-swarm/workspace/T-059/README.md)."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "8ef2644e9d3df22b202c741db988e08afe259463",
+        "message": "✨ T-059 support external previous reports"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "aef7e25e666c3ebeb284a3b4f7fb661e2464b0e6b5f49c11d6814c11f66478e5"
+    "checksum": "46365825d8844b3ab127dd2cb2caf99386f6d907812b96496babb0132dabfd84"
   }
 }
