@@ -50,3 +50,7 @@
 ## Rollback Plan
 
 - Remove the script and revert docs changes.
+
+## Execution log
+
+- Not run (script only; requires prod credentials + explicit smoke approval).

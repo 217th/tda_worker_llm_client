@@ -1661,7 +1661,7 @@
       "id": "T-061",
       "title": "Add one-command prod deploy + smoke script",
       "description": "Create a production deploy script (one command) that performs update deploy with minimal prep, then runs a short smoke run (1 positive + 1 negative scenario), cleans up any test artifacts, and outputs a summary report. Follow the gen2 deploy playbook; require explicit smoke approval and use placeholders in docs. Update docs to describe usage.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "high",
       "owner": "INTEGRATOR",
       "tags": [
@@ -1670,13 +1670,19 @@
         "smoke",
         "docs"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: implement prod deploy + smoke script."
+        }
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "7b0fd9759a641b6cafd5c1ab769f54995c5f2badd8070710c678afb395a40652"
+    "checksum": "7e32dd362bb8fcc3d59995d6e7af269abd5a0cede7be80a6e35301c5ad7c13df"
   }
 }

@@ -183,6 +183,61 @@ Configuration via environment variables (draft):
 - `INVOCATION_TIMEOUT_SECONDS` (MVP, default `780`)
 - `LOG_LEVEL`
 
+## Production deploy (one-command + smoke)
+
+Use the production script for a minimal-prep update deploy plus an **optional** smoke pass:
+- @scripts/deploy_prod.sh
+
+The script expects an env file (ignored by git). Default: `.env.prod.local`.
+Keep real identifiers and secrets **out of tracked docs**; use placeholders here.
+
+### Required env (placeholders)
+
+```
+PROJECT_ID="<PROJECT_ID>"
+REGION="<REGION>"
+FUNCTION_NAME="worker-llm-client"
+FIRESTORE_DB="<FIRESTORE_DB>"
+RUNTIME_SA_EMAIL="<RUNTIME_SA_EMAIL>"
+ARTIFACTS_BUCKET="<ARTIFACTS_BUCKET>"
+FLOW_RUNS_COLLECTION="flow_runs"
+SECRET_ENV_VARS="GEMINI_API_KEY=projects/<PROJECT_NUMBER>/secrets/<SECRET_NAME>:latest"
+```
+
+Optional runtime config (defaults applied if omitted):
+```
+ARTIFACTS_PREFIX=""
+ARTIFACTS_DRY_RUN=false
+GEMINI_TIMEOUT_SECONDS=600
+FINALIZE_BUDGET_SECONDS=120
+INVOCATION_TIMEOUT_SECONDS=780
+LOG_LEVEL=INFO
+```
+
+### Smoke verification (opt-in only)
+
+The script **will not** run smoke unless explicitly approved:
+```
+APPROVE_SMOKE_VERIFY=true
+```
+
+Smoke inputs (placeholders):
+```
+SMOKE_POS_RUN_ID="<RUN_ID_OK>"
+SMOKE_POS_STEP_ID="<STEP_ID_OK>"
+SMOKE_POS_TIMEFRAME="<TIMEFRAME_OK>"
+SMOKE_NEG_RUN_ID="<RUN_ID_INVALID>"
+SMOKE_NEG_STEP_ID="<STEP_ID_INVALID>"
+SMOKE_NEG_SCHEMA_ID="llm_report_output_smoke_invalid"
+SMOKE_CLEANUP_GCS=true
+```
+
+Notes:
+- Positive smoke triggers a READY step and expects `SUCCEEDED`.
+- Negative smoke sets an invalid schema and expects `FAILED` with `LLM_PROFILE_INVALID`.
+- The script restores original step fields and deletes the temporary invalid schema doc.
+- Report artifact cleanup is controlled by `SMOKE_CLEANUP_GCS=true`.
+
 Environment variable style (implementation guidance):
 - use `UPPERCASE_WITH_UNDERSCORES`
 - prefer a project prefix when config becomes shared across multiple workers (e.g., `TDA_LLM_...`) (decision TBD)
