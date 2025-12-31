@@ -1550,7 +1550,7 @@
       "id": "T-057",
       "title": "E08 Time budget gating in handler",
       "description": "Integrate TimeBudgetPolicy guard into orchestration.\n\nScope:\n- Before any external call (LLM and repair), check remainingSeconds >= finalizeBudgetSeconds.\n- If insufficient, do NOT start LLM/GCS calls; finalize FAILED with a stable error.code.\n- Decide error code: add TIME_BUDGET_EXCEEDED to ErrorCode (preferred) or reuse an existing code; update @docs/spec/error_and_retry_model.md and @docs/spec/implementation_contract.md accordingly.\n- Emit policy snapshot in logs (remainingSeconds, finalizeBudgetSeconds, repairPlanned).\n- Unit tests for guard path (no llm_request_started, status FAILED, correct error.code).\n\nContribution to Epic 8 demo:\n- Enables negative time-budget scenario in T-058.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "INTEGRATOR",
       "tags": [
@@ -1560,6 +1560,16 @@
       "depends_on": [
         "T-054",
         "T-056"
+      ],
+      "commit": {
+        "hash": "548c65128c22040c19a72468699cdf687692a15f",
+        "message": "✨ T-057 add time budget guard"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: pytest tests/test_handler_logging.py -q (7 passed, 1 warning). TIME_BUDGET_EXCEEDED guard added + specs updated."
+        }
       ]
     },
     {
@@ -1582,6 +1592,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "5ed8f3e03283f0944a58d6389c8e5a34dd026c18e1a5e151a0c40338e3fcd3c0"
+    "checksum": "d30e80b4cf897d4920f3603c134cc0125e42d63c2ee8f63221a958b314655579"
   }
 }
