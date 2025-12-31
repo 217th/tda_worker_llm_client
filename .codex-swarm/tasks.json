@@ -1633,7 +1633,7 @@
       "id": "T-060",
       "title": "Persist full usageMetadata payload",
       "description": "Update LLM report outputs to store the complete usageMetadata object returned by the model (not just minimum token counts). Preserve all fields as-is (including nulls/details), and update contracts/docs/examples/tests accordingly.",
-      "status": "TODO",
+      "status": "DOING",
       "priority": "med",
       "owner": "INTEGRATOR",
       "tags": [
@@ -1641,13 +1641,19 @@
         "llm",
         "docs"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: implement full usageMetadata passthrough."
+        }
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "b089eba8e7622c86f87406f33c5fd65abdd09202442ae330e400cde5e9429102"
+    "checksum": "0e50dc1d688f0d3a354d16ebb9a8c904238b98fc708126c342b0369575492885"
   }
 }

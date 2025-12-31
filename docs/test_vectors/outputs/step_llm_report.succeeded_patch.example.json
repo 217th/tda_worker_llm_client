@@ -7,7 +7,22 @@
       "llm": {
         "finishReason": "STOP",
         "modelVersion": "gemini-2.0-flash-001",
-        "usageMetadata": { "promptTokenCount": 1234, "totalTokenCount": 1690 }
+        "usageMetadata": {
+          "cache_tokens_details": null,
+          "cached_content_token_count": null,
+          "candidates_token_count": 59,
+          "candidates_tokens_details": null,
+          "prompt_token_count": 287,
+          "prompt_tokens_details": [
+            { "modality": "TEXT", "token_count": 29 },
+            { "modality": "IMAGE", "token_count": 258 }
+          ],
+          "thoughts_token_count": null,
+          "tool_use_prompt_token_count": null,
+          "tool_use_prompt_tokens_details": null,
+          "total_token_count": 346,
+          "traffic_type": null
+        }
       },
       "timing": { "startedAt": "2025-12-24T12:00:21Z", "finishedAt": "2025-12-24T12:00:45Z", "durationMs": 24000 }
     }

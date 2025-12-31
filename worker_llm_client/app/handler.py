@@ -815,7 +815,7 @@ def _handle_cloud_event_impl(
         stepId=step_id,
         status="succeeded",
         finishReason=response.finish_reason,
-        llm={"usage": response.usage},
+        llm={"usageMetadata": response.usage},
     )
 
     validated = structured_output_validator.validate(
@@ -859,7 +859,7 @@ def _handle_cloud_event_impl(
             "schemaSha256": schema.sha256,
             "llmProfile": dict(inputs.llm_profile),
             "finishReason": response.finish_reason,
-            "usage": response.usage,
+            "usageMetadata": response.usage,
         },
         "inputs": {
             "ohlcv_gcs_uri": inputs.ohlcv_gcs_uri,

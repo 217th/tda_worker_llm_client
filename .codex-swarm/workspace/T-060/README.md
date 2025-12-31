@@ -39,3 +39,8 @@
 ## Rollback Plan
 
 - Revert the commit and restore minimal usageMetadata fields.
+
+## Execution log
+
+- Tests:
+  - `python -m pytest tests/test_handler_logging.py -q`

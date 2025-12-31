@@ -112,7 +112,10 @@ def _extract_usage(response: Any) -> dict[str, Any] | None:
     if usage is None:
         return None
     if hasattr(usage, "model_dump"):
-        return usage.model_dump()
+        try:
+            return usage.model_dump(exclude_none=False, by_alias=True)
+        except TypeError:
+            return usage.model_dump()
     if isinstance(usage, dict):
         return usage
     return None

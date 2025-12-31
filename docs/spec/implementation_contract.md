@@ -471,7 +471,7 @@ Persist under `steps.<stepId>.outputs` (or `steps.<stepId>.outputs.execution`):
 - `llm`:
   - `finishReason`
   - `modelVersion` (if available)
-  - `usageMetadata` (token counts; at minimum `promptTokenCount` and `totalTokenCount`, plus optional `thoughtsTokenCount`)
+  - `usageMetadata` (full payload from the model response; store all fields as-is, including nulls/details)
   - `requestId` / `operationId` (if available; for correlation)
   - `attempts.total` (integer): 1 normally; 2 if a structured-output repair attempt was executed
   - optional `safety` (safety ratings/blocks, if available)

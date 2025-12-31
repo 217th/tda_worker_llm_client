@@ -57,6 +57,7 @@
 	            "finishReason": { "type": "string", "minLength": 1 },
 	            "usageMetadata": {
 	              "type": "object",
+	              "description": "Full usageMetadata payload from the model response; stored verbatim.",
 	              "additionalProperties": true,
 	              "properties": {
 	                "promptTokenCount": { "type": "integer", "minimum": 0 },
