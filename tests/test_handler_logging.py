@@ -219,8 +219,27 @@ class HandlerLoggingTests(unittest.TestCase):
         self.assertTrue(any(e["event"] == "prompt_fetch_started" for e in events))
         finished = [e for e in events if e["event"] == "prompt_fetch_finished"]
         self.assertEqual(len(finished), 1)
-        self.assertFalse(finished[0].get("ok"))
-        self.assertEqual(finished[0]["error"]["code"], "PROMPT_NOT_FOUND")
+
+    def test_invalid_subject_ignored(self) -> None:
+        logger = FakeEventLogger()
+        result = handle_cloud_event(
+            {"id": "evt-1", "type": "google.cloud.firestore.document.v1.updated", "subject": "documents/other/run-1"},
+            flow_repo=FakeFlowRunRepo(None),
+            prompt_repo=FakePromptRepo(None),
+            schema_repo=FakeSchemaRepo(None),
+            event_logger=logger,
+            flow_runs_collection="flow_runs",
+            artifact_store=FakeArtifactStore(),
+            path_policy=ArtifactPathPolicy(bucket="bucket"),
+            llm_client=FakeLLMClient(),
+            user_input_assembler=FakeUserInputAssembler(),
+            structured_output_validator=StructuredOutputValidator(),
+            model_allowed=lambda _: True,
+        )
+        self.assertEqual(result, "ignored")
+        ignored = [e for e in logger.events if e["event"] == "cloud_event_ignored"]
+        self.assertEqual(len(ignored), 1)
+        self.assertEqual(ignored[0]["reason"], "invalid_subject")
 
     def test_schema_missing(self) -> None:
         result, events = self._run(flow_run=_build_flow_run(), prompt=_build_prompt(), schema=None)

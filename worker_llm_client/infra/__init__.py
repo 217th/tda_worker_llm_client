@@ -1,3 +1,4 @@
+from worker_llm_client.infra.cloudevents import CloudEventParser
 from worker_llm_client.infra.firestore import (
     FirestoreFlowRunRepository,
     FirestorePromptRepository,
@@ -12,4 +13,5 @@ __all__ = [
     "FirestoreSchemaRepository",
     "GcsArtifactStore",
     "GeminiClientAdapter",
+    "CloudEventParser",
 ]

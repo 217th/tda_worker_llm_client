@@ -12,6 +12,7 @@ from worker_llm_client.app.services import (
 )
 from worker_llm_client.artifacts.domain import ArtifactPathPolicy, InvalidIdentifier
 from worker_llm_client.artifacts.services import ArtifactStore, ArtifactWriteFailed
+from worker_llm_client.infra.cloudevents import CloudEventParser
 from worker_llm_client.ops.logging import EventLogger, MAX_ARRAY_LENGTH
 from worker_llm_client.reporting.domain import (
     LLMProfile,
@@ -32,17 +33,6 @@ def _extract_field(cloud_event: Any, name: str) -> Any:
         except Exception:
             return None
     return getattr(cloud_event, name, None)
-
-
-def _parse_run_id(subject: Any, flow_runs_collection: str) -> str | None:
-    if not isinstance(subject, str) or not subject.strip():
-        return None
-    parts = [part for part in subject.split("/") if part]
-    for idx, part in enumerate(parts):
-        if part == flow_runs_collection and idx + 1 < len(parts):
-            run_id = parts[idx + 1].strip()
-            return run_id or None
-    return None
 
 
 def _step_summaries(steps: list[Any]) -> list[dict[str, Any]]:
@@ -139,7 +129,8 @@ def handle_cloud_event(
         subject=subject,
     )
 
-    run_id = _parse_run_id(subject, flow_runs_collection)
+    parser = CloudEventParser(flow_runs_collection=flow_runs_collection)
+    run_id = parser.run_id_from_subject(subject)
     if run_id is None:
         event_logger.log(
             event="cloud_event_ignored",
