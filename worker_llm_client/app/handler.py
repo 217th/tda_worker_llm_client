@@ -98,7 +98,96 @@ def _extract_model_name(llm_profile: Mapping[str, Any]) -> str:
     return "dry_run"
 
 
+class FlowRunEventHandler:
+    """Application service for one CloudEvent invocation."""
+
+    def __init__(
+        self,
+        *,
+        flow_repo: FlowRunRepository,
+        prompt_repo: PromptRepository,
+        schema_repo: SchemaRepository,
+        event_logger: EventLogger,
+        flow_runs_collection: str,
+        artifact_store: ArtifactStore | None = None,
+        path_policy: ArtifactPathPolicy | None = None,
+        artifacts_dry_run: bool = False,
+        llm_client: LLMClient | None = None,
+        user_input_assembler: UserInputAssembler | None = None,
+        structured_output_validator: StructuredOutputValidator | None = None,
+        model_allowed: Callable[[str], bool] | None = None,
+        finalize_budget_seconds: int = 120,
+    ) -> None:
+        self._flow_repo = flow_repo
+        self._prompt_repo = prompt_repo
+        self._schema_repo = schema_repo
+        self._event_logger = event_logger
+        self._flow_runs_collection = flow_runs_collection
+        self._artifact_store = artifact_store
+        self._path_policy = path_policy
+        self._artifacts_dry_run = artifacts_dry_run
+        self._llm_client = llm_client
+        self._user_input_assembler = user_input_assembler
+        self._structured_output_validator = structured_output_validator
+        self._model_allowed = model_allowed
+        self._finalize_budget_seconds = finalize_budget_seconds
+
+    def handle(self, cloud_event: Any) -> str:
+        return _handle_cloud_event_impl(
+            cloud_event,
+            flow_repo=self._flow_repo,
+            prompt_repo=self._prompt_repo,
+            schema_repo=self._schema_repo,
+            event_logger=self._event_logger,
+            flow_runs_collection=self._flow_runs_collection,
+            artifact_store=self._artifact_store,
+            path_policy=self._path_policy,
+            artifacts_dry_run=self._artifacts_dry_run,
+            llm_client=self._llm_client,
+            user_input_assembler=self._user_input_assembler,
+            structured_output_validator=self._structured_output_validator,
+            model_allowed=self._model_allowed,
+            finalize_budget_seconds=self._finalize_budget_seconds,
+        )
+
+
 def handle_cloud_event(
+    cloud_event: Any,
+    *,
+    flow_repo: FlowRunRepository,
+    prompt_repo: PromptRepository,
+    schema_repo: SchemaRepository,
+    event_logger: EventLogger,
+    flow_runs_collection: str,
+    artifact_store: ArtifactStore | None = None,
+    path_policy: ArtifactPathPolicy | None = None,
+    artifacts_dry_run: bool = False,
+    llm_client: LLMClient | None = None,
+    user_input_assembler: UserInputAssembler | None = None,
+    structured_output_validator: StructuredOutputValidator | None = None,
+    model_allowed: Callable[[str], bool] | None = None,
+    finalize_budget_seconds: int = 120,
+) -> str:
+    """CloudEvent handler for one Firestore update invocation."""
+    handler = FlowRunEventHandler(
+        flow_repo=flow_repo,
+        prompt_repo=prompt_repo,
+        schema_repo=schema_repo,
+        event_logger=event_logger,
+        flow_runs_collection=flow_runs_collection,
+        artifact_store=artifact_store,
+        path_policy=path_policy,
+        artifacts_dry_run=artifacts_dry_run,
+        llm_client=llm_client,
+        user_input_assembler=user_input_assembler,
+        structured_output_validator=structured_output_validator,
+        model_allowed=model_allowed,
+        finalize_budget_seconds=finalize_budget_seconds,
+    )
+    return handler.handle(cloud_event)
+
+
+def _handle_cloud_event_impl(
     cloud_event: Any,
     *,
     flow_repo: FlowRunRepository,

@@ -1,7 +1,7 @@
 import unittest
 from dataclasses import dataclass, field
 
-from worker_llm_client.app.handler import handle_cloud_event
+from worker_llm_client.app.handler import FlowRunEventHandler, handle_cloud_event
 from worker_llm_client.app.llm_client import ProviderResponse
 from worker_llm_client.app.services import ClaimResult, FinalizeResult, FlowRunRecord, LLMPrompt, LLMSchema
 from worker_llm_client.artifacts.domain import ArtifactPathPolicy, GcsUri
@@ -219,6 +219,26 @@ class HandlerLoggingTests(unittest.TestCase):
         self.assertTrue(any(e["event"] == "prompt_fetch_started" for e in events))
         finished = [e for e in events if e["event"] == "prompt_fetch_finished"]
         self.assertEqual(len(finished), 1)
+
+    def test_flow_run_event_handler_wrapper(self) -> None:
+        logger = FakeEventLogger()
+        handler = FlowRunEventHandler(
+            flow_repo=FakeFlowRunRepo(_build_flow_run()),
+            prompt_repo=FakePromptRepo(None),
+            schema_repo=FakeSchemaRepo(None),
+            event_logger=logger,
+            flow_runs_collection="flow_runs",
+            artifact_store=FakeArtifactStore(),
+            path_policy=ArtifactPathPolicy(bucket="bucket"),
+            llm_client=FakeLLMClient(),
+            user_input_assembler=FakeUserInputAssembler(),
+            structured_output_validator=StructuredOutputValidator(),
+            model_allowed=lambda _: True,
+        )
+        result = handler.handle(
+            {"id": "evt-1", "type": "google.cloud.firestore.document.v1.updated", "subject": "documents/flow_runs/run-1"}
+        )
+        self.assertEqual(result, "prompt_not_found")
 
     def test_invalid_subject_ignored(self) -> None:
         logger = FakeEventLogger()
