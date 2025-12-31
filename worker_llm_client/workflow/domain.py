@@ -43,6 +43,7 @@ class ErrorCode(str, Enum):
     STEP_FINALIZE_CONFLICT = "STEP_FINALIZE_CONFLICT"
     NO_READY_STEP = "NO_READY_STEP"
     DEPENDENCY_NOT_SUCCEEDED = "DEPENDENCY_NOT_SUCCEEDED"
+    TIME_BUDGET_EXCEEDED = "TIME_BUDGET_EXCEEDED"
 
     def is_retryable(self) -> bool:
         return self in {

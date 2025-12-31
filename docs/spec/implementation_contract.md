@@ -444,7 +444,7 @@ Recommended defaults:
   - patching `steps.<stepId>.outputs.*`, `steps.<stepId>.error` (if any), and step status
 
 Guardrail:
-- if remaining invocation time is less than `finalizeBudgetSeconds`, the worker must not start new external calls (especially Gemini) and should proceed to finalize the step as `FAILED` with an appropriate error code.
+- if remaining invocation time is less than `finalizeBudgetSeconds`, the worker must not start new external calls (especially Gemini) and should proceed to finalize the step as `FAILED` with `error.code=TIME_BUDGET_EXCEEDED`.
 
 Suggested per-call timeouts (upper bounds; retries must still fit into the overall budget):
 - Firestore:

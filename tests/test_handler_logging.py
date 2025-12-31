@@ -210,6 +210,7 @@ class HandlerLoggingTests(unittest.TestCase):
             user_input_assembler=FakeUserInputAssembler(),
             structured_output_validator=StructuredOutputValidator(),
             model_allowed=lambda _: True,
+            invocation_timeout_seconds=780,
         )
         return result, logger.events
 
@@ -234,6 +235,7 @@ class HandlerLoggingTests(unittest.TestCase):
             user_input_assembler=FakeUserInputAssembler(),
             structured_output_validator=StructuredOutputValidator(),
             model_allowed=lambda _: True,
+            invocation_timeout_seconds=780,
         )
         result = handler.handle(
             {"id": "evt-1", "type": "google.cloud.firestore.document.v1.updated", "subject": "documents/flow_runs/run-1"}
@@ -255,11 +257,35 @@ class HandlerLoggingTests(unittest.TestCase):
             user_input_assembler=FakeUserInputAssembler(),
             structured_output_validator=StructuredOutputValidator(),
             model_allowed=lambda _: True,
+            invocation_timeout_seconds=780,
         )
         self.assertEqual(result, "ignored")
         ignored = [e for e in logger.events if e["event"] == "cloud_event_ignored"]
         self.assertEqual(len(ignored), 1)
         self.assertEqual(ignored[0]["reason"], "invalid_subject")
+
+    def test_time_budget_guard(self) -> None:
+        logger = FakeEventLogger()
+        result = handle_cloud_event(
+            {"id": "evt-1", "type": "google.cloud.firestore.document.v1.updated", "subject": "documents/flow_runs/run-1"},
+            flow_repo=FakeFlowRunRepo(_build_flow_run()),
+            prompt_repo=FakePromptRepo(_build_prompt()),
+            schema_repo=FakeSchemaRepo(_build_schema()),
+            event_logger=logger,
+            flow_runs_collection="flow_runs",
+            artifact_store=FakeArtifactStore(),
+            path_policy=ArtifactPathPolicy(bucket="bucket"),
+            llm_client=FakeLLMClient(),
+            user_input_assembler=FakeUserInputAssembler(),
+            structured_output_validator=StructuredOutputValidator(),
+            model_allowed=lambda _: True,
+            invocation_timeout_seconds=1,
+            finalize_budget_seconds=120,
+        )
+        self.assertEqual(result, "failed")
+        self.assertFalse(any(e["event"] == "llm_request_started" for e in logger.events))
+        finished = [e for e in logger.events if e["event"] == "cloud_event_finished"][0]
+        self.assertEqual(finished["error"]["code"], "TIME_BUDGET_EXCEEDED")
 
     def test_schema_missing(self) -> None:
         result, events = self._run(flow_run=_build_flow_run(), prompt=_build_prompt(), schema=None)

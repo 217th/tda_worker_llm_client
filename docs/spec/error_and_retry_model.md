@@ -20,6 +20,7 @@ Step-level (set `steps.<stepId>.error`):
 - `INVALID_STEP_INPUTS`: missing `inputs.*` references or missing referenced `outputs.gcs_uri`.
 - `LLM_PROFILE_INVALID`: invalid `inputs.llm.llmProfile` for `LLM_REPORT` (response type, candidateCount, or schema rules).
 - `PROMPT_NOT_FOUND`, `INVALID_STRUCTURED_OUTPUT`, `LLM_SAFETY_BLOCK`, `GEMINI_REQUEST_FAILED`, `RATE_LIMITED`, `GCS_WRITE_FAILED`, `FIRESTORE_FINALIZE_FAILED` (when a step was claimed and execution started).
+- `TIME_BUDGET_EXCEEDED`: insufficient remaining invocation time to start external calls; step finalized as FAILED.
 
 No-op (no `error` field should be written):
 - `NO_READY_STEP`, `DEPENDENCY_NOT_SUCCEEDED`, `STEP_CLAIM_CONFLICT`, `STEP_FINALIZE_CONFLICT` (expected races or non-executable states).
@@ -33,6 +34,7 @@ No-op (no `error` field should be written):
 - `INVALID_STEP_INPUTS`: required inputs missing or unusable (e.g., missing `ohlcvStepId` / `chartsManifestStepId`, missing referenced `steps[...].outputs.gcs_uri`, or invalid `previousReportStepIds` references)
 - `LLM_SAFETY_BLOCK`: generation blocked by model/provider safety filters
 - `INVALID_STRUCTURED_OUTPUT`: structured output is invalid (JSON parse / schema validation / incomplete payload). MVP: allow at most **one** repair attempt within the same invocation if time budget allows; otherwise finalize as `FAILED`.
+- `TIME_BUDGET_EXCEEDED`: remaining invocation time is below finalize budget; do not start external calls; step finalized FAILED (retry only after adjusting timeouts).
 
 Orchestrator note (MVP):
 - treat `INVALID_STRUCTURED_OUTPUT` as terminal for automatic runs (no auto re-run with the same step inputs). Manual rerun should create a new run/step identity.
@@ -81,6 +83,7 @@ LLM-specific (`stepType=LLM_REPORT`):
 - `RATE_LIMITED`
 - `LLM_SAFETY_BLOCK`
 - `INVALID_STRUCTURED_OUTPUT`
+- `TIME_BUDGET_EXCEEDED`
 
 No-op / not a failure (should not set `error` field):
 - `NO_READY_STEP` (trigger received but nothing executable)

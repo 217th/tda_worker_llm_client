@@ -88,4 +88,5 @@ def worker_llm_client(cloud_event):
         structured_output_validator=STRUCTURED_OUTPUT_VALIDATOR,
         model_allowed=CONFIG.is_model_allowed,
         finalize_budget_seconds=CONFIG.finalize_budget_seconds,
+        invocation_timeout_seconds=CONFIG.invocation_timeout_seconds,
     )

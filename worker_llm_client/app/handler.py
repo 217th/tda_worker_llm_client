@@ -14,6 +14,7 @@ from worker_llm_client.artifacts.domain import ArtifactPathPolicy, InvalidIdenti
 from worker_llm_client.artifacts.services import ArtifactStore, ArtifactWriteFailed
 from worker_llm_client.infra.cloudevents import CloudEventParser
 from worker_llm_client.ops.logging import EventLogger, MAX_ARRAY_LENGTH
+from worker_llm_client.ops.time_budget import TimeBudgetPolicy
 from worker_llm_client.reporting.domain import (
     LLMProfile,
     LLMReportFile,
@@ -117,6 +118,7 @@ class FlowRunEventHandler:
         structured_output_validator: StructuredOutputValidator | None = None,
         model_allowed: Callable[[str], bool] | None = None,
         finalize_budget_seconds: int = 120,
+        invocation_timeout_seconds: int = 780,
     ) -> None:
         self._flow_repo = flow_repo
         self._prompt_repo = prompt_repo
@@ -131,6 +133,7 @@ class FlowRunEventHandler:
         self._structured_output_validator = structured_output_validator
         self._model_allowed = model_allowed
         self._finalize_budget_seconds = finalize_budget_seconds
+        self._invocation_timeout_seconds = invocation_timeout_seconds
 
     def handle(self, cloud_event: Any) -> str:
         return _handle_cloud_event_impl(
@@ -148,6 +151,7 @@ class FlowRunEventHandler:
             structured_output_validator=self._structured_output_validator,
             model_allowed=self._model_allowed,
             finalize_budget_seconds=self._finalize_budget_seconds,
+            invocation_timeout_seconds=self._invocation_timeout_seconds,
         )
 
 
@@ -167,6 +171,7 @@ def handle_cloud_event(
     structured_output_validator: StructuredOutputValidator | None = None,
     model_allowed: Callable[[str], bool] | None = None,
     finalize_budget_seconds: int = 120,
+    invocation_timeout_seconds: int = 780,
 ) -> str:
     """CloudEvent handler for one Firestore update invocation."""
     handler = FlowRunEventHandler(
@@ -183,6 +188,7 @@ def handle_cloud_event(
         structured_output_validator=structured_output_validator,
         model_allowed=model_allowed,
         finalize_budget_seconds=finalize_budget_seconds,
+        invocation_timeout_seconds=invocation_timeout_seconds,
     )
     return handler.handle(cloud_event)
 
@@ -203,6 +209,7 @@ def _handle_cloud_event_impl(
     structured_output_validator: StructuredOutputValidator | None = None,
     model_allowed: Callable[[str], bool] | None = None,
     finalize_budget_seconds: int = 120,
+    invocation_timeout_seconds: int = 780,
 ) -> str:
     event_id = _extract_field(cloud_event, "id") or "unknown"
     event_type = _extract_field(cloud_event, "type") or "unknown"
@@ -307,6 +314,10 @@ def _handle_cloud_event_impl(
         timeframe=timeframe,
     )
     started_at = _now_rfc3339()
+    time_budget = TimeBudgetPolicy.start_now(
+        invocation_timeout_seconds=invocation_timeout_seconds,
+        finalize_budget_seconds=finalize_budget_seconds,
+    )
 
     def _log_cloud_event_finished(
         *,
@@ -398,6 +409,22 @@ def _handle_cloud_event_impl(
             return "noop"
         _log_cloud_event_finished(status="ok", severity="INFO")
         return "ok"
+
+    if not time_budget.can_start_llm_call():
+        event_logger.log(
+            event="time_budget_exceeded",
+            severity="WARNING",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            action="claim",
+            policy=time_budget.snapshot(),
+        )
+        return _finalize_failed(
+            ErrorCode.TIME_BUDGET_EXCEEDED,
+            "Insufficient time budget for external calls",
+            allow_ready=True,
+        )
 
     claim = flow_repo.claim_step(run_id, step_id, started_at)
     if not claim.claimed:
@@ -647,6 +674,21 @@ def _handle_cloud_event_impl(
         stepId=step_id,
         inputsSummary=inputs_summary,
     )
+
+    if not time_budget.can_start_llm_call():
+        event_logger.log(
+            event="time_budget_exceeded",
+            severity="WARNING",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            action="llm_call",
+            policy=time_budget.snapshot(),
+        )
+        return _finalize_failed(
+            ErrorCode.TIME_BUDGET_EXCEEDED,
+            "Insufficient time budget for LLM call",
+        )
 
     try:
         resolved = user_input_assembler.resolve(
