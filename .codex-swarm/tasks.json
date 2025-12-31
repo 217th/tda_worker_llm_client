@@ -1685,12 +1685,34 @@
         "hash": "bc30db01b63e0d0d64085d69239d108690b78891",
         "message": "🔧 T-061 fix smoke script + log run"
       }
+    },
+    {
+      "id": "T-062",
+      "title": "Add root README for LLM_REPORT entity hierarchy",
+      "description": "Create README.md in the repo root that documents the entity hierarchy used to describe a LLM_REPORT step (Firestore flow_run, referenced prompt/schema docs, and the final GCS report artifact), with brief descriptions and links to schemas + examples.",
+      "status": "DOING",
+      "priority": "low",
+      "owner": "DOCS",
+      "tags": [
+        "docs",
+        "llm_report"
+      ],
+      "depends_on": [],
+      "verify": [
+        "python3 -m pytest -q"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Start: add root README.md describing the LLM_REPORT entity hierarchy (Firestore flow_run + prompt/schema docs + GCS report artifact), with links to schemas/examples."
+        }
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "056e610b132baab8d25a9db785ede70928dd3a2d46b51e0638a0b6ec37e9aaa0"
+    "checksum": "c514d01fb2e29a1926d68562112f77d937d62567ba71b0badfa8eaaff151106c"
   }
 }
