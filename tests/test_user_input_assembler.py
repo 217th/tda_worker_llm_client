@@ -147,6 +147,8 @@ class UserInputAssemblerTests(unittest.TestCase):
         self.assertEqual(resolved.chart_images[0].uri, "gs://bucket/chart1.png")
 
     def test_charts_manifest_outputs_manifest_gcs_uri(self) -> None:
+        inputs = _llm_step_inputs()
+        inputs["previousReportStepIds"] = []
         flow_run = _flow_run_base()
         flow_run["steps"] = {
             "ohlcv": {
@@ -167,7 +169,7 @@ class UserInputAssemblerTests(unittest.TestCase):
                 "stepType": "LLM_REPORT",
                 "status": "READY",
                 "dependsOn": [],
-                "inputs": _llm_step_inputs(),
+                "inputs": inputs,
                 "outputs": {},
                 "timeframe": "1M",
             },

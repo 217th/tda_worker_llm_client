@@ -105,7 +105,7 @@ class FakeLLMClient:
 
 
 class FakeUserInputAssembler:
-    def resolve(self, *, flow_run: FlowRun, step, inputs) -> ResolvedUserInput:
+    def resolve(self, *, flow_run: FlowRun, step, inputs, **_kwargs) -> ResolvedUserInput:
         ohlcv = type("JsonArtifact", (), {"uri": "gs://bucket/ohlcv.json", "bytes_len": 2})()
         charts_manifest = type(
             "JsonArtifact", (), {"uri": "gs://bucket/charts.json", "bytes_len": 2}

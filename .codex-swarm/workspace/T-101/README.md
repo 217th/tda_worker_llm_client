@@ -33,4 +33,5 @@
 - Added test coverage for charts manifest legacy output key.
 - Updated flow_run schema/docs/specs to allow legacy outputsManifestGcsUri.
 - Added structured logs for context ingestion and updated observability spec.
+- Adjusted tests for new logging parameters and charts manifest legacy input.
 <!-- END AUTO SUMMARY -->
