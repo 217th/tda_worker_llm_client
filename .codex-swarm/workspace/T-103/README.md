@@ -28,4 +28,5 @@
 
 <!-- BEGIN AUTO SUMMARY -->
 - Added depth-5 schema example file.
+- Reduced example schema depth to 4 by flattening nested arrays/objects.
 <!-- END AUTO SUMMARY -->

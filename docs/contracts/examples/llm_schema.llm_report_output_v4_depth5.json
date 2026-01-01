@@ -87,172 +87,29 @@
           "waves": {
             "type": "array",
             "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "label",
-                "degree",
-                "start_date",
-                "start_price",
-                "end_date",
-                "end_price",
-                "confidence"
-              ],
-              "properties": {
-                "label": {
-                  "type": "string"
-                },
-                "degree": {
-                  "type": "string",
-                  "enum": [
-                    "cycle",
-                    "primary",
-                    "intermediate",
-                    "minor"
-                  ]
-                },
-                "start_date": {
-                  "type": "string",
-                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-                },
-                "start_price": {
-                  "type": "number"
-                },
-                "end_date": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "end_price": {
-                  "anyOf": [
-                    {
-                      "type": "number"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "confidence": {
-                  "type": "string",
-                  "enum": [
-                    "High",
-                    "Medium",
-                    "Low"
-                  ]
-                }
-              }
+              "type": "string",
+              "description": "Flattened waves entry."
             }
           },
           "wave_scenarios": {
             "type": "array",
             "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "id",
-                "probability",
-                "description",
-                "waves",
-                "score"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "pattern": "^WS[1-9][0-9]*$"
-                },
-                "probability": {
-                  "type": "string",
-                  "enum": [
-                    "High",
-                    "Medium",
-                    "Low"
-                  ]
-                },
-                "description": {
-                  "type": "string"
-                },
-                "waves": {
-                  "type": "string",
-                  "description": "Comma-separated wave labels."
-                },
-                "score": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100
-                }
-              }
+              "type": "string",
+              "description": "Flattened wave_scenarios entry."
             }
           },
           "patterns": {
             "type": "array",
             "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "name",
-                "direction",
-                "price_zone",
-                "description"
-              ],
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "direction": {
-                  "type": "string",
-                  "enum": [
-                    "bullish",
-                    "bearish",
-                    "neutral"
-                  ]
-                },
-                "price_zone": {
-                  "type": "string",
-                  "description": "Text summary of zone, e.g. '120-135'."
-                },
-                "description": {
-                  "type": "string"
-                }
-              }
+              "type": "string",
+              "description": "Flattened patterns entry."
             }
           },
           "key_levels": {
             "type": "array",
             "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "type",
-                "level",
-                "note"
-              ],
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "enum": [
-                    "support",
-                    "resistance",
-                    "vpvr_poc",
-                    "vpvr_hvn",
-                    "vpvr_lvn",
-                    "fib",
-                    "ma"
-                  ]
-                },
-                "level": {
-                  "type": "number"
-                },
-                "note": {
-                  "type": "string"
-                }
-              }
+              "type": "string",
+              "description": "Flattened key_levels entry."
             }
           },
           "indicators_summary": {
@@ -292,68 +149,8 @@
           "scenarios": {
             "type": "array",
             "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "id",
-                "name",
-                "role",
-                "probability",
-                "direction",
-                "time_horizon",
-                "targets",
-                "rationale",
-                "score_total"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "pattern": "^S[1-9][0-9]*$"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "role": {
-                  "type": "string",
-                  "enum": [
-                    "base",
-                    "bullish",
-                    "bearish",
-                    "other"
-                  ]
-                },
-                "probability": {
-                  "type": "string",
-                  "enum": [
-                    "High",
-                    "Medium",
-                    "Low"
-                  ]
-                },
-                "direction": {
-                  "type": "string",
-                  "enum": [
-                    "up",
-                    "down",
-                    "sideways"
-                  ]
-                },
-                "time_horizon": {
-                  "type": "string"
-                },
-                "targets": {
-                  "type": "string",
-                  "description": "Text summary of targets."
-                },
-                "rationale": {
-                  "type": "string"
-                },
-                "score_total": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100
-                }
-              }
+              "type": "string",
+              "description": "Flattened scenarios entry."
             }
           },
           "analysis_confidence": {
@@ -384,18 +181,33 @@
             "type": "object",
             "additionalProperties": false,
             "required": [
+              "dominant_scenario_id",
               "one_line",
-              "key_points"
+              "key_points",
+              "trend_summary",
+              "key_levels_brief",
+              "scenarios_brief"
             ],
             "properties": {
+              "dominant_scenario_id": {
+                "type": "string",
+                "pattern": "^S[1-9][0-9]*$"
+              },
               "one_line": {
                 "type": "string"
               },
               "key_points": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
+                "type": "string",
+                "description": "Comma-separated key points."
+              },
+              "trend_summary": {
+                "type": "string"
+              },
+              "key_levels_brief": {
+                "type": "string"
+              },
+              "scenarios_brief": {
+                "type": "string"
               }
             }
           }
@@ -403,6 +215,6 @@
       }
     }
   },
-  "sha256": "50f4cc981dfe2bdfa1d2fc1bde623b4ffe6c1285e9a82181b9d0bf887f6d6517",
+  "sha256": "f2cb1037545a34724c07a50728bccf388b6d4a22ed6b8ef622d40fa6aece9c7e",
   "isActive": true
 }
