@@ -1773,12 +1773,25 @@
         "prod"
       ],
       "depends_on": []
+    },
+    {
+      "id": "T-103",
+      "title": "Add depth-5 simplified llm_report_output schema example",
+      "description": "Create a simplified llm_report_output schema example with data nesting depth <=5 for experimentation.",
+      "status": "TODO",
+      "priority": "low",
+      "owner": "human",
+      "tags": [
+        "contracts",
+        "experiment"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "5fd494217387db074b9cab406391b8142c71df00963ac24cceff4104dff69893"
+    "checksum": "b7b93d48598c457d328e2f36ebfb4a74f282b1faa853ea5afbe5e5d652dc2a78"
   }
 }
