@@ -31,7 +31,7 @@ No-op (no `error` field should be written):
 - `FLOW_RUN_INVALID`: `flow_run` fails validation for this worker (schema/required fields)
 - `PROMPT_NOT_FOUND`: prompt doc missing for `promptId`
 - `LLM_PROFILE_INVALID`: missing/invalid `inputs.llm.llmProfile` (model/config not usable)
-- `INVALID_STEP_INPUTS`: required inputs missing or unusable (e.g., missing `ohlcvStepId` / `chartsManifestStepId`, missing referenced `steps[...].outputs.gcs_uri`, or invalid `previousReportStepIds` / `previousReports` references)
+- `INVALID_STEP_INPUTS`: required inputs missing or unusable (e.g., missing `ohlcvStepId` / `chartsManifestStepId`, missing referenced `steps[...].outputs.gcs_uri` or legacy `outputs.outputsManifestGcsUri` for CHART_EXPORT, or invalid `previousReportStepIds` / `previousReports` references)
 - `LLM_SAFETY_BLOCK`: generation blocked by model/provider safety filters
 - `INVALID_STRUCTURED_OUTPUT`: structured output is invalid (JSON parse / schema validation / incomplete payload). MVP: allow at most **one** repair attempt within the same invocation if time budget allows; otherwise finalize as `FAILED`.
 - `TIME_BUDGET_EXCEEDED`: remaining invocation time is below finalize budget; do not start external calls; step finalized FAILED (retry only after adjusting timeouts).

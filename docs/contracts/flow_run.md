@@ -54,7 +54,7 @@ Inputs (minimum):
   - `inputs.llm.llmProfile.structuredOutput.schemaSha256`: optional and informational-only in MVP (loggable, not enforced)
   - `inputs.llm.llmProfile.candidateCount`: if provided, must be `1` (deterministic behavior)
 - `inputs.ohlcvStepId`: stepId of an `OHLCV_EXPORT` step; worker resolves `steps[ohlcvStepId].outputs.gcs_uri`.
-- `inputs.chartsManifestStepId`: stepId of a `CHART_EXPORT` step; worker resolves `steps[chartsManifestStepId].outputs.gcs_uri` (charts manifest JSON).
+- `inputs.chartsManifestStepId`: stepId of a `CHART_EXPORT` step; worker resolves the charts manifest URI from `steps[chartsManifestStepId].outputs.gcs_uri` (preferred) or legacy `outputs.outputsManifestGcsUri`.
 - optional `inputs.previousReportStepIds`: stepIds of previous `LLM_REPORT` steps whose report artifacts may be included as context (same workflow). If any referenced step is missing, not `LLM_REPORT`, or missing `outputs.gcs_uri`, the worker must fail the step as `INVALID_STEP_INPUTS`.
 - optional `inputs.previousReports`: explicit previous report references (external or same workflow). Each item is an object with:
   - `stepId` (optional): same-workflow `LLM_REPORT` step ID.
@@ -86,7 +86,7 @@ Step-level required fields for an executable `LLM_REPORT`:
 - `dependsOn` (array of step IDs; missing treated as empty)
 - `inputs.llm.promptId` (string)
 - `inputs.llm.llmProfile` (object; must pass `LLM_PROFILE_INVALID` checks)
-- `inputs.ohlcvStepId` and `inputs.chartsManifestStepId` (string; referenced steps must exist with `outputs.gcs_uri`)
+- `inputs.ohlcvStepId` and `inputs.chartsManifestStepId` (string; referenced steps must exist with `outputs.gcs_uri`, and for CHART_EXPORT also accepts `outputs.outputsManifestGcsUri`)
 - optional `inputs.previousReportStepIds` (if present, each referenced step must be `LLM_REPORT` with `outputs.gcs_uri`)
 - optional `inputs.previousReports` (if present, each item must provide `gcs_uri` or a valid `stepId`; invalid items → `INVALID_STEP_INPUTS`)
 

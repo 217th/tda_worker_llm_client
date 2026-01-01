@@ -273,7 +273,11 @@ class LLMReportInputs:
 
         # Resolve required upstream artifact URIs (must exist in flow_run outputs).
         ohlcv_gcs_uri = _resolve_output_uri(flow_run, ohlcv_step_id)
-        charts_manifest_gcs_uri = _resolve_output_uri(flow_run, charts_manifest_step_id)
+        charts_manifest_gcs_uri = _resolve_output_uri(
+            flow_run,
+            charts_manifest_step_id,
+            fallback_keys=("outputsManifestGcsUri", "outputs_manifest_gcs_uri"),
+        )
         previous_report_gcs_uris = tuple(ref.gcs_uri for ref in previous_report_refs)
 
         return cls(
@@ -350,7 +354,11 @@ def _parse_previous_report_refs(
 
 
 def _resolve_output_uri(
-    flow_run: FlowRun, step_id: str, *, require_llm_report: bool = False
+    flow_run: FlowRun,
+    step_id: str,
+    *,
+    require_llm_report: bool = False,
+    fallback_keys: tuple[str, ...] | None = None,
 ) -> str:
     step = flow_run.get_step(step_id)
     if step is None:
@@ -360,6 +368,13 @@ def _resolve_output_uri(
     outputs = step.outputs
     gcs_uri = outputs.get("gcs_uri")
     if not isinstance(gcs_uri, str) or not gcs_uri.strip():
+        if fallback_keys:
+            for key in fallback_keys:
+                value = outputs.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
+            keys = "outputs.gcs_uri or " + " or ".join(f"outputs.{key}" for key in fallback_keys)
+            raise InvalidStepInputs(f"Referenced step missing {keys}: {step_id}")
         raise InvalidStepInputs(f"Referenced step missing outputs.gcs_uri: {step_id}")
     return gcs_uri
 

@@ -146,6 +146,40 @@ class UserInputAssemblerTests(unittest.TestCase):
         self.assertEqual(len(resolved.chart_images), 1)
         self.assertEqual(resolved.chart_images[0].uri, "gs://bucket/chart1.png")
 
+    def test_charts_manifest_outputs_manifest_gcs_uri(self) -> None:
+        flow_run = _flow_run_base()
+        flow_run["steps"] = {
+            "ohlcv": {
+                "stepType": "OHLCV_EXPORT",
+                "status": "SUCCEEDED",
+                "dependsOn": [],
+                "inputs": {},
+                "outputs": {"gcs_uri": "gs://bucket/ohlcv.json"},
+            },
+            "charts": {
+                "stepType": "CHART_EXPORT",
+                "status": "SUCCEEDED",
+                "dependsOn": [],
+                "inputs": {},
+                "outputs": {"outputsManifestGcsUri": "gs://bucket/charts_manifest.json"},
+            },
+            "llm": {
+                "stepType": "LLM_REPORT",
+                "status": "READY",
+                "dependsOn": [],
+                "inputs": _llm_step_inputs(),
+                "outputs": {},
+                "timeframe": "1M",
+            },
+        }
+        flow = FlowRun.from_raw(flow_run)
+        raw_step = flow.get_step("llm")
+        self.assertIsNotNone(raw_step)
+        step = LLMReportStep.from_flow_step(raw_step)
+        inputs = step.parse_inputs(flow_run=flow)
+
+        self.assertEqual(inputs.charts_manifest_gcs_uri, "gs://bucket/charts_manifest.json")
+
     def test_previous_report_external_gcs_uri(self) -> None:
         flow_run = _flow_run_base()
         flow_run["steps"] = {

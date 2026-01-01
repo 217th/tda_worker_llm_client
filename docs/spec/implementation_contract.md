@@ -41,7 +41,7 @@ For this component, we care about:
   - `llmProfile` (effective model + request config; authoritative; no overrides)
 - `inputs` (artifact sources for prompt context):
   - `ohlcvStepId`: step ID of an `OHLCV_EXPORT` step; worker resolves `steps[ohlcvStepId].outputs.gcs_uri`
-  - `chartsManifestStepId`: step ID of a `CHART_EXPORT` step; worker resolves `steps[chartsManifestStepId].outputs.gcs_uri` (charts manifest JSON)
+- `chartsManifestStepId`: step ID of a `CHART_EXPORT` step; worker resolves charts manifest URI from `steps[chartsManifestStepId].outputs.gcs_uri` (preferred) or legacy `outputs.outputsManifestGcsUri`
   - optional `previousReportStepIds`: step IDs of earlier `LLM_REPORT` steps whose artifacts may be included as context
   - optional `previousReports`: explicit report references (external or same workflow):
     - each item is an object with optional `stepId` and/or `gcs_uri`
@@ -87,7 +87,7 @@ This subset is the minimum required to select and execute one `LLM_REPORT` step 
   - `candidateCount` (if present) must be `1` → otherwise `LLM_PROFILE_INVALID`
   - `structuredOutput.schemaId` must be present and valid for `LLM_REPORT` → otherwise `LLM_PROFILE_INVALID`
 - `inputs.ohlcvStepId`: string; referenced step must exist and contain `outputs.gcs_uri`
-- `inputs.chartsManifestStepId`: string; referenced step must exist and contain `outputs.gcs_uri`
+- `inputs.chartsManifestStepId`: string; referenced step must exist and contain `outputs.gcs_uri` (or legacy `outputs.outputsManifestGcsUri` for CHART_EXPORT)
 - `inputs.previousReportStepIds` (optional): each referenced step must be `LLM_REPORT` and contain `outputs.gcs_uri`
 - `inputs.previousReports` (optional): each item must include `gcs_uri` or a valid `stepId` (invalid items → `INVALID_STEP_INPUTS`)
 

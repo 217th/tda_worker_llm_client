@@ -92,7 +92,7 @@ To develop and demo Epic 5, seed **at least** these documents in Firestore.
      - `status=READY`
      - `inputs.llm.promptId` referencing the prompt doc above
      - `inputs.llm.llmProfile.structuredOutput.schemaId` referencing the schema doc above
-     - `inputs.ohlcvStepId` and `inputs.chartsManifestStepId` referencing steps with `outputs.gcs_uri`
+    - `inputs.ohlcvStepId` and `inputs.chartsManifestStepId` referencing steps with `outputs.gcs_uri` (or legacy `outputs.outputsManifestGcsUri` for CHART_EXPORT)
    - Example source: `contracts/examples/flow_run.example.json`.
 
 Negative cases for demo:

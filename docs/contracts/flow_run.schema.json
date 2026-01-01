@@ -262,6 +262,11 @@
                   "description": "Primary output artifact for this step (charts manifest JSON).",
                   "pattern": "^gs://.+"
                 },
+                "outputsManifestGcsUri": {
+                  "type": "string",
+                  "description": "Legacy alias for charts manifest URI (emitted by CHART_EXPORT).",
+                  "pattern": "^gs://.+"
+                },
                 "expires_at": { "$ref": "#/$defs/rfc3339Timestamp" }
               }
             }
@@ -269,7 +274,16 @@
         },
         {
           "if": { "properties": { "status": { "const": "SUCCEEDED" } } },
-          "then": { "properties": { "outputs": { "required": ["gcs_uri"] } } }
+          "then": {
+            "properties": {
+              "outputs": {
+                "anyOf": [
+                  { "required": ["gcs_uri"] },
+                  { "required": ["outputsManifestGcsUri"] }
+                ]
+              }
+            }
+          }
         }
       ]
     },
