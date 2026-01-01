@@ -1759,12 +1759,26 @@
         "hash": "b0350d31a905603a7c517ca03bc1ad37864cc100",
         "message": "🧪 T-101 fix tests for context logs"
       }
+    },
+    {
+      "id": "T-102",
+      "title": "Log Gemini API error details for 400 diagnosis",
+      "description": "Include Gemini API status/code details in RequestFailed message/logs to diagnose 400 Bad Request during prod smoke.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "observability",
+        "gemini",
+        "prod"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "7bf3e8b1934e64b6c7fb9dc634a3f17f315c39e1996fac1963ecb57f1c257ba6"
+    "checksum": "5fd494217387db074b9cab406391b8142c71df00963ac24cceff4104dff69893"
   }
 }
