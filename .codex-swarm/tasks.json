@@ -1786,12 +1786,26 @@
         "experiment"
       ],
       "depends_on": []
+    },
+    {
+      "id": "T-104",
+      "title": "Restructure LLM_REPORT UserInput format",
+      "description": "Adjust UserInput assembly to new structured format with metadata, OHLCV request_timestamp/data, chart template/kind list, and conditional previous reports section.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "prompt",
+        "user_input",
+        "llm_report"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "b7b93d48598c457d328e2f36ebfb4a74f282b1faa853ea5afbe5e5d652dc2a78"
+    "checksum": "e1566f553e73b1004cc970c825cf637510870da62921b955d93cef3fac23196b"
   }
 }
