@@ -115,11 +115,13 @@ class UserInputAssemblerTests(unittest.TestCase):
         resolved = assembler.resolve(flow_run=flow_run, step=step, inputs=inputs)
         payload = assembler.assemble(base_user_prompt="Analyze market.", resolved=resolved)
 
-        self.assertIn("## UserInput", payload.text)
-        self.assertIn("Symbol: BTCUSDT", payload.text)
-        self.assertIn("Timeframe: 1M", payload.text)
-        self.assertIn("ohlcv.json", payload.text)
-        self.assertIn("charts_manifest.json", payload.text)
+        self.assertIn("## UserInput:", payload.text)
+        self.assertIn("- symbol: BTCUSDT", payload.text)
+        self.assertIn("- timeframe: 1M", payload.text)
+        self.assertIn("- request_timestamp: unknown", payload.text)
+        self.assertIn("- generated_at: unknown", payload.text)
+        self.assertIn("- unknown_template: Price MA", payload.text)
+        self.assertIn("\"rows\"", payload.text)
         self.assertIn("prev_report.json", payload.text)
         self.assertEqual(len(payload.chart_images), 1)
 

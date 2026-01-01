@@ -27,11 +27,10 @@ The worker builds the final user content as:
 
 1) take `userPrompt` as-is (no templating in MVP)
 2) append a generated section named `UserInput` that describes and includes resolved inputs:
-   - **Time series input (OHLCV)**: explicitly state symbol + timeframe, then include JSON
-   - **Charts (images)**: for each image, add a short text line describing what the chart is
-     - preferred: use `description` from the charts manifest (copied from chart_template during chart export)
-     - fallback: use `chartTemplateId` if no description is availableclude JSON
-   - **Previous reports**: for each previous report, add a short text description (timeframe/stepId), then in
+   - **Metadata**: symbol + timeframe.
+   - **Time series input (OHLCV)**: include `request_timestamp` (if available) and the OHLCV data JSON.
+   - **Charts (images)**: list chart template IDs and their kinds from the charts manifest.
+   - **Previous reports**: include only when previous reports are provided, with a short label and JSON.
 
 See `spec/prompt_storage_and_context.md` for the exact assembly rules and size limits.
 

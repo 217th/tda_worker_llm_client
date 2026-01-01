@@ -166,40 +166,35 @@ class UserInputAssembler:
         lines: list[str] = []
         lines.append(base_user_prompt.rstrip())
         lines.append("")
-        lines.append("## UserInput")
+        lines.append("## UserInput:")
         lines.append("")
-        lines.append(f"Symbol: {resolved.symbol}")
-        lines.append(f"Timeframe: {resolved.timeframe}")
+        lines.append("Метаданные:")
+        lines.append(f"- symbol: {resolved.symbol}")
+        lines.append(f"- timeframe: {resolved.timeframe}")
         lines.append("")
         lines.append("### OHLCV (time series)")
-        lines.append(f"Source: {resolved.ohlcv.uri}")
+        request_ts = _extract_ohlcv_request_timestamp(resolved.ohlcv.data)
+        lines.append(f"- request_timestamp: {request_ts}")
+        lines.append("- data:")
         lines.append("```json")
-        lines.append(resolved.ohlcv.payload)
+        lines.append(_render_ohlcv_data(resolved.ohlcv))
         lines.append("```")
         lines.append("")
         lines.append("### Charts (images)")
-        if resolved.chart_images:
-            for chart in resolved.chart_images:
-                lines.append(f"- {chart.description} (uri: {chart.uri})")
-        else:
-            lines.append("- (no charts available)")
+        generated_at = _extract_charts_generated_at(resolved.charts_manifest.data)
+        lines.append(f"- generated_at: {generated_at}")
+        chart_entries = _extract_chart_entries(resolved.charts_manifest.data)
+        for entry in chart_entries:
+            lines.append(f"- {entry.template_id}: {entry.kind}")
         lines.append("")
-        lines.append("### Charts manifest (JSON)")
-        lines.append(f"Source: {resolved.charts_manifest.uri}")
-        lines.append("```json")
-        lines.append(resolved.charts_manifest.payload)
-        lines.append("```")
-        lines.append("")
-        lines.append("### Previous reports")
         if resolved.previous_reports:
+            lines.append("### Previous reports")
             for report in resolved.previous_reports:
                 label = report.step_id or "external"
                 lines.append(f"- {label} (uri: {report.artifact.uri})")
                 lines.append("```json")
                 lines.append(report.artifact.payload)
                 lines.append("```")
-        else:
-            lines.append("(none)")
 
         # Return a text payload for the prompt, plus any chart images that will
         # be attached as separate binary parts by the LLM client.
@@ -233,6 +228,60 @@ def _extract_timeframe(step: LLMReportStep) -> str:
     if not isinstance(timeframe, str) or not timeframe.strip():
         raise InvalidStepInputs("step.timeframe is required")
     return timeframe.strip()
+
+
+def _extract_ohlcv_request_timestamp(data: Any) -> str:
+    if isinstance(data, Mapping):
+        meta = data.get("metadata")
+        if isinstance(meta, Mapping):
+            for key in ("request_timestamp", "requestTimestamp"):
+                value = meta.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
+    return "unknown"
+
+
+def _render_ohlcv_data(artifact: JsonArtifact) -> str:
+    data = artifact.data
+    if isinstance(data, Mapping) and "data" in data:
+        payload = data.get("data")
+        return _normalize_json(payload)
+    return artifact.payload
+
+
+@dataclass(frozen=True, slots=True)
+class ChartEntry:
+    template_id: str
+    kind: str
+
+
+def _extract_charts_generated_at(manifest_data: Any) -> str:
+    if isinstance(manifest_data, Mapping):
+        for key in ("generated_at", "generatedAt", "created_at", "createdAt"):
+            value = manifest_data.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return "unknown"
+
+
+def _extract_chart_entries(manifest_data: Any) -> list[ChartEntry]:
+    if not isinstance(manifest_data, Mapping):
+        return [ChartEntry(template_id="unknown_template", kind="chart")]
+    items = []
+    try:
+        items = list(_extract_manifest_items(manifest_data))
+    except InvalidStepInputs:
+        return [ChartEntry(template_id="unknown_template", kind="chart")]
+    entries: list[ChartEntry] = []
+    for item in items:
+        if not isinstance(item, Mapping):
+            continue
+        template_id = _extract_chart_template_id(item)
+        kind = _extract_chart_kind(item)
+        entries.append(ChartEntry(template_id=template_id, kind=kind))
+    if not entries:
+        entries.append(ChartEntry(template_id="unknown_template", kind="chart"))
+    return entries
 
 
 def _load_json_artifact(
@@ -504,6 +553,28 @@ def _extract_chart_uri(item: Mapping[str, Any]) -> str | None:
     return None
 
 
+def _extract_chart_template_id(item: Mapping[str, Any]) -> str:
+    for key in ("templateId", "chartTemplateId", "chart_template_id"):
+        value = item.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    artifact = item.get("artifact")
+    if isinstance(artifact, Mapping):
+        for key in ("templateId", "chartTemplateId", "chart_template_id"):
+            value = artifact.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return "unknown_template"
+
+
+def _extract_chart_kind(item: Mapping[str, Any]) -> str:
+    for key in ("kind", "description"):
+        value = item.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return "chart"
+
+
 def _extract_chart_description(item: Mapping[str, Any]) -> str:
     for key in ("description", "chartTemplateId", "kind", "templateId"):
         value = item.get(key)
@@ -524,3 +595,7 @@ def _decode_utf8(payload: bytes, *, label: str) -> str:
         return payload.decode("utf-8")
     except UnicodeDecodeError as exc:
         raise InvalidStepInputs(f"{label} must be utf-8 JSON") from exc
+
+
+def _normalize_json(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))

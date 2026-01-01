@@ -28,4 +28,5 @@
 
 <!-- BEGIN AUTO SUMMARY -->
 - Created T-104 task README.
+- Restructured UserInput assembly format and updated related docs/tests.
 <!-- END AUTO SUMMARY -->

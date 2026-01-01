@@ -87,20 +87,23 @@ The worker builds the final user prompt as:
 2) append:
 
 ```
-## UserInput
+## UserInput:
 
-Symbol: <scope.symbol>
-Timeframe: <step.timeframe>
+Метаданные:
+- symbol: <scope.symbol>
+- timeframe: <step.timeframe>
 
 ### OHLCV (time series)
-Source: <resolved_inputs.ohlcv.gcs_uri>
+- request_timestamp: <ohlcv.metadata.request_timestamp or "unknown">
+- data:
 ```json
-<downloaded ohlcv JSON>
+<downloaded ohlcv JSON data payload>
 ```
 
 ### Charts (images)
-- <description 1> (uri: <gs://...>)
-- <description 2> (uri: <gs://...>)
+- generated_at: <charts_manifest.generated_at or "unknown">
+- <templateId>: <kind>
+- <templateId>: <kind>
 ...
 
 ### Previous reports
@@ -109,8 +112,8 @@ Source: <resolved_inputs.ohlcv.gcs_uri>
 
 Notes:
 - The OHLCV section must explicitly state it is a time series and name symbol + timeframe.
-- The charts section must list each chart and what it represents (using chart_template description).
-- Previous reports must be described (which timeframe/step) before including JSON.
+- The charts section lists chart template IDs and their human-readable kinds (from the manifest).
+- The previous reports section is included only when previous reports are provided.
 
 ## 5) `scope` integration (MVP)
 
