@@ -1746,7 +1746,7 @@
       "id": "T-101",
       "title": "Investigate LLM_REPORT failure due to charts manifest GCS URI",
       "description": "Investigate why LLM_REPORT fails with INVALID_STEP_INPUTS when CHART_EXPORT writes outputsManifestGcsUri instead of outputs.gcs_uri; propose and implement contract/code fix.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "human",
       "tags": [
@@ -1754,13 +1754,17 @@
         "llm_report",
         "charts_manifest"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "b0350d31a905603a7c517ca03bc1ad37864cc100",
+        "message": "🧪 T-101 fix tests for context logs"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "2bc16356ab40d8053c04b86bcbb165e2e0603c10fd6cbe8525c357a133f1e795"
+    "checksum": "7bf3e8b1934e64b6c7fb9dc634a3f17f315c39e1996fac1963ecb57f1c257ba6"
   }
 }
