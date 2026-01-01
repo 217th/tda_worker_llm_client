@@ -142,11 +142,32 @@ def _map_gemini_error(exc: Exception) -> Exception:
     if genai_errors is not None and isinstance(exc, genai_errors.APIError):
         status = getattr(exc, "status", None)
         code = getattr(exc, "code", None)
+        detail = _format_api_error_detail(exc)
         if code == 429 or status == "RESOURCE_EXHAUSTED":
-            return RateLimited("Gemini rate limited")
+            return RateLimited(f"Gemini rate limited ({detail})")
         if getattr(exc, "status", None) == "SAFETY":
-            return SafetyBlocked("Gemini safety block")
+            return SafetyBlocked(f"Gemini safety block ({detail})")
         if 500 <= int(code or 0) < 600:
-            return RequestFailed("Gemini server error")
-        return RequestFailed("Gemini request failed")
-    return RequestFailed("Gemini request failed")
+            return RequestFailed(f"Gemini server error ({detail})")
+        return RequestFailed(f"Gemini request failed ({detail})")
+    return RequestFailed(f"Gemini request failed ({exc.__class__.__name__})")
+
+
+def _format_api_error_detail(exc: Exception) -> str:
+    code = getattr(exc, "code", None)
+    status = getattr(exc, "status", None)
+    message = getattr(exc, "message", None) or str(exc)
+    if isinstance(message, str):
+        message = " ".join(message.split())
+        if len(message) > 200:
+            message = message[:200] + "..."
+    else:
+        message = None
+    parts: list[str] = []
+    if code is not None:
+        parts.append(f"code={code}")
+    if status:
+        parts.append(f"status={status}")
+    if message:
+        parts.append(f"message={message}")
+    return " ".join(parts) if parts else "no_details"

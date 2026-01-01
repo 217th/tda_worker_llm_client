@@ -28,4 +28,5 @@
 
 <!-- BEGIN AUTO SUMMARY -->
 - Created T-102 task README.
+- Added sanitized Gemini API error details to RequestFailed messages.
 <!-- END AUTO SUMMARY -->
