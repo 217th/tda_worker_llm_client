@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import time
 from typing import Any, Mapping, Sequence
 
 from worker_llm_client.artifacts.domain import GcsUri, InvalidGcsUri
 from worker_llm_client.artifacts.services import ArtifactStore
+from worker_llm_client.ops.logging import EventLogger
 from worker_llm_client.workflow.domain import (
     FlowRun,
     InvalidStepInputs,
@@ -78,10 +80,15 @@ class UserInputAssembler:
         flow_run: FlowRun,
         step: LLMReportStep,
         inputs: LLMReportInputs,
+        event_logger: EventLogger | None = None,
+        event_id: str | None = None,
     ) -> ResolvedUserInput:
         # Resolve *all* upstream context referenced by LLM_REPORT inputs.
         # This produces a fully materialized snapshot that can be rendered into
         # the final UserInput section (text + optional chart images).
+        run_id = _extract_run_id(flow_run)
+        step_id = step.step.step_id
+        event_id = event_id or "unknown"
         symbol = _extract_symbol(flow_run)
         timeframe = _extract_timeframe(step)
 
@@ -92,12 +99,20 @@ class UserInputAssembler:
             inputs.ohlcv_gcs_uri,
             label="ohlcv",
             max_bytes=self._max_json_bytes,
+            event_logger=event_logger,
+            event_id=event_id,
+            run_id=run_id,
+            step_id=step_id,
         )
         charts_manifest = _load_json_artifact(
             self._artifact_store,
             inputs.charts_manifest_gcs_uri,
             label="charts_manifest",
             max_bytes=self._max_json_bytes,
+            event_logger=event_logger,
+            event_id=event_id,
+            run_id=run_id,
+            step_id=step_id,
         )
 
         # Chart images are optional, but the manifest must contain at least one
@@ -106,6 +121,10 @@ class UserInputAssembler:
             self._artifact_store,
             charts_manifest.data,
             max_bytes=self._max_chart_image_bytes,
+            event_logger=event_logger,
+            event_id=event_id,
+            run_id=run_id,
+            step_id=step_id,
         )
 
         # Previous reports may be referenced by stepId or external GCS URI.
@@ -119,6 +138,10 @@ class UserInputAssembler:
                 ref.gcs_uri,
                 label=f"previous_report:{label}",
                 max_bytes=self._max_json_bytes,
+                event_logger=event_logger,
+                event_id=event_id,
+                run_id=run_id,
+                step_id=step.step.step_id,
             )
             previous_reports.append(PreviousReport(step_id=step_id, artifact=report))
 
@@ -194,6 +217,14 @@ def _extract_symbol(flow_run: FlowRun) -> str:
     return symbol.strip()
 
 
+def _extract_run_id(flow_run: FlowRun) -> str:
+    if flow_run.run_id:
+        return flow_run.run_id
+    raw = flow_run.raw if isinstance(flow_run.raw, Mapping) else {}
+    run_id = raw.get("runId")
+    return run_id.strip() if isinstance(run_id, str) and run_id.strip() else "unknown"
+
+
 def _extract_timeframe(step: LLMReportStep) -> str:
     raw = step.step.raw
     if not isinstance(raw, Mapping):
@@ -205,7 +236,15 @@ def _extract_timeframe(step: LLMReportStep) -> str:
 
 
 def _load_json_artifact(
-    store: ArtifactStore, uri: str, *, label: str, max_bytes: int
+    store: ArtifactStore,
+    uri: str,
+    *,
+    label: str,
+    max_bytes: int,
+    event_logger: EventLogger | None,
+    event_id: str,
+    run_id: str,
+    step_id: str,
 ) -> JsonArtifact:
     # Reads a JSON artifact from GCS and enforces:
     # - valid gs:// URI
@@ -214,15 +253,87 @@ def _load_json_artifact(
     # - valid JSON parse
     # It then re-serializes the JSON with sorted keys for stable prompt output.
     gcs_uri = _parse_gcs_uri(uri, label=label)
-    payload = store.read_bytes(gcs_uri)
+    _log_event(
+        event_logger,
+        event="gcs_read_started",
+        severity="INFO",
+        eventId=event_id,
+        runId=run_id,
+        stepId=step_id,
+        gcs_uri=str(gcs_uri),
+        kind=label,
+    )
+    started = time.monotonic()
+    try:
+        payload = store.read_bytes(gcs_uri)
+    except Exception as exc:
+        _log_event(
+            event_logger,
+            event="gcs_read_finished",
+            severity="ERROR",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            gcs_uri=str(gcs_uri),
+            kind=label,
+            ok=False,
+            error={"type": exc.__class__.__name__},
+            durationMs=int((time.monotonic() - started) * 1000),
+        )
+        raise
+    _log_event(
+        event_logger,
+        event="gcs_read_finished",
+        severity="INFO",
+        eventId=event_id,
+        runId=run_id,
+        stepId=step_id,
+        gcs_uri=str(gcs_uri),
+        kind=label,
+        ok=True,
+        bytes=len(payload),
+        durationMs=int((time.monotonic() - started) * 1000),
+    )
     if len(payload) > max_bytes:
+        _log_event(
+            event_logger,
+            event="context_json_too_large",
+            severity="WARNING",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            kind=label,
+            bytes=len(payload),
+            maxBytes=max_bytes,
+        )
         raise InvalidStepInputs(f"{label} exceeds maxContextBytesPerJsonArtifact")
     text = _decode_utf8(payload, label=label)
     try:
         parsed = json.loads(text)
     except json.JSONDecodeError as exc:
+        _log_event(
+            event_logger,
+            event="context_json_invalid",
+            severity="WARNING",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            kind=label,
+            error={"type": exc.__class__.__name__},
+        )
         raise InvalidStepInputs(f"{label} must be valid JSON") from exc
     normalized = json.dumps(parsed, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    _log_event(
+        event_logger,
+        event="context_json_validated",
+        severity="INFO",
+        eventId=event_id,
+        runId=run_id,
+        stepId=step_id,
+        kind=label,
+        bytes=len(payload),
+        normalizedBytes=len(normalized.encode("utf-8")),
+    )
     return JsonArtifact(
         uri=str(gcs_uri),
         payload=normalized,
@@ -232,7 +343,14 @@ def _load_json_artifact(
 
 
 def _load_chart_images(
-    store: ArtifactStore, manifest_data: Any, *, max_bytes: int
+    store: ArtifactStore,
+    manifest_data: Any,
+    *,
+    max_bytes: int,
+    event_logger: EventLogger | None,
+    event_id: str,
+    run_id: str,
+    step_id: str,
 ) -> list[ChartImage]:
     # Parse the charts manifest and load image bytes from GCS. The manifest is
     # expected to be a JSON object containing an array of items under one of the
@@ -242,6 +360,7 @@ def _load_chart_images(
         raise InvalidStepInputs("charts manifest must be an object")
 
     items = _extract_manifest_items(manifest_data)
+    items_with_uri = 0
     images: list[ChartImage] = []
     for item in items:
         if not isinstance(item, Mapping):
@@ -249,10 +368,62 @@ def _load_chart_images(
         uri = _extract_chart_uri(item)
         if uri is None:
             continue
+        items_with_uri += 1
         description = _extract_chart_description(item)
         gcs_uri = _parse_gcs_uri(uri, label="chart_image")
-        data = store.read_bytes(gcs_uri)
+        _log_event(
+            event_logger,
+            event="gcs_read_started",
+            severity="INFO",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            gcs_uri=str(gcs_uri),
+            kind="chart_image",
+        )
+        started = time.monotonic()
+        try:
+            data = store.read_bytes(gcs_uri)
+        except Exception as exc:
+            _log_event(
+                event_logger,
+                event="gcs_read_finished",
+                severity="ERROR",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                gcs_uri=str(gcs_uri),
+                kind="chart_image",
+                ok=False,
+                error={"type": exc.__class__.__name__},
+                durationMs=int((time.monotonic() - started) * 1000),
+            )
+            raise
+        _log_event(
+            event_logger,
+            event="gcs_read_finished",
+            severity="INFO",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            gcs_uri=str(gcs_uri),
+            kind="chart_image",
+            ok=True,
+            bytes=len(data),
+            durationMs=int((time.monotonic() - started) * 1000),
+        )
         if len(data) > max_bytes:
+            _log_event(
+                event_logger,
+                event="chart_image_too_large",
+                severity="WARNING",
+                eventId=event_id,
+                runId=run_id,
+                stepId=step_id,
+                gcs_uri=str(gcs_uri),
+                bytes=len(data),
+                maxBytes=max_bytes,
+            )
             raise InvalidStepInputs("chart image exceeds maxChartImageBytes")
         images.append(
             ChartImage(
@@ -263,12 +434,47 @@ def _load_chart_images(
                 bytes_len=len(data),
             )
         )
+        _log_event(
+            event_logger,
+            event="chart_image_loaded",
+            severity="INFO",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            gcs_uri=str(gcs_uri),
+            bytes=len(data),
+        )
 
+    _log_event(
+        event_logger,
+        event="charts_manifest_parsed",
+        severity="INFO",
+        eventId=event_id,
+        runId=run_id,
+        stepId=step_id,
+        itemsTotal=len(items),
+        itemsWithUri=items_with_uri,
+    )
     # The manifest must point to at least one valid image to be considered usable.
     if not images:
+        _log_event(
+            event_logger,
+            event="charts_manifest_no_images",
+            severity="WARNING",
+            eventId=event_id,
+            runId=run_id,
+            stepId=step_id,
+            itemsTotal=len(items),
+        )
         raise InvalidStepInputs("charts manifest contains no valid image URIs")
 
     return images
+
+
+def _log_event(event_logger: EventLogger | None, **payload: Any) -> None:
+    if event_logger is None:
+        return
+    event_logger.log(**payload)
 
 
 def _extract_manifest_items(manifest: Mapping[str, Any]) -> Sequence[Any]:

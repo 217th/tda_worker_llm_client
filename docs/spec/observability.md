@@ -209,7 +209,15 @@ This table is the canonical event taxonomy for `worker_llm_client`.
 | `prompt_fetch_finished` | INFO/ERROR | after read | `ok` (bool), optional `error.code` |
 | `context_resolve_started` | INFO | before resolving inputs | `inputsSummary` (URIs only) |
 | `gcs_read_started` | INFO | before reading an input object | `gcs_uri`, `kind` (`ohlcv|charts_manifest|previous_report|chart_image`) |
-| `gcs_read_finished` | INFO/ERROR | after reading an input object | `gcs_uri`, `kind`, `ok` (bool), `bytes` |
+| `gcs_read_finished` | INFO/ERROR | after reading an input object | `gcs_uri`, `kind`, `ok` (bool), `bytes`, `durationMs` |
+| `context_json_validated` | INFO | JSON artifact parsed + normalized | `kind` (`ohlcv|charts_manifest|previous_report`), `bytes`, `normalizedBytes` |
+| `context_json_invalid` | WARNING | JSON artifact invalid | `kind`, `error.type` |
+| `context_json_too_large` | WARNING | JSON artifact exceeds size limit | `kind`, `bytes`, `maxBytes` |
+| `charts_manifest_parsed` | INFO | charts manifest items extracted | `itemsTotal`, `itemsWithUri` |
+| `charts_manifest_no_images` | WARNING | charts manifest contains no valid images | `itemsTotal` |
+| `chart_image_loaded` | INFO | chart image downloaded | `gcs_uri`, `bytes` |
+| `chart_image_too_large` | WARNING | chart image exceeds size limit | `gcs_uri`, `bytes`, `maxBytes` |
+| `user_input_built` | INFO | UserInput section assembled | `chartsCount`, `previousReportsCount`, `ohlcvBytes`, `chartsManifestBytes`, `textChars` |
 | `context_resolve_finished` | INFO/ERROR | after resolution | `ok` (bool), `artifacts` (sizes/hashes only) |
 
 ### LLM call

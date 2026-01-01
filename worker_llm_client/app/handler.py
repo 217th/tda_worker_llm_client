@@ -695,6 +695,8 @@ def _handle_cloud_event_impl(
             flow_run=flow_run,
             step=pick.step,
             inputs=inputs,
+            event_logger=event_logger,
+            event_id=event_id,
         )
     except InvalidStepInputs as exc:
         event_logger.log(
@@ -749,6 +751,19 @@ def _handle_cloud_event_impl(
         )
     except InvalidStepInputs as exc:
         return _finalize_failed(ErrorCode.INVALID_STEP_INPUTS, str(exc))
+
+    event_logger.log(
+        event="user_input_built",
+        severity="INFO",
+        eventId=event_id,
+        runId=run_id,
+        stepId=step_id,
+        chartsCount=len(user_payload.chart_images),
+        previousReportsCount=len(resolved.previous_reports),
+        ohlcvBytes=resolved.ohlcv.bytes_len,
+        chartsManifestBytes=resolved.charts_manifest.bytes_len,
+        textChars=len(user_payload.text),
+    )
 
     user_parts = [user_payload.text]
     user_parts.extend(user_payload.chart_images)

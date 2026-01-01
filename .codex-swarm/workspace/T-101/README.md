@@ -4,6 +4,7 @@
 
 - Investigate why LLM_REPORT fails with INVALID_STEP_INPUTS when CHART_EXPORT emits `outputsManifestGcsUri` instead of `outputs.gcs_uri`.
 - Implement compatibility fallback for charts manifest resolution and align docs/contracts.
+- Add detailed context-ingestion logs and update observability spec.
 
 ## Goal
 
@@ -31,4 +32,5 @@
 - Added fallback resolution for CHART_EXPORT outputsManifestGcsUri in LLM_REPORT inputs.
 - Added test coverage for charts manifest legacy output key.
 - Updated flow_run schema/docs/specs to allow legacy outputsManifestGcsUri.
+- Added structured logs for context ingestion and updated observability spec.
 <!-- END AUTO SUMMARY -->
