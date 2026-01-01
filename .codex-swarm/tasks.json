@@ -1741,12 +1741,26 @@
           "body": "Verified: locally ran python3 -m pytest -q (PASS). Fix removes NameError in agentctl finish path so tasks can be closed when verify commands are configured."
         }
       ]
+    },
+    {
+      "id": "T-101",
+      "title": "Investigate LLM_REPORT failure due to charts manifest GCS URI",
+      "description": "Investigate why LLM_REPORT fails with INVALID_STEP_INPUTS when CHART_EXPORT writes outputsManifestGcsUri instead of outputs.gcs_uri; propose and implement contract/code fix.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "bug",
+        "llm_report",
+        "charts_manifest"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "bef74bc0d8e7d14835265fc062f2959a991f594f9d7615ac0ddbc19faaa65e62"
+    "checksum": "2bc16356ab40d8053c04b86bcbb165e2e0603c10fd6cbe8525c357a133f1e795"
   }
 }

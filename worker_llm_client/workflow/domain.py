@@ -232,6 +232,8 @@ class LLMReportInputs:
     def from_raw(
         cls, inputs: Mapping[str, Any], *, flow_run: FlowRun
     ) -> "LLMReportInputs":
+        # Parse and validate LLM_REPORT inputs, then resolve step references
+        # to concrete GCS URIs using the current flow_run state.
         if not isinstance(inputs, Mapping):
             raise InvalidStepInputs("inputs must be an object")
         llm = inputs.get("llm")
@@ -247,10 +249,16 @@ class LLMReportInputs:
             raise LLMProfileInvalid("inputs.llm.llmProfile is required")
         _validate_llm_profile(llm_profile)
 
+        # Required upstream step references.
         ohlcv_step_id = _require_string(inputs.get("ohlcvStepId"), label="inputs.ohlcvStepId")
         charts_manifest_step_id = _require_string(
             inputs.get("chartsManifestStepId"), label="inputs.chartsManifestStepId"
         )
+
+        # Optional previous reports can be provided as:
+        # - step IDs within the same flow_run (previousReportStepIds)
+        # - explicit refs with stepId and/or gcs_uri (previousReports)
+        # If both stepId and gcs_uri are present in a ref, gcs_uri wins.
         previous_report_step_ids = _parse_optional_step_ids(inputs.get("previousReportStepIds"))
         previous_report_refs: list[PreviousReportRef] = [
             PreviousReportRef(
@@ -263,6 +271,7 @@ class LLMReportInputs:
             _parse_previous_report_refs(inputs.get("previousReports"), flow_run=flow_run)
         )
 
+        # Resolve required upstream artifact URIs (must exist in flow_run outputs).
         ohlcv_gcs_uri = _resolve_output_uri(flow_run, ohlcv_step_id)
         charts_manifest_gcs_uri = _resolve_output_uri(flow_run, charts_manifest_step_id)
         previous_report_gcs_uris = tuple(ref.gcs_uri for ref in previous_report_refs)

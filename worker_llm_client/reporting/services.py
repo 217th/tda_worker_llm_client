@@ -14,6 +14,9 @@ from worker_llm_client.workflow.domain import (
 )
 
 
+# Hard limits used during prompt/context assembly.
+# These enforce the contract in spec/prompt_storage_and_context.md and prevent
+# oversized artifacts from being injected into the model request.
 MAX_CONTEXT_BYTES_PER_JSON_ARTIFACT = 65536
 MAX_CHART_IMAGE_BYTES = 262144
 
@@ -76,9 +79,14 @@ class UserInputAssembler:
         step: LLMReportStep,
         inputs: LLMReportInputs,
     ) -> ResolvedUserInput:
+        # Resolve *all* upstream context referenced by LLM_REPORT inputs.
+        # This produces a fully materialized snapshot that can be rendered into
+        # the final UserInput section (text + optional chart images).
         symbol = _extract_symbol(flow_run)
         timeframe = _extract_timeframe(step)
 
+        # Load JSON artifacts from GCS, validate size/UTF-8/JSON, and normalize
+        # to a canonical JSON string for deterministic prompt injection.
         ohlcv = _load_json_artifact(
             self._artifact_store,
             inputs.ohlcv_gcs_uri,
@@ -92,12 +100,16 @@ class UserInputAssembler:
             max_bytes=self._max_json_bytes,
         )
 
+        # Chart images are optional, but the manifest must contain at least one
+        # valid image URI; otherwise the step is invalid.
         chart_images = _load_chart_images(
             self._artifact_store,
             charts_manifest.data,
             max_bytes=self._max_chart_image_bytes,
         )
 
+        # Previous reports may be referenced by stepId or external GCS URI.
+        # Each reference is loaded and normalized as JSON for prompt context.
         previous_reports = []
         for ref in inputs.previous_report_refs:
             step_id = ref.step_id
@@ -120,6 +132,11 @@ class UserInputAssembler:
         )
 
     def assemble(self, *, base_user_prompt: str, resolved: ResolvedUserInput) -> UserInputPayload:
+        # Compose the final user prompt by appending a deterministic "UserInput"
+        # section that includes:
+        # - basic scope (symbol + timeframe)
+        # - JSON artifacts (OHLCV + charts manifest + previous reports)
+        # - a human-readable list of chart images (actual bytes returned separately)
         if not isinstance(base_user_prompt, str) or not base_user_prompt.strip():
             raise InvalidStepInputs("userPrompt must be a non-empty string")
 
@@ -161,6 +178,8 @@ class UserInputAssembler:
         else:
             lines.append("(none)")
 
+        # Return a text payload for the prompt, plus any chart images that will
+        # be attached as separate binary parts by the LLM client.
         return UserInputPayload(text="\n".join(lines).strip() + "\n", chart_images=resolved.chart_images)
 
 
@@ -188,6 +207,12 @@ def _extract_timeframe(step: LLMReportStep) -> str:
 def _load_json_artifact(
     store: ArtifactStore, uri: str, *, label: str, max_bytes: int
 ) -> JsonArtifact:
+    # Reads a JSON artifact from GCS and enforces:
+    # - valid gs:// URI
+    # - max size limit (raw bytes)
+    # - UTF-8 decoding
+    # - valid JSON parse
+    # It then re-serializes the JSON with sorted keys for stable prompt output.
     gcs_uri = _parse_gcs_uri(uri, label=label)
     payload = store.read_bytes(gcs_uri)
     if len(payload) > max_bytes:
@@ -209,6 +234,10 @@ def _load_json_artifact(
 def _load_chart_images(
     store: ArtifactStore, manifest_data: Any, *, max_bytes: int
 ) -> list[ChartImage]:
+    # Parse the charts manifest and load image bytes from GCS. The manifest is
+    # expected to be a JSON object containing an array of items under one of the
+    # accepted keys (items/charts/images). Each item can expose a URI directly
+    # or nested under an "artifact" object.
     if not isinstance(manifest_data, Mapping):
         raise InvalidStepInputs("charts manifest must be an object")
 
@@ -235,6 +264,7 @@ def _load_chart_images(
             )
         )
 
+    # The manifest must point to at least one valid image to be considered usable.
     if not images:
         raise InvalidStepInputs("charts manifest contains no valid image URIs")
 
