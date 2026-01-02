@@ -1778,20 +1778,24 @@
       "id": "T-103",
       "title": "Add depth-5 simplified llm_report_output schema example",
       "description": "Create a simplified llm_report_output schema example with data nesting depth <=5 for experimentation.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "low",
       "owner": "human",
       "tags": [
         "contracts",
         "experiment"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "6056de7fe3a3352381ae8e9d2671d17e2252072a",
+        "message": "🧪 T-103 reduce schema depth to 4"
+      }
     },
     {
       "id": "T-104",
       "title": "Restructure LLM_REPORT UserInput format",
       "description": "Adjust UserInput assembly to new structured format with metadata, OHLCV request_timestamp/data, chart template/kind list, and conditional previous reports section.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "human",
       "tags": [
@@ -1799,13 +1803,17 @@
         "user_input",
         "llm_report"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "7c83f557653cc40b65c4474115bf8e031f680eda",
+        "message": "🧩 T-104 restructure UserInput assembly"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "e1566f553e73b1004cc970c825cf637510870da62921b955d93cef3fac23196b"
+    "checksum": "a02ccd97a0851f213ccd90f116fe26b8114aa99dbf268882f65e2805355bdd06"
   }
 }
