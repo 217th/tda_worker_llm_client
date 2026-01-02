@@ -28,4 +28,5 @@
 
 <!-- BEGIN AUTO SUMMARY -->
 - Created T-105 task README.
+- Added minimal v5 schema example file.
 <!-- END AUTO SUMMARY -->
