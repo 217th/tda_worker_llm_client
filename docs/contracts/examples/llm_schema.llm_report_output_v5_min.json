@@ -1,0 +1,34 @@
+{
+  "schemaId": "llm_report_output_v5",
+  "kind": "LLM_REPORT_OUTPUT",
+  "createdAt": "2026-01-02T00:00:00Z",
+  "description": "Minimal LLM report output schema (summary.markdown + free-form details).",
+  "jsonSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "summary",
+      "details"
+    ],
+    "properties": {
+      "summary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "markdown"
+        ],
+        "properties": {
+          "markdown": {
+            "type": "string"
+          }
+        }
+      },
+      "details": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  },
+  "sha256": "4c1faf40b7e5f63ba581b366c24ff3f3ac6be972cf72f89230cd62d774de264c",
+  "isActive": true
+}
