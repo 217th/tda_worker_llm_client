@@ -1813,7 +1813,7 @@
       "id": "T-105",
       "title": "Create minimal llm_schema v5 and upload",
       "description": "Create minimal llm_report_output_v5 schema document (passes validation) and upload to llm_schemas collection.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "human",
       "tags": [
@@ -1821,13 +1821,17 @@
         "llm_schema",
         "firestore"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "d7feeb2cd03c882d747b6728996e3e0af1df462e",
+        "message": "📝 T-105 update README"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "49cdb87a503a9945da1dc1286fd0f8252d0e730485ec307531124bb08008e1cf"
+    "checksum": "b4cb5ec6dc13f801c10704a1aa507d39a4d78a7772d9b0e8d8c2fc1c64eb03e8"
   }
 }
