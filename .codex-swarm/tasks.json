@@ -1826,12 +1826,26 @@
         "hash": "d7feeb2cd03c882d747b6728996e3e0af1df462e",
         "message": "📝 T-105 update README"
       }
+    },
+    {
+      "id": "T-106",
+      "title": "Update llm_schema upload instructions: no schema changes without consent",
+      "description": "Update llm_schema_upload_instructions.ru.md to prohibit modifying user-provided jsonSchema without explicit consent and require proposing depth-reduction options when depth validation fails.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "docs",
+        "checklist",
+        "llm_schema"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "b4cb5ec6dc13f801c10704a1aa507d39a4d78a7772d9b0e8d8c2fc1c64eb03e8"
+    "checksum": "4721e6e249b315ecbb8b1fd7c1537b26d4fe0d76b9fa7c927661a0cf9022fa80"
   }
 }
