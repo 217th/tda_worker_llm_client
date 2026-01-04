@@ -1831,7 +1831,7 @@
       "id": "T-106",
       "title": "Update llm_schema upload instructions: no schema changes without consent",
       "description": "Update llm_schema_upload_instructions.ru.md to prohibit modifying user-provided jsonSchema without explicit consent and require proposing depth-reduction options when depth validation fails.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "human",
       "tags": [
@@ -1839,13 +1839,17 @@
         "checklist",
         "llm_schema"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "3effad3c399ad1f8d112e41abc8a4b83e4dc04bb",
+        "message": "📝 T-106 update schema depth policy"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "4721e6e249b315ecbb8b1fd7c1537b26d4fe0d76b9fa7c927661a0cf9022fa80"
+    "checksum": "481b921e070625389515cb865c6ef863eb19525eb9e4ca04d247b2bc7074038a"
   }
 }
