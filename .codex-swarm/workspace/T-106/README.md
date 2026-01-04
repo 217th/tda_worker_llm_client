@@ -28,4 +28,5 @@
 
 <!-- BEGIN AUTO SUMMARY -->
 - Created T-106 task README.
+- Updated llm_schema upload checklist to require explicit consent for schema structure changes and to propose depth-reduction options.
 <!-- END AUTO SUMMARY -->
