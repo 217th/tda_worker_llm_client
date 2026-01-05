@@ -1868,7 +1868,7 @@
       "id": "T-108",
       "title": "Switch UserInput to XML context blocks",
       "description": "Update UserInput assembly to use XML-tagged context blocks for OHLCV, charts, and previous reports plus a task block; refresh specs/tests accordingly.",
-      "status": "DOING",
+      "status": "DONE",
       "priority": "med",
       "owner": "human",
       "tags": [
@@ -1876,13 +1876,17 @@
         "llm_report",
         "prompt"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "7ca6691cd4779675bc5c822e366d63c6ae3a2a1f",
+        "message": "✅ T-108 update UserInput XML format"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "64f613c10d089f01aaa9c2974eb3725ac5c99b12bfbda13753751276abd7445f"
+    "checksum": "cdaf7fbd3afcf4f1b8411f0862c413a42fbc59aef9b69f910023000c4c8bc682"
   }
 }
