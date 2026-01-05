@@ -1863,12 +1863,26 @@
         "hash": "0812053a2415a93a26218c4178d449f2bddd6dd4",
         "message": "✅ T-107 update prompt/schema id rules"
       }
+    },
+    {
+      "id": "T-108",
+      "title": "Switch UserInput to XML context blocks",
+      "description": "Update UserInput assembly to use XML-tagged context blocks for OHLCV, charts, and previous reports plus a task block; refresh specs/tests accordingly.",
+      "status": "DOING",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "userinput",
+        "llm_report",
+        "prompt"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "6db49b6b16a52113825901869af176a0863664ea504925f2da487739cc339484"
+    "checksum": "64f613c10d089f01aaa9c2974eb3725ac5c99b12bfbda13753751276abd7445f"
   }
 }
