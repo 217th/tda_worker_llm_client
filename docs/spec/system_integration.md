@@ -57,10 +57,17 @@ Collections (names are configurable; MVP uses Firestore for prompts and schema r
   - example: `contracts/examples/llm_schema.example.json`
 
 Key rules (MVP decisions):
-- `promptId` (Firestore doc ID) must be storage-safe: `^[a-z0-9_]{1,128}$` (no `/`, `.`, `:`, spaces, unicode).
-- Versioning is encoded into `promptId` by convention (e.g. `llm_report_1m_v1`).
+- `promptId` (Firestore doc ID) must be storage-safe and follow:
+  `llm_prompt_<timeframe>_<type>[_<suffix>]_v<major>_<minor>`
+  - regex:
+    `^llm_prompt_[1-9][0-9]*[A-Za-z]+_(report|reco)(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$`
+  - no `/`, `.`, `:`, spaces, unicode
+- Versioning is encoded into `promptId` by convention (e.g. `llm_prompt_1M_report_v1_0`).
 - Prompt doc stores only **instruction texts** (`systemInstruction`, `userPrompt`). Effective Gemini request config (including structured output schema reference) is taken from `inputs.llm.llmProfile`.
-- Structured output schema naming convention: `llmProfile.structuredOutput.schemaId` uses `llm_report_output_v{N}`; the worker writes `metadata.schemaVersion=N` into the report artifact.
+- Structured output schema naming convention:
+  `llmProfile.structuredOutput.schemaId` uses
+  `llm_schema_<timeframe>_<type>[_<suffix>]_v<major>_<minor>`;
+  the worker writes `metadata.schemaVersion=<major>` into the report artifact.
 - Orchestrator must **pin explicit versions** in `promptId` / `schemaId` (no “latest” resolution in MVP).
 
 Future (optional, post-MVP):

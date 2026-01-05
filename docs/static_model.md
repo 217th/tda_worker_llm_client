@@ -326,7 +326,8 @@ No questions
 - Conceptual:
   - Meaning in the domain: Declares that the model must return JSON matching a named schema in the registry.
   - Invariants/rules:
-    - `schemaId` must follow `llm_report_output_v{N}` to derive `schemaVersion`.
+    - `schemaId` must follow `llm_schema_<timeframe>_<type>[_<suffix>]_v<major>_<minor>` to derive
+      `schemaVersion` from `<major>`.
     - `schemaSha256` (if present in the step) is informational-only in MVP.
   - Main states/attributes (meaning):
     - Kind, schemaId, optional schema hash.

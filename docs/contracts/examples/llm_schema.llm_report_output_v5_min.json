@@ -1,5 +1,5 @@
 {
-  "schemaId": "llm_report_output_v5",
+  "schemaId": "llm_schema_1M_report_min_v5_0",
   "kind": "LLM_REPORT_OUTPUT",
   "createdAt": "2026-01-02T00:00:00Z",
   "description": "Minimal LLM report output schema (summary.markdown + free-form details).",

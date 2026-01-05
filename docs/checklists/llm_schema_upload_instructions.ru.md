@@ -14,7 +14,8 @@
 ## Вход от пользователя (минимум)
 
 Пользователь должен предоставить агенту:
-- `schemaId`: строка вида `llm_report_output_v{N}` (например `llm_report_output_v5`)
+- `schemaId`: строка вида `llm_schema_<timeframe>_<type>[_<suffix>]_v<major>_<minor>`
+  (например `llm_schema_1M_report_v5_0`)
 - `description`: строка (коротко, зачем схема)
 - `jsonSchema`: JSON‑объект (корень — object)
 
@@ -161,7 +162,8 @@ PY
 ## Шаг 4 — собрать llm_schema документ и посчитать sha256
 
 Требуемая обёртка (см. `docs/contracts/llm_schema.schema.json`):
-- `schemaId` (Firestore doc id): `^llm_report_output_v[1-9][0-9]*$`
+- `schemaId` (Firestore doc id):
+  `^llm_schema_[1-9][0-9]*[A-Za-z]+_(report|reco)(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$`
 - `kind`: `"LLM_REPORT_OUTPUT"`
 - `createdAt`: RFC3339 (UTC)
 - `description`: строка
@@ -176,7 +178,7 @@ json.dumps(jsonSchema, ensure_ascii=False, sort_keys=True, separators=(",", ":")
 
 Генерация файла (пример: `llm_schema.upload.json`):
 ```bash
-SCHEMA_ID="llm_report_output_v5" \
+SCHEMA_ID="llm_schema_1M_report_v5_0" \
 DESCRIPTION="Short human description" \
 python3 - <<'PY'
 import json, os, hashlib
@@ -218,7 +220,7 @@ PY
 Загрузка:
 ```bash
 source .env.prod.local
-SCHEMA_ID="llm_report_output_v5"
+SCHEMA_ID="llm_schema_1M_report_v5_0"
 
 TMPDIR="$(mktemp -d)"
 OUT_PATH="${TMPDIR}/firestore_payload.json"
@@ -274,4 +276,4 @@ echo "Uploaded ${SCHEMA_ID}"
 
 - Никогда не логировать и не коммитить секреты/токены.
 - Не включать в схему или описание конфиденциальные данные.
-- Для экспериментов предпочтительно создавать новые `schemaId` (vN), а перезапись существующих делать только по явной команде пользователя.
+- Для экспериментов предпочтительно создавать новые `schemaId` (v<major>_<minor>), а перезапись существующих делать только по явной команде пользователя.

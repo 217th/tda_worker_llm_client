@@ -33,8 +33,14 @@ def _get_step_status(flow_run: Mapping[str, Any], step_id: str) -> str | None:
     return status if isinstance(status, str) else None
 
 
-_PROMPT_ID_RE = re.compile(r"^[a-z0-9_]{1,128}$")
-_SCHEMA_ID_RE = re.compile(r"^llm_report_output_v[1-9][0-9]*$")
+_PROMPT_ID_RE = re.compile(
+    r"^(?=.{1,128}$)llm_prompt_[1-9][0-9]*[A-Za-z]+_(report|reco)"
+    r"(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$"
+)
+_SCHEMA_ID_RE = re.compile(
+    r"^(?=.{1,128}$)llm_schema_[1-9][0-9]*[A-Za-z]+_(report|reco)"
+    r"(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$"
+)
 
 
 def _is_prompt_id_safe(prompt_id: str) -> bool:
@@ -180,7 +186,10 @@ class FirestorePromptRepository(PromptRepository):
         if not isinstance(prompt_id, str) or not prompt_id.strip():
             raise ValueError("prompt_id must be a non-empty string")
         if not _is_prompt_id_safe(prompt_id):
-            raise ValueError("prompt_id must be storage-safe (^[a-z0-9_]{1,128}$)")
+            raise ValueError(
+                "prompt_id must follow "
+                "llm_prompt_<timeframe>_<type>[_<suffix>]_v<major>_<minor>"
+            )
 
         doc_ref = self.client.collection(self.prompts_collection).document(prompt_id)
         snapshot = doc_ref.get()
@@ -203,7 +212,10 @@ class FirestoreSchemaRepository(SchemaRepository):
         if not isinstance(schema_id, str) or not schema_id.strip():
             raise ValueError("schema_id must be a non-empty string")
         if not _is_schema_id_safe(schema_id):
-            raise ValueError("schema_id must match ^llm_report_output_v[1-9][0-9]*$")
+            raise ValueError(
+                "schema_id must follow "
+                "llm_schema_<timeframe>_<type>[_<suffix>]_v<major>_<minor>"
+            )
 
         doc_ref = self.client.collection(self.schemas_collection).document(schema_id)
         snapshot = doc_ref.get()

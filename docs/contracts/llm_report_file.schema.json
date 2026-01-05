@@ -15,7 +15,7 @@
 	        "schemaVersion": {
 	          "type": "integer",
 	          "minimum": 1,
-	          "description": "Version of the model-owned `output` format written in this file. Worker-owned; derived from the structured output schema id used for the step (e.g., `llm_report_output_v1` -> 1)."
+	          "description": "Version of the model-owned `output` format written in this file. Worker-owned; derived from the structured output schema id used for the step (e.g., `llm_schema_1M_report_v3_2` -> 3)."
 	        },
 	        "runId": {
 	          "type": "string",
@@ -36,12 +36,18 @@
 	          "additionalProperties": false,
 	          "required": ["promptId", "modelName", "finishReason"],
 	          "properties": {
-	            "promptId": { "type": "string", "minLength": 1 },
+	            "promptId": {
+	              "type": "string",
+	              "minLength": 1,
+	              "maxLength": 128,
+	              "pattern": "^llm_prompt_[1-9][0-9]*[A-Za-z]+_(report|reco)(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$"
+	            },
 	            "modelName": { "type": "string", "minLength": 1 },
 	            "schemaId": {
 	              "type": "string",
 	              "description": "Structured output schema id used for this report (llm_schemas/{schemaId}).",
-	              "pattern": "^[a-z0-9_]{1,128}$"
+	              "maxLength": 128,
+	              "pattern": "^llm_schema_[1-9][0-9]*[A-Za-z]+_(report|reco)(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$"
 	            },
 	            "schemaSha256": {
 	              "type": "string",

@@ -103,7 +103,7 @@ require_var SMOKE_POS_TIMEFRAME
 require_var SMOKE_NEG_RUN_ID
 require_var SMOKE_NEG_STEP_ID
 
-SMOKE_NEG_SCHEMA_ID="${SMOKE_NEG_SCHEMA_ID:-llm_report_output_smoke_invalid}"
+SMOKE_NEG_SCHEMA_ID="${SMOKE_NEG_SCHEMA_ID:-llm_schema_1M_report_smoke_invalid_v0_0}"
 SMOKE_NEG_SCHEMA_KIND="${SMOKE_NEG_SCHEMA_KIND:-LLM_REPORT_OUTPUT}"
 SMOKE_NEG_SCHEMA_DESC="${SMOKE_NEG_SCHEMA_DESC:-Invalid schema for smoke negative scenario.}"
 SMOKE_CLEANUP_GCS="${SMOKE_CLEANUP_GCS:-true}"

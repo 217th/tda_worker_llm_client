@@ -123,7 +123,7 @@ class FakeUserInputAssembler:
         return UserInputPayload(text="user prompt", chart_images=())
 
 
-def _build_flow_run(schema_id: str | None = "llm_report_output_v1") -> FlowRun:
+def _build_flow_run(schema_id: str | None = "llm_schema_1M_report_v1_0") -> FlowRun:
     llm_profile = {
         "modelName": "gemini-2.0-flash",
         "responseMimeType": "application/json",
@@ -153,7 +153,7 @@ def _build_flow_run(schema_id: str | None = "llm_report_output_v1") -> FlowRun:
                 "dependsOn": ["ohlcv_1m_v1", "charts_1m_v1"],
                 "timeframe": "1M",
                 "inputs": {
-                    "llm": {"promptId": "prompt_v1", "llmProfile": llm_profile},
+                    "llm": {"promptId": "llm_prompt_1M_report_v1_0", "llmProfile": llm_profile},
                     "ohlcvStepId": "ohlcv_1m_v1",
                     "chartsManifestStepId": "charts_1m_v1",
                     "previousReportStepIds": [],
@@ -167,7 +167,7 @@ def _build_flow_run(schema_id: str | None = "llm_report_output_v1") -> FlowRun:
 
 def _build_prompt() -> LLMPrompt:
     return LLMPrompt(
-        prompt_id="prompt_v1",
+        prompt_id="llm_prompt_1M_report_v1_0",
         schema_version=1,
         system_instruction="sys",
         user_prompt="user",
@@ -176,7 +176,7 @@ def _build_prompt() -> LLMPrompt:
 
 def _build_schema() -> LLMSchema:
     return LLMSchema(
-        schema_id="llm_report_output_v1",
+        schema_id="llm_schema_1M_report_v1_0",
         kind="LLM_REPORT_OUTPUT",
         json_schema={
             "type": "object",

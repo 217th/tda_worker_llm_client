@@ -661,7 +661,10 @@ Model output data safety (MVP):
 Schema versioning (MVP):
 - The worker writes `metadata.schemaVersion` into the `llm_report_file` artifact (worker-owned).
 - `metadata.schemaVersion` represents the version of the model-owned `output` format (structured output schema).
-- `llmProfile.structuredOutput.schemaId` must follow `llm_report_output_v{schemaVersion}`; if it does not match this convention or is unparseable, treat as `LLM_PROFILE_INVALID`.
+- `llmProfile.structuredOutput.schemaId` must follow
+  `llm_schema_<timeframe>_<type>[_<suffix>]_v<major>_<minor>`; if it does not match this
+  convention or is unparseable, treat as `LLM_PROFILE_INVALID`. `schemaVersion` is derived from
+  `<major>`.
 
 #### Repair prompt contract (MVP)
 

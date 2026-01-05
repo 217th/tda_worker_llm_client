@@ -27,5 +27,7 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- Created T-107 task README.
+- Updated prompt/schema ID validation regexes and schemaVersion parsing to support the new structured IDs (uppercase timeframe allowed).
+- Aligned contracts/spec docs and JSON schemas with the new promptId/schemaId format (major/minor versions).
+- Refreshed examples, test vectors, and unit tests to use the new IDs.
 <!-- END AUTO SUMMARY -->

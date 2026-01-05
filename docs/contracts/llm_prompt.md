@@ -8,10 +8,14 @@ Machine-readable schema: `contracts/llm_prompt.schema.json`.
 
 - Firestore collection: `llm_prompts`
 - Document ID: `promptId` (referenced from `steps.<stepId>.inputs.llm.promptId`)
-- `promptId` **must** be storage-safe: `^[a-z0-9_]{1,128}$`
+- `promptId` **must** be storage-safe and follow:
+  `llm_prompt_<timeframe>_<type>[_<suffix>]_v<major>_<minor>`
+  - regex:
+    `^llm_prompt_[1-9][0-9]*[A-Za-z]+_(report|reco)(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$`
+  - total length: `<= 128`
   - no `/`, `.`, `:`, spaces, unicode
   - do not include file extensions like `.json` in the document ID (extensions are only for exported files)
-  - versioning convention (MVP): encode version in the ID: `..._v1`, `..._v2`, ...
+  - versioning convention (MVP): encode version in the ID: `..._v1_0`, `..._v2_3`, ...
 
 ## Required fields
 

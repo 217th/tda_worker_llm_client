@@ -36,11 +36,11 @@ def _flow_run_base() -> dict:
 def _llm_step_inputs() -> dict:
     return {
         "llm": {
-            "promptId": "prompt-1",
+            "promptId": "llm_prompt_1M_report_v1_0",
             "llmProfile": {
                 "responseMimeType": "application/json",
                 "candidateCount": 1,
-                "structuredOutput": {"schemaId": "llm_report_output_v1"},
+                "structuredOutput": {"schemaId": "llm_schema_1M_report_v1_0"},
             },
         },
         "ohlcvStepId": "ohlcv",
@@ -207,11 +207,11 @@ class UserInputAssemblerTests(unittest.TestCase):
                 "dependsOn": [],
                 "inputs": {
                     "llm": {
-                        "promptId": "prompt-1",
+                        "promptId": "llm_prompt_1M_report_v1_0",
                         "llmProfile": {
                             "responseMimeType": "application/json",
                             "candidateCount": 1,
-                            "structuredOutput": {"schemaId": "llm_report_output_v1"},
+                            "structuredOutput": {"schemaId": "llm_schema_1M_report_v1_0"},
                         },
                     },
                     "ohlcvStepId": "ohlcv",

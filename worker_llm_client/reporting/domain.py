@@ -12,7 +12,10 @@ class SerializationError(ValueError):
     """Raised when report serialization fails unexpectedly."""
 
 
-_SCHEMA_ID_RE = re.compile(r"^llm_report_output_v([1-9][0-9]*)$")
+_SCHEMA_ID_RE = re.compile(
+    r"^(?=.{1,128}$)llm_schema_[1-9][0-9]*[A-Za-z]+_(report|reco)"
+    r"(?:_[a-z0-9]{1,24})?_v([1-9][0-9]*)_(?:0|[1-9][0-9]*)$"
+)
 _SHA256_RE = re.compile(r"^[a-f0-9]{64}$")
 
 
@@ -45,8 +48,11 @@ class StructuredOutputSpec:
     def schema_version(self) -> int:
         match = _SCHEMA_ID_RE.fullmatch(self.schema_id)
         if not match:
-            raise LLMProfileInvalid("structuredOutput.schemaId must follow llm_report_output_v{N}")
-        return int(match.group(1))
+            raise LLMProfileInvalid(
+                "structuredOutput.schemaId must follow "
+                "llm_schema_<timeframe>_<type>[_<suffix>]_v<major>_<minor>"
+            )
+        return int(match.group(2))
 
     def to_dict(self) -> dict[str, Any]:
         payload = {"schemaId": self.schema_id, "kind": self.kind}

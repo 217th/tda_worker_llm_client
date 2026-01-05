@@ -8,7 +8,8 @@
     "schemaId": {
       "type": "string",
       "description": "Firestore document ID (immutable). Storage-safe ASCII identifier.",
-      "pattern": "^llm_report_output_v[1-9][0-9]*$"
+      "maxLength": 128,
+      "pattern": "^llm_schema_[1-9][0-9]*[A-Za-z]+_(report|reco)(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$"
     },
     "kind": {
       "type": "string",

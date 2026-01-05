@@ -25,11 +25,11 @@ def _llm_step(*, step_id: str, status: str, depends_on: list[str] | None = None)
         "dependsOn": depends_on or [],
         "inputs": {
             "llm": {
-                "promptId": "prompt-1",
+                "promptId": "llm_prompt_1M_report_v1_0",
                 "llmProfile": {
                     "responseMimeType": "application/json",
                     "candidateCount": 1,
-                    "structuredOutput": {"schemaId": "llm_report_output_v1"},
+                    "structuredOutput": {"schemaId": "llm_schema_1M_report_v1_0"},
                 },
             },
             "ohlcvStepId": "ohlcv",
@@ -126,7 +126,7 @@ class LLMReportInputsTests(unittest.TestCase):
         inputs = _llm_step(step_id="llm-a", status="READY")["inputs"]
         inputs["previousReportStepIds"] = ["prev"]
         parsed = LLMReportInputs.from_raw(inputs, flow_run=flow)
-        self.assertEqual(parsed.prompt_id, "prompt-1")
+        self.assertEqual(parsed.prompt_id, "llm_prompt_1M_report_v1_0")
         self.assertEqual(parsed.ohlcv_gcs_uri, "gs://x/ohlcv.json")
         self.assertEqual(parsed.charts_manifest_gcs_uri, "gs://x/charts.json")
         self.assertEqual(parsed.previous_report_gcs_uris, ("gs://x/prev.json",))

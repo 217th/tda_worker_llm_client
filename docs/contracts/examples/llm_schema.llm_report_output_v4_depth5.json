@@ -1,5 +1,5 @@
 {
-  "schemaId": "llm_report_output_v4",
+  "schemaId": "llm_schema_1M_report_depth5_v4_0",
   "kind": "LLM_REPORT_OUTPUT",
   "createdAt": "2026-01-01T00:00:00Z",
   "description": "Simplified depth-5 variant of v3 for nesting-limit experiments.",

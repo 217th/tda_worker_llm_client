@@ -53,7 +53,7 @@
       "dependsOn": ["ohlcv_1M_bigquery_all_v1", "charts_1M_default_set_v1"],
       "inputs": {
         "llm": {
-          "promptId": "prompt_month_v1",
+          "promptId": "llm_prompt_1M_report_v1_0",
           "llmProfile": {
             "modelName": "gemini-2.0-flash",
             "temperature": 0.2,

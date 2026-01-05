@@ -8,9 +8,9 @@
     "symbol": "BTCUSDT",
     "timeframe": "1M",
     "llm": {
-      "promptId": "prompt_month_v1",
+      "promptId": "llm_prompt_1M_report_v1_0",
       "modelName": "gemini-2.0-flash",
-      "schemaId": "llm_report_output_v1",
+      "schemaId": "llm_schema_1M_report_v1_0",
       "schemaSha256": "1267bf2982c5b2ab8991ffe70894134f0357f0bc7deb8a61d9959fa886a24797",
       "llmProfile": {
         "modelName": "gemini-2.0-flash",

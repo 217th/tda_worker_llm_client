@@ -50,7 +50,10 @@ def _step_summaries(steps: list[Any]) -> list[dict[str, Any]]:
     return summaries
 
 
-_SCHEMA_VERSION_RE = re.compile(r"^llm_report_output_v([1-9][0-9]*)$")
+_SCHEMA_VERSION_RE = re.compile(
+    r"^(?=.{1,128}$)llm_schema_[1-9][0-9]*[A-Za-z]+_(report|reco)"
+    r"(?:_[a-z0-9]{1,24})?_v([1-9][0-9]*)_(?:0|[1-9][0-9]*)$"
+)
 
 
 def _now_rfc3339() -> str:
@@ -63,7 +66,7 @@ def _parse_schema_version(schema_id: str) -> int | None:
     match = _SCHEMA_VERSION_RE.fullmatch(schema_id.strip())
     if not match:
         return None
-    return int(match.group(1))
+    return int(match.group(2))
 
 
 def _extract_symbol(flow_run: Any) -> str | None:
@@ -545,7 +548,10 @@ def _handle_cloud_event_impl(
             runId=run_id,
             stepId=step_id,
             llm={"schemaId": schema.schema_id, "schemaSha256": schema.sha256},
-            reason={"message": "schemaId must follow llm_report_output_v{N}"},
+            reason={
+                "message": "schemaId must follow "
+                "llm_schema_<timeframe>_<type>[_<suffix>]_v<major>_<minor>"
+            },
             error={"code": ErrorCode.LLM_PROFILE_INVALID.value},
         )
         return _finalize_failed(

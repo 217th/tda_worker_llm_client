@@ -305,7 +305,12 @@
                   "additionalProperties": true,
                   "required": ["promptId", "llmProfile"],
                   "properties": {
-                    "promptId": { "type": "string", "minLength": 1 },
+                    "promptId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^llm_prompt_[1-9][0-9]*[A-Za-z]+_(report|reco)(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$"
+                    },
                     "llmProfile": {
                       "type": "object",
                       "additionalProperties": false,
@@ -340,7 +345,11 @@
                           "description": "Structured output configuration. Schema is referenced via the schema registry (llm_schemas/{schemaId}).",
                           "required": ["schemaId"],
                           "properties": {
-                            "schemaId": { "type": "string", "pattern": "^llm_report_output_v[1-9][0-9]*$" },
+                            "schemaId": {
+                              "type": "string",
+                              "maxLength": 128,
+                              "pattern": "^llm_schema_[1-9][0-9]*[A-Za-z]+_(report|reco)(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$"
+                            },
                             "schemaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
                             "kind": { "type": "string", "enum": ["LLM_REPORT_OUTPUT"] }
                           }

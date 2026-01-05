@@ -11,7 +11,8 @@ This document fixes the MVP rules for:
 Collection: `llm_prompts`
 
 - Document ID = `promptId` referenced from `steps.<stepId>.inputs.llm.promptId`
-- `promptId` must match: `^[a-z0-9_]{1,128}$`
+- `promptId` must match:
+  `^llm_prompt_[1-9][0-9]*[A-Za-z]+_(report|reco)(?:_[a-z0-9]{1,24})?_v[1-9][0-9]*_(?:0|[1-9][0-9]*)$`
 
 Canonical prompt document schema:
 - `contracts/llm_prompt.schema.json`
@@ -25,7 +26,7 @@ Canonical prompt document schema:
 
 ### Versioning rules (MVP)
 
-- Version is encoded into `promptId` by convention: `..._v1`, `..._v2`, ...
+- Version is encoded into `promptId` by convention: `..._v1_0`, `..._v2_3`, ...
 - The worker treats `promptId` as immutable and does not attempt to resolve aliases.
 
 ## 2) Templating (MVP)

@@ -16,8 +16,11 @@ Canonical schema:
 ## Immutability / versioning (MVP)
 
 - Treat each schema doc as **immutable**.
-- Changes create a new `schemaId` (e.g., `llm_report_output_v1`, `llm_report_output_v2`).
-- Naming convention (MVP): `llm_report_output_v{N}` where `N` matches the report artifact `metadata.schemaVersion` written by the worker.
+- Changes create a new `schemaId` (e.g., `llm_schema_1M_report_v1_0`, `llm_schema_1M_report_v2_1`).
+- Naming convention (MVP):
+  `llm_schema_<timeframe>_<type>[_<suffix>]_v<major>_<minor>` where `major` matches
+  the report artifact `metadata.schemaVersion` written by the worker.
+  - total length: `<= 128`
 
 ## SHA-256 policy (MVP)
 
@@ -62,7 +65,8 @@ If the schema does not enforce these invariants, treat it as invalid configurati
 
 - `details` is intentionally **free-form** (`additionalProperties=true`).
 - Do not require stable keys inside `details` on MVP.
-- If stable machine-readable fields are needed later, introduce them by tightening the structured output schema in a new version (`llm_report_output_v{N}`) and bumping `metadata.schemaVersion`.
+- If stable machine-readable fields are needed later, introduce them by tightening the structured output schema in a new version
+  (`llm_schema_<timeframe>_<type>[_<suffix>]_v<major>_<minor>`) and bumping `metadata.schemaVersion`.
 
 Troubleshooting:
 - always log and persist `schemaId` + `schemaSha256` (and never the raw output payload)

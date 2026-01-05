@@ -39,21 +39,21 @@ class PromptRepositoryTests(unittest.TestCase):
             {"schemaVersion": 1, "systemInstruction": "sys", "userPrompt": "user"}
         )
         repo = FirestorePromptRepository(FakeClient(FakeDocRef([snapshot])))
-        prompt = repo.get("prompt_v1")
+        prompt = repo.get("llm_prompt_1M_report_v1_0")
         self.assertIsNotNone(prompt)
         assert prompt is not None
-        self.assertEqual(prompt.prompt_id, "prompt_v1")
+        self.assertEqual(prompt.prompt_id, "llm_prompt_1M_report_v1_0")
         self.assertEqual(prompt.schema_version, 1)
 
     def test_get_prompt_missing(self) -> None:
         snapshot = FakeSnapshot(None, exists=False)
         repo = FirestorePromptRepository(FakeClient(FakeDocRef([snapshot])))
-        self.assertIsNone(repo.get("prompt_v1"))
+        self.assertIsNone(repo.get("llm_prompt_1M_report_v1_0"))
 
     def test_get_prompt_invalid_doc(self) -> None:
         snapshot = FakeSnapshot({"schemaVersion": 2, "systemInstruction": "", "userPrompt": ""})
         repo = FirestorePromptRepository(FakeClient(FakeDocRef([snapshot])))
-        self.assertIsNone(repo.get("prompt_v1"))
+        self.assertIsNone(repo.get("llm_prompt_1M_report_v1_0"))
 
     def test_get_prompt_invalid_id(self) -> None:
         repo = FirestorePromptRepository(FakeClient(FakeDocRef([])))
@@ -62,7 +62,7 @@ class PromptRepositoryTests(unittest.TestCase):
 
 
 class SchemaRepositoryTests(unittest.TestCase):
-    def _valid_schema_doc(self, *, schema_id: str = "llm_report_output_v1") -> dict:
+    def _valid_schema_doc(self, *, schema_id: str = "llm_schema_1M_report_v1_0") -> dict:
         return {
             "schemaId": schema_id,
             "kind": "LLM_REPORT_OUTPUT",
@@ -84,15 +84,15 @@ class SchemaRepositoryTests(unittest.TestCase):
     def test_get_schema_success(self) -> None:
         snapshot = FakeSnapshot(self._valid_schema_doc())
         repo = FirestoreSchemaRepository(FakeClient(FakeDocRef([snapshot])))
-        schema = repo.get("llm_report_output_v1")
+        schema = repo.get("llm_schema_1M_report_v1_0")
         self.assertIsNotNone(schema)
         assert schema is not None
-        self.assertEqual(schema.schema_id, "llm_report_output_v1")
+        self.assertEqual(schema.schema_id, "llm_schema_1M_report_v1_0")
 
     def test_get_schema_missing(self) -> None:
         snapshot = FakeSnapshot(None, exists=False)
         repo = FirestoreSchemaRepository(FakeClient(FakeDocRef([snapshot])))
-        self.assertIsNone(repo.get("llm_report_output_v1"))
+        self.assertIsNone(repo.get("llm_schema_1M_report_v1_0"))
 
     def test_get_schema_invalid_id(self) -> None:
         repo = FirestoreSchemaRepository(FakeClient(FakeDocRef([])))
@@ -100,23 +100,23 @@ class SchemaRepositoryTests(unittest.TestCase):
             repo.get("bad_schema")
 
     def test_get_schema_mismatch_id(self) -> None:
-        snapshot = FakeSnapshot(self._valid_schema_doc(schema_id="llm_report_output_v2"))
+        snapshot = FakeSnapshot(self._valid_schema_doc(schema_id="llm_schema_1M_report_v2_0"))
         repo = FirestoreSchemaRepository(FakeClient(FakeDocRef([snapshot])))
-        self.assertIsNone(repo.get("llm_report_output_v1"))
+        self.assertIsNone(repo.get("llm_schema_1M_report_v1_0"))
 
     def test_get_schema_invalid_invariants(self) -> None:
         doc = self._valid_schema_doc()
         doc["jsonSchema"]["required"] = ["summary"]
         snapshot = FakeSnapshot(doc)
         repo = FirestoreSchemaRepository(FakeClient(FakeDocRef([snapshot])))
-        self.assertIsNone(repo.get("llm_report_output_v1"))
+        self.assertIsNone(repo.get("llm_schema_1M_report_v1_0"))
 
     def test_get_schema_invalid_sha256(self) -> None:
         doc = self._valid_schema_doc()
         doc["sha256"] = "not-hex"
         snapshot = FakeSnapshot(doc)
         repo = FirestoreSchemaRepository(FakeClient(FakeDocRef([snapshot])))
-        self.assertIsNone(repo.get("llm_report_output_v1"))
+        self.assertIsNone(repo.get("llm_schema_1M_report_v1_0"))
 
 
 if __name__ == "__main__":

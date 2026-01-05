@@ -8,7 +8,7 @@ from worker_llm_client.reporting.domain import StructuredOutputInvalid
 
 def _schema() -> LLMSchema:
     raw = {
-        "schemaId": "llm_report_output_v1",
+        "schemaId": "llm_schema_1M_report_v1_0",
         "kind": "LLM_REPORT_OUTPUT",
         "jsonSchema": {
             "type": "object",
@@ -26,7 +26,7 @@ def _schema() -> LLMSchema:
         },
         "sha256": "0" * 64,
     }
-    return LLMSchema.from_raw(raw, schema_id="llm_report_output_v1")
+    return LLMSchema.from_raw(raw, schema_id="llm_schema_1M_report_v1_0")
 
 
 class StructuredOutputValidatorTests(unittest.TestCase):
