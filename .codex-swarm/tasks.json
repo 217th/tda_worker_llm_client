@@ -1849,7 +1849,7 @@
       "id": "T-107",
       "title": "Relax timeframe token to allow uppercase in prompt/schema ids",
       "description": "Allow uppercase letters in the timeframe token used inside promptId/schemaId validation rules; update documented regex patterns accordingly.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "human",
       "tags": [
@@ -1858,13 +1858,17 @@
         "llm_schema",
         "validation"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "0812053a2415a93a26218c4178d449f2bddd6dd4",
+        "message": "✅ T-107 update prompt/schema id rules"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "1e9994b30636deb0131aedb39547d90b1aa027a3d16e756f08319e220026fc97"
+    "checksum": "6db49b6b16a52113825901869af176a0863664ea504925f2da487739cc339484"
   }
 }
