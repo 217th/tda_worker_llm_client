@@ -1844,12 +1844,27 @@
         "hash": "3effad3c399ad1f8d112e41abc8a4b83e4dc04bb",
         "message": "📝 T-106 update schema depth policy"
       }
+    },
+    {
+      "id": "T-107",
+      "title": "Relax timeframe token to allow uppercase in prompt/schema ids",
+      "description": "Allow uppercase letters in the timeframe token used inside promptId/schemaId validation rules; update documented regex patterns accordingly.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "contracts",
+        "llm_prompt",
+        "llm_schema",
+        "validation"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "481b921e070625389515cb865c6ef863eb19525eb9e4ca04d247b2bc7074038a"
+    "checksum": "1e9994b30636deb0131aedb39547d90b1aa027a3d16e756f08319e220026fc97"
   }
 }
