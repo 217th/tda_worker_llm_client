@@ -30,11 +30,8 @@ Machine-readable schema: `contracts/llm_prompt.schema.json`.
 The worker builds the final user content as:
 
 1) take `userPrompt` as-is (no templating in MVP)
-2) append a generated section named `UserInput` that describes and includes resolved inputs:
-   - **Metadata**: symbol + timeframe.
-   - **Time series input (OHLCV)**: include `request_timestamp` (if available) and the OHLCV data JSON.
-   - **Charts (images)**: list chart template IDs and their kinds from the charts manifest.
-   - **Previous reports**: include only when previous reports are provided, with a short label and JSON.
+2) append XML-tagged context blocks for OHLCV, charts (image descriptions), and any previous reports,
+   followed by a `<task>` instruction block.
 
 See `spec/prompt_storage_and_context.md` for the exact assembly rules and size limits.
 

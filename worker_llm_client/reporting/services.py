@@ -155,50 +155,64 @@ class UserInputAssembler:
         )
 
     def assemble(self, *, base_user_prompt: str, resolved: ResolvedUserInput) -> UserInputPayload:
-        # Compose the final user prompt by appending a deterministic "UserInput"
-        # section that includes:
-        # - basic scope (symbol + timeframe)
-        # - JSON artifacts (OHLCV + charts manifest + previous reports)
-        # - a human-readable list of chart images (actual bytes returned separately)
+        # Compose the final user prompt by appending XML-tagged context blocks
+        # for OHLCV, charts (image descriptions), and optional previous reports,
+        # followed by a task instruction.
         if not isinstance(base_user_prompt, str) or not base_user_prompt.strip():
             raise InvalidStepInputs("userPrompt must be a non-empty string")
 
         lines: list[str] = []
         lines.append(base_user_prompt.rstrip())
         lines.append("")
-        lines.append("## UserInput:")
-        lines.append("")
-        lines.append("Метаданные:")
-        lines.append(f"- symbol: {resolved.symbol}")
-        lines.append(f"- timeframe: {resolved.timeframe}")
-        lines.append("")
-        lines.append("### OHLCV (time series)")
-        request_ts = _extract_ohlcv_request_timestamp(resolved.ohlcv.data)
-        lines.append(f"- request_timestamp: {request_ts}")
-        lines.append("- data:")
-        lines.append("```json")
-        lines.append(_render_ohlcv_data(resolved.ohlcv))
-        lines.append("```")
-        lines.append("")
-        lines.append("### Charts (images)")
-        generated_at = _extract_charts_generated_at(resolved.charts_manifest.data)
-        lines.append(f"- generated_at: {generated_at}")
-        chart_entries = _extract_chart_entries(resolved.charts_manifest.data)
-        for entry in chart_entries:
-            lines.append(f"- {entry.template_id}: {entry.kind}")
-        lines.append("")
-        if resolved.previous_reports:
-            lines.append("### Previous reports")
-            for report in resolved.previous_reports:
-                label = report.step_id or "external"
-                lines.append(f"- {label} (uri: {report.artifact.uri})")
-                lines.append("```json")
-                lines.append(report.artifact.payload)
-                lines.append("```")
+        _append_context_block(
+            lines,
+            data_type=f"{resolved.timeframe} OHLCV Candles (JSON)",
+            content=_render_ohlcv_data(resolved.ohlcv),
+        )
+
+        chart_lines = ["[Images attached to this message with description]"]
+        for image in resolved.chart_images:
+            chart_lines.append(f"- {image.description}")
+        _append_context_block(
+            lines,
+            data_type="Technical Charts (Images)",
+            content=chart_lines,
+        )
+
+        for report in resolved.previous_reports:
+            label = report.step_id or "external"
+            _append_context_block(
+                lines,
+                data_type=f"Previous Report ({label}, uri: {report.artifact.uri}) (JSON)",
+                content=report.artifact.payload,
+            )
+
+        lines.append("<task>")
+        lines.append(
+            "Based on the context above, perform the analysis for `symbol`, `timeframe` "
+            "defined in the System Instructions."
+        )
+        lines.append("Generate the full report in JSON.")
+        lines.append("</task>")
 
         # Return a text payload for the prompt, plus any chart images that will
         # be attached as separate binary parts by the LLM client.
         return UserInputPayload(text="\n".join(lines).strip() + "\n", chart_images=resolved.chart_images)
+
+
+def _append_context_block(lines: list[str], *, data_type: str, content: str | Sequence[str]) -> None:
+    lines.append("<context>")
+    lines.append(f"  <data_type>{data_type}</data_type>")
+    lines.append("  <content>")
+    if isinstance(content, str):
+        content_lines = content.splitlines() or [""]
+    else:
+        content_lines = list(content)
+    for line in content_lines:
+        lines.append(f"    {line}")
+    lines.append("  </content>")
+    lines.append("</context>")
+    lines.append("")
 
 
 def _extract_symbol(flow_run: FlowRun) -> str:

@@ -33,7 +33,7 @@ Canonical prompt document schema:
 
 No templating in MVP:
 - `systemInstruction` and `userPrompt` are used as-is.
-- All dynamic values (symbol/timeframe/URIs/artifacts) are provided via the generated `UserInput` section.
+- All dynamic artifacts (OHLCV, charts, previous reports) are provided via the generated `UserInput` section.
 
 ## 3) Context injection policy (MVP)
 
@@ -45,9 +45,8 @@ Baseline policy:
 
 Default mechanism:
 - download the JSON from GCS
-- inject as a dedicated **text part** (or plain text appended to user content) inside a fenced block:
-  - include the `gs://...` URI and a short description
-  - include the JSON text (UTF-8)
+- inject OHLCV + previous reports inside XML `<context>` blocks (payload goes into `<content>` as JSON)
+- charts manifest JSON is **not** injected directly; it is used to find images + descriptions
 
 Hard limits (per artifact):
 - JSON: `maxContextBytesPerJsonArtifact = 65536` (64 KB)
@@ -84,42 +83,48 @@ The prompt doc (`llm_prompts/{promptId}`) stores `userPrompt` **without** UserIn
 
 The worker builds the final user prompt as:
 
-1) render `userPrompt` template (Mustache context above)
+1) use `userPrompt` as-is (no templating in MVP)
 2) append:
 
 ```
-## UserInput:
+<context>
+  <data_type><timeframe> OHLCV Candles (JSON)</data_type>
+  <content>
+    <downloaded OHLCV JSON data payload>
+  </content>
+</context>
 
-Метаданные:
-- symbol: <scope.symbol>
-- timeframe: <step.timeframe>
+<context>
+  <data_type>Technical Charts (Images)</data_type>
+  <content>
+    [Images attached to this message with description]
+    - <chart description>
+    - ...
+  </content>
+</context>
 
-### OHLCV (time series)
-- request_timestamp: <ohlcv.metadata.request_timestamp or "unknown">
-- data:
-```json
-<downloaded ohlcv JSON data payload>
-```
+<context>
+  <data_type>Previous Report (<label>, uri: <gs://...>) (JSON)</data_type>
+  <content>
+    <report JSON payload>
+  </content>
+</context>
 
-### Charts (images)
-- generated_at: <charts_manifest.generated_at or "unknown">
-- <templateId>: <kind>
-- <templateId>: <kind>
-...
-
-### Previous reports
-<one block per report, if any; label as stepId or `external` when only gcs_uri is provided>
+<task>
+Based on the context above, perform the analysis for `symbol`, `timeframe` defined in the System Instructions.
+Generate the full report in JSON.
+</task>
 ```
 
 Notes:
-- The OHLCV section must explicitly state it is a time series and name symbol + timeframe.
-- The charts section lists chart template IDs and their human-readable kinds (from the manifest).
-- The previous reports section is included only when previous reports are provided.
+- The OHLCV context embeds the JSON payload (normalized) and uses the step timeframe in `data_type`.
+- The charts context lists image descriptions derived from the manifest.
+- The previous reports context is included once per report (label = stepId or `external`).
 
 ## 5) `scope` integration (MVP)
 
 Decision:
-- `flow_run.scope` is injected into the prompt via the generated `UserInput` section (e.g., `Symbol: <scope.symbol>`).
+- `flow_run.scope` is **not** injected into the `UserInput` text; prompts should define `symbol`/`timeframe` in System Instructions.
 - Flows and step inputs do **not** need to re-pass scope fields through `steps[*].inputs.*` unless a step needs a scope override.
 
 In particular:

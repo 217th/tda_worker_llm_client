@@ -115,14 +115,13 @@ class UserInputAssemblerTests(unittest.TestCase):
         resolved = assembler.resolve(flow_run=flow_run, step=step, inputs=inputs)
         payload = assembler.assemble(base_user_prompt="Analyze market.", resolved=resolved)
 
-        self.assertIn("## UserInput:", payload.text)
-        self.assertIn("- symbol: BTCUSDT", payload.text)
-        self.assertIn("- timeframe: 1M", payload.text)
-        self.assertIn("- request_timestamp: unknown", payload.text)
-        self.assertIn("- generated_at: unknown", payload.text)
-        self.assertIn("- unknown_template: Price MA", payload.text)
+        self.assertIn("<context>", payload.text)
+        self.assertIn("<data_type>1M OHLCV Candles (JSON)</data_type>", payload.text)
         self.assertIn("\"rows\"", payload.text)
+        self.assertIn("<data_type>Technical Charts (Images)</data_type>", payload.text)
+        self.assertIn("Price MA", payload.text)
         self.assertIn("prev_report.json", payload.text)
+        self.assertIn("<task>", payload.text)
         self.assertEqual(len(payload.chart_images), 1)
 
     def test_accepts_png_gcs_uri(self) -> None:

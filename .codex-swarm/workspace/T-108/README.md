@@ -28,5 +28,6 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- Updated UserInput assembly to emit XML-tagged context blocks for OHLCV, charts, previous reports, and task instruction.
+- Refreshed UserInput expectations in specs and tests.
 <!-- END AUTO SUMMARY -->
